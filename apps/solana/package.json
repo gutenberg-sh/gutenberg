@@ -1,0 +1,9 @@
+{
+  "name": "@veritas/solana",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "anchor:build": "PATH=\"$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH\" \"$HOME/.cargo/bin/anchor\" build && cp programs/veritas_registry/target/deploy/veritas_registry.so target/deploy/veritas_registry.so",
+    "anchor:deploy": "PATH=\"$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH\" \"$HOME/.cargo/bin/anchor\" deploy"
+  }
+}

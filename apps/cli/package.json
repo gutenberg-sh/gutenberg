@@ -1,0 +1,28 @@
+{
+  "name": "@veritas/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "commonjs",
+  "bin": {
+    "veritas": "./dist/src/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "format": "eslint . --fix --ignore-pattern 'dist/**' --ignore-pattern '*.json' && prettier --write .",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "veritas": "pnpm run build && node dist/src/cli.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1039.0",
+    "@drizzle-team/brocli": "0.12.0",
+    "@nestjs/common": "^11.1.19",
+    "@nestjs/config": "^4.0.4",
+    "@nestjs/core": "^11.1.19",
+    "@solana/web3.js": "^1.98.4",
+    "bs58": "6.0.0",
+    "dotenv": "17.4.2",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^4.3.6"
+  }
+}

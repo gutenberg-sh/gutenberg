@@ -1,0 +1,23 @@
+dist/
+node_modules/
+.veritas-local/
+*.log
+
+.env
+
+# Solana / Anchor
+apps/solana/.anchor/
+apps/solana/target/
+apps/solana/programs/*/target/
+apps/solana/programs/*/Cargo.lock
+apps/solana/test-ledger/
+apps/solana/.ledger/
+apps/solana/validator.log
+test-ledger/
+.ledger/
+validator.log
+apps/solana/program-keypair.json
+apps/solana/**/target/
+apps/solana/**/deploy/*.json
+apps/solana/**/deploy/*.so
+!apps/solana/**/deploy/.gitkeep
