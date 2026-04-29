@@ -15,9 +15,9 @@
     "solana:build": "pnpm --filter @gutenberg/solana run anchor:build",
     "solana:deploy": "pnpm --filter @gutenberg/solana run anchor:deploy",
     "cli:build": "pnpm --filter @gutenberg/cli run build",
+    "cli:start": "pnpm --filter @gutenberg/cli run gutenberg",
     "cli:format": "pnpm --filter @gutenberg/cli run format",
-    "cli:lint": "pnpm --filter @gutenberg/cli run lint",
-    "cli:start": "pnpm --filter @gutenberg/cli run gutenberg"
+    "cli:lint": "pnpm --filter @gutenberg/cli run lint"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

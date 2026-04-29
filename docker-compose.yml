@@ -1,3 +1,5 @@
+name: gutenberg
+
 services:
   minio:
     image: minio/minio:latest
