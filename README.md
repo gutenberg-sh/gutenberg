@@ -1,6 +1,6 @@
 # Gutenberg
 
-Gutenberg is the publishing layer for verifiable content on Solana.
+Gutenberg lets anyone publish freely, privately, and permanently on Solana.
 
 ## Prerequisites
 
