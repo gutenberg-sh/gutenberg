@@ -32,6 +32,7 @@ import { StorageService } from './storage.service';
       ): S3Client =>
         new S3Client({
           endpoint,
+          region: 'auto',
           credentials: {
             accessKeyId,
             secretAccessKey,

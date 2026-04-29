@@ -8,6 +8,7 @@ import { spawn } from 'node:child_process';
 import { DoctorService } from '../doctor/doctor.service';
 import { OpenService } from '../open/open.service';
 import { PublishService } from '../publish/publish.service';
+import { SolanaRegistryRepository } from '../registry/solana-registry.repository';
 
 @Injectable()
 export class CliService {
@@ -15,6 +16,7 @@ export class CliService {
     private readonly doctorService: DoctorService,
     private readonly openService: OpenService,
     private readonly publishService: PublishService,
+    private readonly solanaRegistryRepository: SolanaRegistryRepository,
   ) {}
 
   async run(): Promise<void> {
@@ -97,7 +99,28 @@ export class CliService {
       },
     });
 
-    await run([doctor, publish, open], {
+    const airdrop = command({
+      name: 'airdrop',
+      desc: 'Airdrop localnet SOL to the publisher wallet',
+      options: {
+        amount: string('amount').desc('SOL amount to airdrop'),
+      },
+      handler: async (options) => {
+        const amount = Number(options.amount ?? '2');
+
+        if (!Number.isFinite(amount) || amount <= 0) {
+          throw new Error('Airdrop amount must be a positive number');
+        }
+
+        const result = await this.solanaRegistryRepository.airdrop_sol(amount);
+
+        console.log(
+          `Airdropped ${result.sol} SOL to ${result.public_key.toBase58()}`,
+        );
+      },
+    });
+
+    await run([doctor, publish, open, airdrop], {
       name: 'gutenberg',
       description: 'Verifiable publishing for the Solana ecosystem',
       version: '0.0.0',

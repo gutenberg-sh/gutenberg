@@ -11,6 +11,7 @@
   "scripts": {
     "docker:up": "docker compose up -d",
     "solana:validator": "solana-test-validator",
+    "solana:airdrop": "pnpm run cli:start airdrop",
     "solana:build": "pnpm --filter @gutenberg/solana run anchor:build",
     "solana:deploy": "pnpm --filter @gutenberg/solana run anchor:deploy",
     "cli:build": "pnpm --filter @gutenberg/cli run build",

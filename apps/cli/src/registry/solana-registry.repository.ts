@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   Connection,
   LAMPORTS_PER_SOL,
@@ -10,7 +10,6 @@ import {
 } from '@solana/web3.js';
 import { createHash } from 'node:crypto';
 
-import { REGISTRY_PROGRAM_ID_KEY } from '../config/config.symbols';
 import { SolanaWalletRepository } from '../solana/solana-wallet.repository';
 
 import type {
@@ -21,12 +20,13 @@ import type {
 } from './registry.types';
 import { release_event_type } from './registry.types';
 
+export const GUTENBERG_REGISTRY_PROGRAM_ID =
+  'NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517';
+
 @Injectable()
 export class SolanaRegistryRepository implements ReleaseRegistryRepository {
   constructor(
     private readonly connection: Connection,
-    @Inject(REGISTRY_PROGRAM_ID_KEY)
-    private readonly registryProgramId: string | undefined,
     private readonly solanaWalletRepository: SolanaWalletRepository,
   ) {}
 
@@ -83,6 +83,21 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
     return {
       public_key: wallet.publicKey,
       sol: balance / LAMPORTS_PER_SOL,
+    };
+  }
+
+  async airdrop_sol(sol: number): Promise<{ public_key: PublicKey; sol: number }> {
+    const wallet = this.solanaWalletRepository.load_keypair();
+    const signature = await this.connection.requestAirdrop(
+      wallet.publicKey,
+      sol * LAMPORTS_PER_SOL,
+    );
+
+    await this.connection.confirmTransaction(signature, 'confirmed');
+
+    return {
+      public_key: wallet.publicKey,
+      sol,
     };
   }
 
@@ -164,13 +179,7 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
   }
 
   private require_program_id(): PublicKey {
-    const program_id = this.registryProgramId;
-
-    if (!program_id) {
-      throw new Error('GUTENBERG_REGISTRY_PROGRAM_ID is required');
-    }
-
-    return new PublicKey(program_id);
+    return new PublicKey(GUTENBERG_REGISTRY_PROGRAM_ID);
   }
 }
 

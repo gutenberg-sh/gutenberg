@@ -37,7 +37,6 @@ GUTENBERG_STORAGE_ACCESS_KEY=minioadmin
 GUTENBERG_STORAGE_SECRET_KEY=minioadmin
 GUTENBERG_SOLANA_RPC_URL=http://127.0.0.1:8899
 GUTENBERG_SOLANA_PRIVATE_KEY=<base58-encoded-solana-secret-key>
-GUTENBERG_REGISTRY_PROGRAM_ID=<deployed-gutenberg-registry-program-id>
 ```
 
 `GUTENBERG_SOLANA_PRIVATE_KEY` is the publisher identity. Its public key is stored as the `publisher` value in manifests and on-chain release accounts, and the same wallet pays for release account creation.
@@ -69,7 +68,13 @@ pnpm run solana:build
 pnpm run solana:deploy
 ```
 
-Gutenberg uses the same registry program id across localnet, devnet, and mainnet. After deployment, set `GUTENBERG_REGISTRY_PROGRAM_ID` in `.env` to the program id from `apps/solana/Anchor.toml`.
+Gutenberg uses the same hardcoded registry program id across localnet, devnet, and mainnet.
+
+Airdrop localnet SOL to the configured publisher wallet:
+
+```bash
+pnpm run solana:airdrop --amount 5
+```
 
 ## Running the Project
 

@@ -9,7 +9,6 @@ import { resolve } from 'node:path';
 
 import { env } from '../env';
 import {
-  REGISTRY_PROGRAM_ID_KEY,
   SOLANA_PRIVATE_KEY_KEY,
   SOLANA_RPC_URL_KEY,
   STORAGE_ACCESS_KEY_KEY,
@@ -78,12 +77,6 @@ load_dotenv({ path: envFilePath, quiet: true });
       useFactory: (config: ConfigService) =>
         config.getOrThrow<string>('GUTENBERG_SOLANA_PRIVATE_KEY'),
     },
-    {
-      provide: REGISTRY_PROGRAM_ID_KEY,
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) =>
-        config.get<string>('GUTENBERG_REGISTRY_PROGRAM_ID'),
-    },
   ],
   exports: [
     NestConfigModule,
@@ -93,7 +86,6 @@ load_dotenv({ path: envFilePath, quiet: true });
     STORAGE_SECRET_KEY_KEY,
     SOLANA_PRIVATE_KEY_KEY,
     SOLANA_RPC_URL_KEY,
-    REGISTRY_PROGRAM_ID_KEY,
   ],
 })
 export class ConfigModule {}

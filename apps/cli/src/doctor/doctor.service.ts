@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import {
-  REGISTRY_PROGRAM_ID_KEY,
   SOLANA_RPC_URL_KEY,
   STORAGE_BUCKET_KEY,
   STORAGE_ENDPOINT_KEY,
@@ -21,8 +20,6 @@ export class DoctorService {
     @Inject(STORAGE_ENDPOINT_KEY) private readonly storageEndpoint: string,
     @Inject(STORAGE_BUCKET_KEY) private readonly storageBucket: string,
     @Inject(SOLANA_RPC_URL_KEY) private readonly solanaRpcUrl: string,
-    @Inject(REGISTRY_PROGRAM_ID_KEY)
-    private readonly registryProgramId: string | undefined,
   ) {}
 
   async check(): Promise<DoctorResult> {
@@ -115,12 +112,7 @@ export class DoctorService {
         `Using registry program ${program_id.toBase58()}`,
       );
     } catch (error) {
-      return error_check(
-        'registry_program_id',
-        this.registryProgramId
-          ? error
-          : new Error('GUTENBERG_REGISTRY_PROGRAM_ID is required'),
-      );
+      return error_check('registry_program_id', error);
     }
   }
 }
