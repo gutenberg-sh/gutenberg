@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { boolean, command, positional, run, string } from '@drizzle-team/brocli';
+import {
+  boolean,
+  command,
+  positional,
+  run,
+  string,
+} from '@drizzle-team/brocli';
 import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -22,7 +28,7 @@ export class CliService {
   async run(): Promise<void> {
     const doctor = command({
       name: 'doctor',
-      desc: 'Check S3 and Solana publisher configuration',
+      desc: 'Check S3-compatible storage and Solana publisher configuration',
       options: {},
       handler: async () => {
         const result = await this.doctorService.check();
@@ -40,13 +46,13 @@ export class CliService {
 
     const publish = command({
       name: 'publish',
-      desc: 'Publish a Markdown folder into S3-compatible storage',
+      desc: 'Publish a Markdown folder (tar bundle + manifest) to S3-compatible storage',
       options: {
         folder: positional('folder')
           .desc('Markdown folder to publish')
           .required(),
         name: string().desc('Site name').required(),
-        site_version: string('site-version')
+        version: string('version')
           .desc('Immutable site version')
           .required(),
       },
@@ -54,7 +60,7 @@ export class CliService {
         const result = await this.publishService.publish_site({
           folder: options.folder,
           name: options.name,
-          version: options.site_version,
+          version: options.version,
         });
 
         console.log(`Uploaded ${this.format_bytes(result.total_bytes)}`);
@@ -66,18 +72,22 @@ export class CliService {
 
     const open = command({
       name: 'open',
-      desc: 'Open and verify a registered site name or s3:// manifest',
+      desc: 'Open and verify a registered site name or s3:// manifest URI',
       options: {
         source: positional('source')
-          .desc('Site name or manifest URI, e.g. example or s3://...')
+          .desc(
+            'Site name or manifest URI (e.g. example or s3://bucket/manifests/...)',
+          )
           .required(),
-        site_version: string('site-version').desc('Specific site version'),
-        print: boolean().desc('Print the verified Markdown entry instead of opening an editor'),
+        version: string('version').desc('Specific site version'),
+        print: boolean().desc(
+          'Print the verified Markdown entry instead of opening an editor',
+        ),
       },
       handler: async (options) => {
         const result = await this.openService.open_site({
           source: options.source,
-          version: options.site_version,
+          version: options.version,
         });
 
         console.log('Verified');
@@ -146,7 +156,8 @@ export class CliService {
     content: string;
   }): Promise<string> {
     const dir = await mkdtemp(join(tmpdir(), 'gutenberg-open-'));
-    const basename = result.entry.split('/').filter(Boolean).at(-1) ?? 'index.md';
+    const basename =
+      result.entry.split('/').filter(Boolean).at(-1) ?? 'index.md';
     const path = join(dir, `${result.name}-${result.version}-${basename}`);
 
     await writeFile(path, result.content);

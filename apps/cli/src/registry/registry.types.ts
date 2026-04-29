@@ -4,9 +4,9 @@ import type {
   SolanaPublicKey,
 } from '../manifest/manifest.types';
 
-export const release_event_type = 'gutenberg.release.v0' as const;
+export const release_event_type = 'gutenberg.release.v1' as const;
 
-export type GutenbergReleaseEventV0 = {
+export type GutenbergReleaseEvent = {
   type: typeof release_event_type;
   name: string;
   version: string;
@@ -30,10 +30,10 @@ export type HasReleaseInput = {
 
 export type ReleaseRegistryRepository = {
   assert_can_publish(): Promise<void>;
-  publish_release(event: GutenbergReleaseEventV0): Promise<void>;
-  list_releases(): Promise<GutenbergReleaseEventV0[]>;
+  publish_release(event: GutenbergReleaseEvent): Promise<void>;
+  list_releases(): Promise<GutenbergReleaseEvent[]>;
   find_release(
     input: FindReleaseInput,
-  ): Promise<GutenbergReleaseEventV0 | undefined>;
+  ): Promise<GutenbergReleaseEvent | undefined>;
   has_release(input: HasReleaseInput): Promise<boolean>;
 };

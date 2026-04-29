@@ -16,7 +16,7 @@ import type {
   FindReleaseInput,
   HasReleaseInput,
   ReleaseRegistryRepository,
-  GutenbergReleaseEventV0,
+  GutenbergReleaseEvent,
 } from './registry.types';
 import { release_event_type } from './registry.types';
 
@@ -40,7 +40,7 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
     }
   }
 
-  async publish_release(event: GutenbergReleaseEventV0): Promise<void> {
+  async publish_release(event: GutenbergReleaseEvent): Promise<void> {
     const program_id = this.require_program_id();
     const wallet = this.solanaWalletRepository.load_keypair();
     const release_address = this.release_address({
@@ -86,7 +86,9 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
     };
   }
 
-  async airdrop_sol(sol: number): Promise<{ public_key: PublicKey; sol: number }> {
+  async airdrop_sol(
+    sol: number,
+  ): Promise<{ public_key: PublicKey; sol: number }> {
     const wallet = this.solanaWalletRepository.load_keypair();
     const signature = await this.connection.requestAirdrop(
       wallet.publicKey,
@@ -101,7 +103,7 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
     };
   }
 
-  async list_releases(): Promise<GutenbergReleaseEventV0[]> {
+  async list_releases(): Promise<GutenbergReleaseEvent[]> {
     const program_id = this.require_program_id();
     const accounts = await this.connection.getProgramAccounts(program_id);
 
@@ -112,7 +114,7 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
 
   async find_release(
     input: FindReleaseInput,
-  ): Promise<GutenbergReleaseEventV0 | undefined> {
+  ): Promise<GutenbergReleaseEvent | undefined> {
     if (input.publisher && input.version) {
       const release_address = this.release_address({
         publisher: input.publisher,
@@ -184,7 +186,7 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
 }
 
 function encode_publish_release_instruction(
-  event: GutenbergReleaseEventV0,
+  event: GutenbergReleaseEvent,
 ): Buffer {
   return Buffer.concat([
     instruction_discriminator('publish_release'),
@@ -198,7 +200,7 @@ function encode_publish_release_instruction(
   ]);
 }
 
-function decode_release_account(data: Buffer): GutenbergReleaseEventV0 {
+function decode_release_account(data: Buffer): GutenbergReleaseEvent {
   const reader = new AccountReader(data);
   const discriminator = reader.read_bytes(8);
 
@@ -217,14 +219,14 @@ function decode_release_account(data: Buffer): GutenbergReleaseEventV0 {
     type: release_event_type,
     name,
     version,
-    manifest: manifest as GutenbergReleaseEventV0['manifest'],
-    manifest_hash: manifest_hash as GutenbergReleaseEventV0['manifest_hash'],
+    manifest: manifest as GutenbergReleaseEvent['manifest'],
+    manifest_hash: manifest_hash as GutenbergReleaseEvent['manifest_hash'],
     publisher,
     created_at,
   };
 }
 
-function decode_release_account_safe(data: Buffer): GutenbergReleaseEventV0[] {
+function decode_release_account_safe(data: Buffer): GutenbergReleaseEvent[] {
   try {
     return [decode_release_account(data)];
   } catch {
@@ -253,8 +255,8 @@ function seed_hash(value: string): Buffer {
 }
 
 function compare_release_events(
-  a: GutenbergReleaseEventV0,
-  b: GutenbergReleaseEventV0,
+  a: GutenbergReleaseEvent,
+  b: GutenbergReleaseEvent,
 ): number {
   const by_created_at = Date.parse(a.created_at) - Date.parse(b.created_at);
 

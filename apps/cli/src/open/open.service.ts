@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import type { ContentUri } from '../manifest/manifest.types';
 import { ManifestService } from '../manifest/manifest.service';
+import { extract_site_tarball } from '../publish/site-bundle';
 import { RegistryService } from '../registry/registry.service';
 import { CONTENT_STORE } from '../storage/storage.tokens';
 import type { ContentStore } from '../storage/storage.types';
@@ -26,12 +27,10 @@ export class OpenService {
       });
     }
 
-    const release = await this.registryService.find_release(
-      {
-        name: options.source,
-        version: options.version,
-      },
-    );
+    const release = await this.registryService.find_release({
+      name: options.source,
+      version: options.version,
+    });
 
     if (!release) {
       throw new Error(
@@ -72,10 +71,24 @@ export class OpenService {
       this.assert_manifest_matches_release(manifest, options.expected_release);
     }
 
+    const bundle_bytes = await this.contentStore.get_blob(manifest.bundle_uri);
+
+    if (
+      this.manifestService.sha256_hash(bundle_bytes) !== manifest.bundle_hash
+    ) {
+      throw new Error('Site bundle hash does not match manifest bundle_hash');
+    }
+
+    const extracted = await extract_site_tarball(bundle_bytes);
+
     let entry_content: string | undefined;
 
     for (const [path, file] of Object.entries(manifest.files)) {
-      const bytes = await this.contentStore.get_blob(file.uri);
+      const bytes = extracted.get(path);
+
+      if (!bytes) {
+        throw new Error(`Missing path ${path} in site bundle`);
+      }
 
       if (!this.manifestService.verify_file_hash(file, bytes)) {
         throw new Error(`File hash verification failed for ${path}`);

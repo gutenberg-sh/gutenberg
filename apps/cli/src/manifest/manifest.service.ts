@@ -4,14 +4,12 @@ import { createHash, createPublicKey, sign, verify } from 'node:crypto';
 import type { KeyObject } from 'node:crypto';
 
 import {
-  manifest_type,
   sha256_prefix,
   signature_prefix,
   type SolanaPublicKey,
   type Sha256Hash,
-  type GutenbergManifestFileV0,
-  type GutenbergManifestV0,
-  type GutenbergUnsignedManifestV0,
+  type GutenbergManifest,
+  type GutenbergUnsignedManifest,
 } from './manifest.types';
 
 @Injectable()
@@ -20,17 +18,14 @@ export class ManifestService {
     return `${sha256_prefix}${createHash('sha256').update(data).digest('hex')}`;
   }
 
-  verify_file_hash(
-    file: GutenbergManifestFileV0,
-    data: Buffer | string,
-  ): boolean {
+  verify_file_hash(file: { hash: Sha256Hash }, data: Buffer | string): boolean {
     return this.sha256_hash(data) === file.hash;
   }
 
   sign_manifest(
-    unsigned_manifest: GutenbergUnsignedManifestV0,
+    unsigned_manifest: GutenbergUnsignedManifest,
     private_key: KeyObject,
-  ): GutenbergManifestV0 {
+  ): GutenbergManifest {
     if (
       private_key.type !== 'private' ||
       private_key.asymmetricKeyType !== 'ed25519'
@@ -52,7 +47,7 @@ export class ManifestService {
     };
   }
 
-  verify_manifest(manifest: unknown): manifest is GutenbergManifestV0 {
+  verify_manifest(manifest: unknown): manifest is GutenbergManifest {
     try {
       this.assert_valid_manifest(manifest);
 
@@ -76,9 +71,9 @@ export class ManifestService {
 
   assert_valid_manifest(
     manifest: unknown,
-  ): asserts manifest is GutenbergManifestV0 {
+  ): asserts manifest is GutenbergManifest {
     this.assert_record(manifest, 'manifest');
-    this.assert_exact_keys(manifest, manifest_keys, 'manifest');
+    this.assert_exact_keys(manifest, manifest_signed_keys, 'manifest');
 
     if (!this.is_prefixed_base64url(manifest.signature, signature_prefix)) {
       throw new Error('Manifest signature must be an ed25519 base64url value');
@@ -89,12 +84,13 @@ export class ManifestService {
 
   assert_valid_unsigned_manifest(
     manifest: unknown,
-  ): asserts manifest is GutenbergUnsignedManifestV0 {
+  ): asserts manifest is GutenbergUnsignedManifest {
     this.assert_record(manifest, 'manifest');
-
-    const keys = new Set(manifest_keys);
-    keys.delete('signature');
-    this.assert_exact_keys(manifest, keys, 'unsigned manifest');
+    this.assert_exact_keys(
+      manifest,
+      manifest_unsigned_keys,
+      'unsigned manifest',
+    );
     this.assert_valid_manifest_fields(manifest);
   }
 
@@ -110,10 +106,7 @@ export class ManifestService {
     }
 
     return createPublicKey({
-      key: Buffer.concat([
-        ed25519_spki_prefix,
-        Buffer.from(public_key_bytes),
-      ]),
+      key: Buffer.concat([ed25519_spki_prefix, Buffer.from(public_key_bytes)]),
       format: 'der',
       type: 'spki',
     });
@@ -141,11 +134,7 @@ export class ManifestService {
 
   private assert_valid_manifest_fields(
     manifest: Record<string, unknown>,
-  ): asserts manifest is GutenbergUnsignedManifestV0 {
-    if (manifest.type !== manifest_type) {
-      throw new Error(`Manifest type must be ${manifest_type}`);
-    }
-
+  ): asserts manifest is GutenbergUnsignedManifest {
     if (
       typeof manifest.name !== 'string' ||
       !/^[a-z0-9][a-z0-9._-]*$/.test(manifest.name)
@@ -173,16 +162,31 @@ export class ManifestService {
       throw new Error('Manifest created_at must be an ISO timestamp');
     }
 
+    if (
+      typeof manifest.bundle_uri !== 'string' ||
+      !/^s3:\/\/[^/]+\/.+$/.test(manifest.bundle_uri)
+    ) {
+      throw new Error('Manifest bundle_uri must be an immutable s3:// URI');
+    }
+
+    if (
+      typeof manifest.bundle_hash !== 'string' ||
+      !/^sha256:[a-f0-9]{64}$/.test(manifest.bundle_hash)
+    ) {
+      throw new Error('Manifest bundle_hash must be a sha256 hex digest');
+    }
+
     this.assert_valid_files(manifest.files);
 
-    if (!(manifest.entry in manifest.files)) {
+    const entry = manifest.entry;
+    if (typeof entry !== 'string' || !(entry in (manifest.files as object))) {
       throw new Error('Manifest entry must exist in files');
     }
   }
 
   private assert_valid_files(
     files: unknown,
-  ): asserts files is GutenbergUnsignedManifestV0['files'] {
+  ): asserts files is GutenbergUnsignedManifest['files'] {
     this.assert_record(files, 'manifest files');
 
     if (Object.keys(files).length === 0) {
@@ -200,15 +204,6 @@ export class ManifestService {
       ) {
         throw new Error(
           `Manifest file ${path} hash must be a sha256 hex digest`,
-        );
-      }
-
-      if (
-        typeof file.uri !== 'string' ||
-        !/^s3:\/\/[^/]+\/.+$/.test(file.uri)
-      ) {
-        throw new Error(
-          `Manifest file ${path} uri must be an immutable s3:// URI`,
         );
       }
     }
@@ -285,17 +280,29 @@ export class ManifestService {
   }
 }
 
-const manifest_keys = new Set([
-  'type',
+const manifest_signed_keys = new Set([
   'name',
   'version',
   'entry',
   'files',
   'publisher',
   'created_at',
+  'bundle_uri',
+  'bundle_hash',
   'signature',
 ]);
 
-const file_keys = new Set(['hash', 'uri']);
+const manifest_unsigned_keys = new Set([
+  'name',
+  'version',
+  'entry',
+  'files',
+  'publisher',
+  'created_at',
+  'bundle_uri',
+  'bundle_hash',
+]);
+
+const file_keys = new Set(['hash']);
 const solana_public_key_length = 32;
 const ed25519_spki_prefix = Buffer.from('302a300506032b6570032100', 'hex');

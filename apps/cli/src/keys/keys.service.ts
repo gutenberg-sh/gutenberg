@@ -34,5 +34,8 @@ export class KeysService {
   }
 }
 
-const ed25519_pkcs8_prefix = Buffer.from('302e020100300506032b657004220420', 'hex');
+const ed25519_pkcs8_prefix = Buffer.from(
+  '302e020100300506032b657004220420',
+  'hex',
+);
 const ed25519_spki_prefix = Buffer.from('302a300506032b6570032100', 'hex');

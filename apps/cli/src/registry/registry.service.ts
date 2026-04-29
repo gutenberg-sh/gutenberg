@@ -7,7 +7,7 @@ import {
   type FindReleaseInput,
   type HasReleaseInput,
   type ReleaseRegistryRepository,
-  type GutenbergReleaseEventV0,
+  type GutenbergReleaseEvent,
 } from './registry.types';
 import { RELEASE_REGISTRY_REPOSITORY } from './registry.tokens';
 
@@ -23,13 +23,13 @@ export class RegistryService {
     await this.releaseRegistryRepository.assert_can_publish();
   }
 
-  async append_release(event: GutenbergReleaseEventV0): Promise<void> {
+  async append_release(event: GutenbergReleaseEvent): Promise<void> {
     this.assert_valid_release_event(event);
 
     await this.releaseRegistryRepository.publish_release(event);
   }
 
-  async list_releases(): Promise<GutenbergReleaseEventV0[]> {
+  async list_releases(): Promise<GutenbergReleaseEvent[]> {
     const releases = await this.releaseRegistryRepository.list_releases();
 
     return releases.filter((release) => this.is_valid_release_event(release));
@@ -37,7 +37,7 @@ export class RegistryService {
 
   async find_release(
     input: FindReleaseInput,
-  ): Promise<GutenbergReleaseEventV0 | undefined> {
+  ): Promise<GutenbergReleaseEvent | undefined> {
     const release = await this.releaseRegistryRepository.find_release(input);
 
     if (!release) {
@@ -55,7 +55,7 @@ export class RegistryService {
     return this.releaseRegistryRepository.has_release(input);
   }
 
-  is_valid_release_event(event: unknown): event is GutenbergReleaseEventV0 {
+  is_valid_release_event(event: unknown): event is GutenbergReleaseEvent {
     try {
       this.assert_valid_release_event(event);
       return true;
@@ -66,7 +66,7 @@ export class RegistryService {
 
   assert_valid_release_event(
     event: unknown,
-  ): asserts event is GutenbergReleaseEventV0 {
+  ): asserts event is GutenbergReleaseEvent {
     if (typeof event !== 'object' || event === null || Array.isArray(event)) {
       throw new Error('Release event must be an object');
     }
@@ -111,7 +111,9 @@ export class RegistryService {
       typeof event.manifest_hash !== 'string' ||
       !/^sha256:[a-f0-9]{64}$/.test(event.manifest_hash)
     ) {
-      throw new Error('Release event manifest_hash must be a sha256 hex digest');
+      throw new Error(
+        'Release event manifest_hash must be a sha256 hex digest',
+      );
     }
 
     if (typeof event.publisher !== 'string') {

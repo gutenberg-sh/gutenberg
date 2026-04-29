@@ -8,7 +8,7 @@ Before you start, check if you have the following installed:
 
 - **Node.js** `>=22.12.0`
 - **pnpm** `>=10.28.2`
-- **Docker** for local MinIO storage
+- **Docker** for local MinIO (S3-compatible) storage
 - **Solana CLI** for local validator and wallet utilities
 - **Anchor CLI** for building and deploying the registry program
 
@@ -51,7 +51,11 @@ Local development uses MinIO through the same S3-compatible storage repository u
 pnpm run docker:up
 ```
 
-This starts MinIO and creates the configured bucket.
+This starts MinIO, creates the `gutenberg` bucket, and sets **anonymous download** on it so manifest and bundle objects are **world-readable** via HTTP. The CLI **reads** objects with unsigned GETs; **publish** still uses your access keys for writes.
+
+### Hosted S3 (production)
+
+Grant **public read** for object GET (only) on the bucket or on prefixes such as `blobs/` and `manifests/`—for example via a bucket policy that allows `s3:GetObject` to `"Principal": "*"`. Keep **writes** restricted to your publisher IAM user or role.
 
 ### Solana Registry
 
@@ -91,13 +95,13 @@ pnpm run cli:start doctor
 Publish the demo Markdown folder:
 
 ```bash
-pnpm run cli:start publish examples/gutenberg-demo --name gutenberg-demo --site-version 1.0.0
+pnpm run cli:start publish examples/gutenberg-demo --name gutenberg-demo --version 1.0.0
 ```
 
 Open and verify the registered release:
 
 ```bash
-pnpm run cli:start open gutenberg-demo --site-version 1.0.0
+pnpm run cli:start open gutenberg-demo --version 1.0.0
 ```
 
 ### Build And Lint
@@ -118,9 +122,9 @@ pnpm run cli:lint
 
 Publishing a Markdown folder:
 
-- Stores files in S3-compatible storage using content-addressed keys
-- Creates a signed manifest with hashes for every file
-- Stores the manifest off-chain
-- Registers the release on Solana for `publisher + name + version`
+- Builds a deterministic POSIX tar of all site files and uploads it once as a single content-addressed blob
+- Creates a signed manifest listing each file’s SHA-256 (blobs live only inside the tarball on storage)
+- Stores the signed manifest JSON as a second object (still content-addressed `manifests/sha256/...`)
+- Registers the release (`gutenberg.release.v1`) on Solana for `publisher + name + version`
 
-The Solana registry stores the publisher, site name, version, manifest URI, manifest hash, and timestamp. Readers can fetch the manifest and files, then verify that the content matches what the publisher signed.
+The Solana registry stores the publisher, site name, version, manifest URI, manifest hash, and timestamp. Readers fetch the signed manifest and tarball bundle, verify the bundle hash and per-file SHA-256s, then verify the publisher signature.

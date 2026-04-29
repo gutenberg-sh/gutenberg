@@ -1,16 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { KeysService } from '../keys/keys.service';
-import {
-  manifest_type,
-  type GutenbergManifestFileV0,
-  type GutenbergUnsignedManifestV0,
+import type {
+  GutenbergManifestFile,
+  GutenbergUnsignedManifest,
 } from '../manifest/manifest.types';
 import { ManifestService } from '../manifest/manifest.service';
 import { RegistryService } from '../registry/registry.service';
+import { release_event_type } from '../registry/registry.types';
 import { CONTENT_STORE } from '../storage/storage.tokens';
 import type { ContentStore } from '../storage/storage.types';
 
+import { resolve_publish_folder } from './resolve-publish-folder';
+import { create_site_tarball } from './site-bundle';
 import { SiteFilesRepository } from './site-files.repository';
 import type { PublishOptions, PublishResult } from './publish.types';
 
@@ -26,19 +28,17 @@ export class PublishService {
 
   async publish_site(options: PublishOptions): Promise<PublishResult> {
     const root = await this.siteFilesRepository.assert_directory(
-      options.folder,
+      resolve_publish_folder(options.folder),
     );
 
     const keypair = this.keysService.load_publisher_key();
 
     if (
-      await this.registryService.has_release(
-        {
-          name: options.name,
-          version: options.version,
-          publisher: keypair.publisher,
-        },
-      )
+      await this.registryService.has_release({
+        name: options.name,
+        version: options.version,
+        publisher: keypair.publisher,
+      })
     ) {
       throw new Error(
         `Release already exists for ${options.name}@${options.version}`,
@@ -53,7 +53,7 @@ export class PublishService {
       throw new Error('Publish folder does not contain any files');
     }
 
-    const manifest_files: Record<`/${string}`, GutenbergManifestFileV0> = {};
+    const manifest_files: Record<`/${string}`, GutenbergManifestFile> = {};
     let total_bytes = 0;
 
     for (const file of files) {
@@ -63,12 +63,16 @@ export class PublishService {
       total_bytes += bytes.byteLength;
       manifest_files[file.site_path] = {
         hash: this.manifestService.sha256_hash(bytes),
-        uri: await this.contentStore.put_blob(bytes),
       };
     }
 
-    const unsigned_manifest: GutenbergUnsignedManifestV0 = {
-      type: manifest_type,
+    const tarball = await create_site_tarball(root, files);
+    const bundle_hash = this.manifestService.sha256_hash(tarball);
+    const bundle_uri = await this.contentStore.put_blob(tarball);
+
+    const unsigned_manifest: GutenbergUnsignedManifest = {
+      bundle_uri,
+      bundle_hash,
       name: options.name,
       version: options.version,
       entry: options.entry ?? '/index.md',
@@ -84,7 +88,7 @@ export class PublishService {
     const manifest_hash = this.manifestService.sha256_hash(manifest_json);
     const manifest_uri = await this.contentStore.put_manifest(manifest_json);
     const release = {
-      type: 'gutenberg.release.v0',
+      type: release_event_type,
       name: manifest.name,
       version: manifest.version,
       manifest: manifest_uri,

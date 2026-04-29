@@ -1,8 +1,5 @@
-import type {
-  ContentUri,
-  GutenbergManifestV0,
-} from '../manifest/manifest.types';
-import type { GutenbergReleaseEventV0 } from '../registry/registry.types';
+import type { ContentUri, GutenbergManifest } from '../manifest/manifest.types';
+import type { GutenbergReleaseEvent } from '../registry/registry.types';
 
 export type PublishOptions = {
   folder: string;
@@ -12,9 +9,9 @@ export type PublishOptions = {
 };
 
 export type PublishResult = {
-  manifest: GutenbergManifestV0;
+  manifest: GutenbergManifest;
   manifest_uri: ContentUri;
-  release: GutenbergReleaseEventV0;
+  release: GutenbergReleaseEvent;
   file_count: number;
   total_bytes: number;
 };

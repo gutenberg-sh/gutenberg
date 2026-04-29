@@ -70,7 +70,8 @@ export class DoctorService {
 
   private async check_solana_rpc(): Promise<DoctorCheck> {
     try {
-      const version = await this.solanaRegistryRepository.check_rpc_connection();
+      const version =
+        await this.solanaRegistryRepository.check_rpc_connection();
 
       return ok_check(
         'solana_rpc',
