@@ -1,6 +1,6 @@
-# Veritas Demo
+# Gutenberg Demo
 
-This is a local demo document for publishing through Veritas.
+This is a local demo document for publishing through Gutenberg.
 
 It should be uploaded to S3-compatible storage, referenced by a signed manifest,
 and registered on the local Solana registry.

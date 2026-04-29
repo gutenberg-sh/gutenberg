@@ -1,6 +1,6 @@
 dist/
 node_modules/
-.veritas-local/
+.gutenberg-local/
 *.log
 
 .env

@@ -1,9 +1,9 @@
 {
-  "name": "@veritas/solana",
+  "name": "@gutenberg/solana",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "anchor:build": "PATH=\"$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH\" \"$HOME/.cargo/bin/anchor\" build",
-    "anchor:deploy": "PATH=\"$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH\" \"$HOME/.cargo/bin/anchor\" deploy"
+    "anchor:build": "PATH=\"$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH\" \"$HOME/.cargo/bin/anchor\" build && PATH=\"$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH\" cargo build-sbf --manifest-path programs/gutenberg_registry/Cargo.toml --sbf-out-dir target/deploy",
+    "anchor:deploy": "pnpm run anchor:build && PATH=\"$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH\" \"$HOME/.cargo/bin/anchor\" deploy"
   }
 }

@@ -5,7 +5,13 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-veritas_registry = "BRcCBWgjBo3M9ZtzrGMzy2PmGkbNTUs9n4fiNFhoCrrz"
+gutenberg_registry = "NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517"
+
+[programs.devnet]
+gutenberg_registry = "NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517"
+
+[programs.mainnet]
+gutenberg_registry = "NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517"
 
 [registry]
 url = "https://api.apr.dev"

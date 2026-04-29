@@ -1,12 +1,12 @@
 [package]
-name = "veritas_registry"
+name = "gutenberg_registry"
 version = "0.1.0"
-description = "Veritas release registry"
+description = "Gutenberg release registry"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "veritas_registry"
+name = "gutenberg_registry"
 
 [features]
 anchor-debug = []

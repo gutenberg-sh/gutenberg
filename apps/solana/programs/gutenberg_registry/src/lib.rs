@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
 use solana_sha256_hasher::hashv;
 
-declare_id!("BRcCBWgjBo3M9ZtzrGMzy2PmGkbNTUs9n4fiNFhoCrrz");
+declare_id!("NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517");
 
 #[program]
-pub mod veritas_registry {
+pub mod gutenberg_registry {
     use super::*;
 
     pub fn publish_release(
@@ -12,58 +12,43 @@ pub mod veritas_registry {
         name: String,
         version: String,
         manifest_uri: String,
-        manifest_publisher: String,
-        release_signature: String,
+        manifest_hash: String,
         created_at: String,
-        manifest_publisher_hash: [u8; 32],
         name_hash: [u8; 32],
         version_hash: [u8; 32],
     ) -> Result<()> {
-        require!(name.len() <= Release::MAX_NAME_LEN, VeritasError::NameTooLong);
+        require!(name.len() <= Release::MAX_NAME_LEN, GutenbergError::NameTooLong);
         require!(
             version.len() <= Release::MAX_VERSION_LEN,
-            VeritasError::VersionTooLong
+            GutenbergError::VersionTooLong
         );
         require!(
             manifest_uri.len() <= Release::MAX_URI_LEN,
-            VeritasError::ManifestUriTooLong
+            GutenbergError::ManifestUriTooLong
         );
         require!(
-            manifest_publisher.len() <= Release::MAX_PUBLISHER_LEN,
-            VeritasError::ManifestPublisherTooLong
-        );
-        require!(
-            ctx.accounts.registry_authority.key().to_string() == manifest_publisher,
-            VeritasError::PublisherMustSign
-        );
-        require!(
-            release_signature.len() <= Release::MAX_SIGNATURE_LEN,
-            VeritasError::ReleaseSignatureTooLong
+            manifest_hash.len() <= Release::MAX_HASH_LEN,
+            GutenbergError::ManifestHashTooLong
         );
         require!(
             created_at.len() <= Release::MAX_CREATED_AT_LEN,
-            VeritasError::CreatedAtTooLong
-        );
-        require!(
-            hashv(&[manifest_publisher.as_bytes()]).to_bytes() == manifest_publisher_hash,
-            VeritasError::InvalidSeedHash
+            GutenbergError::CreatedAtTooLong
         );
         require!(
             hashv(&[name.as_bytes()]).to_bytes() == name_hash,
-            VeritasError::InvalidSeedHash
+            GutenbergError::InvalidSeedHash
         );
         require!(
             hashv(&[version.as_bytes()]).to_bytes() == version_hash,
-            VeritasError::InvalidSeedHash
+            GutenbergError::InvalidSeedHash
         );
 
         let release = &mut ctx.accounts.release;
-        release.registry_authority = ctx.accounts.registry_authority.key();
+        release.publisher = ctx.accounts.publisher.key();
         release.name = name;
         release.version = version;
         release.manifest_uri = manifest_uri;
-        release.manifest_publisher = manifest_publisher;
-        release.release_signature = release_signature;
+        release.manifest_hash = manifest_hash;
         release.created_at = created_at;
 
         Ok(())
@@ -75,24 +60,22 @@ pub mod veritas_registry {
     name: String,
     version: String,
     manifest_uri: String,
-    manifest_publisher: String,
-    release_signature: String,
+    manifest_hash: String,
     created_at: String,
-    manifest_publisher_hash: [u8; 32],
     name_hash: [u8; 32],
     version_hash: [u8; 32],
 )]
 pub struct PublishRelease<'info> {
     #[account(mut)]
-    pub registry_authority: Signer<'info>,
+    pub publisher: Signer<'info>,
 
     #[account(
         init,
-        payer = registry_authority,
+        payer = publisher,
         space = Release::SPACE,
         seeds = [
             b"release",
-            manifest_publisher_hash.as_ref(),
+            publisher.key().as_ref(),
             name_hash.as_ref(),
             version_hash.as_ref(),
         ],
@@ -105,12 +88,11 @@ pub struct PublishRelease<'info> {
 
 #[account]
 pub struct Release {
-    pub registry_authority: Pubkey,
+    pub publisher: Pubkey,
     pub name: String,
     pub version: String,
     pub manifest_uri: String,
-    pub manifest_publisher: String,
-    pub release_signature: String,
+    pub manifest_hash: String,
     pub created_at: String,
 }
 
@@ -118,8 +100,7 @@ impl Release {
     pub const MAX_NAME_LEN: usize = 64;
     pub const MAX_VERSION_LEN: usize = 32;
     pub const MAX_URI_LEN: usize = 512;
-    pub const MAX_PUBLISHER_LEN: usize = 128;
-    pub const MAX_SIGNATURE_LEN: usize = 128;
+    pub const MAX_HASH_LEN: usize = 71;
     pub const MAX_CREATED_AT_LEN: usize = 32;
     pub const SPACE: usize = 8
         + 32
@@ -130,27 +111,21 @@ impl Release {
         + 4
         + Self::MAX_URI_LEN
         + 4
-        + Self::MAX_PUBLISHER_LEN
-        + 4
-        + Self::MAX_SIGNATURE_LEN
+        + Self::MAX_HASH_LEN
         + 4
         + Self::MAX_CREATED_AT_LEN;
 }
 
 #[error_code]
-pub enum VeritasError {
+pub enum GutenbergError {
     #[msg("Release name is too long")]
     NameTooLong,
     #[msg("Release version is too long")]
     VersionTooLong,
     #[msg("Manifest URI is too long")]
     ManifestUriTooLong,
-    #[msg("Manifest publisher is too long")]
-    ManifestPublisherTooLong,
-    #[msg("Manifest publisher must match the transaction signer")]
-    PublisherMustSign,
-    #[msg("Release signature is too long")]
-    ReleaseSignatureTooLong,
+    #[msg("Manifest hash is too long")]
+    ManifestHashTooLong,
     #[msg("Created-at timestamp is too long")]
     CreatedAtTooLong,
     #[msg("Seed hash does not match instruction data")]

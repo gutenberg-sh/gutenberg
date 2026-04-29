@@ -46,43 +46,43 @@ load_dotenv({ path: envFilePath, quiet: true });
       provide: STORAGE_ENDPOINT_KEY,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('VERITAS_STORAGE_ENDPOINT'),
+        config.getOrThrow<string>('GUTENBERG_STORAGE_ENDPOINT'),
     },
     {
       provide: STORAGE_BUCKET_KEY,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('VERITAS_STORAGE_BUCKET'),
+        config.getOrThrow<string>('GUTENBERG_STORAGE_BUCKET'),
     },
     {
       provide: STORAGE_ACCESS_KEY_KEY,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('VERITAS_STORAGE_ACCESS_KEY'),
+        config.getOrThrow<string>('GUTENBERG_STORAGE_ACCESS_KEY'),
     },
     {
       provide: STORAGE_SECRET_KEY_KEY,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('VERITAS_STORAGE_SECRET_KEY'),
+        config.getOrThrow<string>('GUTENBERG_STORAGE_SECRET_KEY'),
     },
     {
       provide: SOLANA_RPC_URL_KEY,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('VERITAS_SOLANA_RPC_URL'),
+        config.getOrThrow<string>('GUTENBERG_SOLANA_RPC_URL'),
     },
     {
       provide: SOLANA_PRIVATE_KEY_KEY,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('VERITAS_SOLANA_PRIVATE_KEY'),
+        config.getOrThrow<string>('GUTENBERG_SOLANA_PRIVATE_KEY'),
     },
     {
       provide: REGISTRY_PROGRAM_ID_KEY,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.get<string>('VERITAS_REGISTRY_PROGRAM_ID'),
+        config.get<string>('GUTENBERG_REGISTRY_PROGRAM_ID'),
     },
   ],
   exports: [

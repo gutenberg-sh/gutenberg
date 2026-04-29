@@ -1,6 +1,6 @@
-# Veritas
+# Gutenberg
 
-Veritas is an immutable Markdown publishing system with S3-compatible content storage and a public Solana registry.
+Gutenberg is the publishing layer for verifiable content on Solana.
 
 ## Prerequisites
 
@@ -31,16 +31,16 @@ cp .env.example .env
 Required values:
 
 ```txt
-VERITAS_STORAGE_ENDPOINT=http://127.0.0.1:9000
-VERITAS_STORAGE_BUCKET=veritas
-VERITAS_STORAGE_ACCESS_KEY=minioadmin
-VERITAS_STORAGE_SECRET_KEY=minioadmin
-VERITAS_SOLANA_RPC_URL=http://127.0.0.1:8899
-VERITAS_SOLANA_PRIVATE_KEY=<base58-encoded-solana-secret-key>
-VERITAS_REGISTRY_PROGRAM_ID=<deployed-veritas-registry-program-id>
+GUTENBERG_STORAGE_ENDPOINT=http://127.0.0.1:9000
+GUTENBERG_STORAGE_BUCKET=gutenberg
+GUTENBERG_STORAGE_ACCESS_KEY=minioadmin
+GUTENBERG_STORAGE_SECRET_KEY=minioadmin
+GUTENBERG_SOLANA_RPC_URL=http://127.0.0.1:8899
+GUTENBERG_SOLANA_PRIVATE_KEY=<base58-encoded-solana-secret-key>
+GUTENBERG_REGISTRY_PROGRAM_ID=<deployed-gutenberg-registry-program-id>
 ```
 
-`VERITAS_SOLANA_PRIVATE_KEY` is the publisher identity. Its public key is stored as the `publisher` value in manifests and on-chain release accounts.
+`GUTENBERG_SOLANA_PRIVATE_KEY` is the publisher identity. Its public key is stored as the `publisher` value in manifests and on-chain release accounts, and the same wallet pays for release account creation.
 
 ## Running Local Infrastructure
 
@@ -59,17 +59,17 @@ This starts MinIO and creates the configured bucket.
 Run a local validator in a separate terminal:
 
 ```bash
-solana-test-validator
+pnpm run solana:validator
 ```
 
-Build and deploy the Veritas registry program:
+Build and deploy the Gutenberg registry program:
 
 ```bash
 pnpm run solana:build
 pnpm run solana:deploy
 ```
 
-After deployment, set `VERITAS_REGISTRY_PROGRAM_ID` in `.env` to the deployed program id.
+Gutenberg uses the same registry program id across localnet, devnet, and mainnet. After deployment, set `GUTENBERG_REGISTRY_PROGRAM_ID` in `.env` to the program id from `apps/solana/Anchor.toml`.
 
 ## Running the Project
 
@@ -86,13 +86,13 @@ pnpm run cli:start doctor
 Publish the demo Markdown folder:
 
 ```bash
-pnpm run cli:start publish examples/veritas-demo --name veritas-demo --site-version 1.0.0
+pnpm run cli:start publish examples/gutenberg-demo --name gutenberg-demo --site-version 1.0.0
 ```
 
 Open and verify the registered release:
 
 ```bash
-pnpm run cli:start open veritas-demo --site-version 1.0.0
+pnpm run cli:start open gutenberg-demo --site-version 1.0.0
 ```
 
 ### Build And Lint
@@ -118,7 +118,7 @@ Publishing a Markdown folder does the following:
 - Uploads the manifest to S3-compatible storage
 - Writes a release account to the Solana registry for `publisher + name + version`
 
-On-chain release accounts store the publisher public key, site name, version, manifest URI, release signature, and creation timestamp. The Markdown files and manifest content stay in S3-compatible storage.
+On-chain release accounts store the publisher public key, site name, version, manifest URI, manifest hash, and creation timestamp. The publisher is always the transaction signer and payer. The manifest hash pins the exact signed manifest bytes registered on-chain. The manifest is signed by that publisher and contains hashes for every Markdown file, so readers can verify that the registered manifest and fetched content were not tampered with. The Markdown files and manifest content stay in S3-compatible storage.
 
 ## Doctor Checks
 

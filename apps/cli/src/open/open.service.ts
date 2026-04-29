@@ -43,6 +43,7 @@ export class OpenService {
 
     return this.open_manifest({
       manifest_uri: release.manifest,
+      expected_release: release,
     });
   }
 
@@ -50,12 +51,25 @@ export class OpenService {
     const manifest_bytes = await this.contentStore.get_blob(
       options.manifest_uri,
     );
+
+    if (
+      options.expected_release &&
+      this.manifestService.sha256_hash(manifest_bytes) !==
+        options.expected_release.manifest_hash
+    ) {
+      throw new Error('Manifest hash does not match the registered release');
+    }
+
     const manifest: unknown = JSON.parse(manifest_bytes.toString('utf8'));
 
     this.manifestService.assert_valid_manifest(manifest);
 
     if (!this.manifestService.verify_manifest(manifest)) {
       throw new Error('Manifest signature verification failed');
+    }
+
+    if (options.expected_release) {
+      this.assert_manifest_matches_release(manifest, options.expected_release);
     }
 
     let entry_content: string | undefined;
@@ -85,5 +99,18 @@ export class OpenService {
       content: entry_content,
       file_count: Object.keys(manifest.files).length,
     };
+  }
+
+  private assert_manifest_matches_release(
+    manifest: OpenResult['manifest'],
+    release: NonNullable<OpenManifestOptions['expected_release']>,
+  ): void {
+    if (
+      manifest.publisher !== release.publisher ||
+      manifest.name !== release.name ||
+      manifest.version !== release.version
+    ) {
+      throw new Error('Manifest does not match the registered release');
+    }
   }
 }

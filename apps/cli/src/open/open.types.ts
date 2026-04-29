@@ -1,10 +1,12 @@
 import type {
   ContentUri,
-  VeritasManifestV0,
+  GutenbergManifestV0,
 } from '../manifest/manifest.types';
+import type { GutenbergReleaseEventV0 } from '../registry/registry.types';
 
 export type OpenManifestOptions = {
   manifest_uri: ContentUri;
+  expected_release?: GutenbergReleaseEventV0;
 };
 
 export type OpenSiteOptions = {
@@ -13,7 +15,7 @@ export type OpenSiteOptions = {
 };
 
 export type OpenResult = {
-  manifest: VeritasManifestV0;
+  manifest: GutenbergManifestV0;
   manifest_uri: ContentUri;
   name: string;
   version: string;

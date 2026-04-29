@@ -1,5 +1,5 @@
 {
-  "name": "veritas",
+  "name": "gutenberg",
   "version": "0.0.0",
   "private": true,
   "packageManager": "pnpm@10.33.1",
@@ -10,12 +10,13 @@
   },
   "scripts": {
     "docker:up": "docker compose up -d",
-    "solana:build": "pnpm --filter @veritas/solana run anchor:build",
-    "solana:deploy": "pnpm --filter @veritas/solana run anchor:deploy",
-    "cli:build": "pnpm --filter @veritas/cli run build",
-    "cli:format": "pnpm --filter @veritas/cli run format",
-    "cli:lint": "pnpm --filter @veritas/cli run lint",
-    "cli:start": "pnpm --filter @veritas/cli run veritas"
+    "solana:validator": "solana-test-validator",
+    "solana:build": "pnpm --filter @gutenberg/solana run anchor:build",
+    "solana:deploy": "pnpm --filter @gutenberg/solana run anchor:deploy",
+    "cli:build": "pnpm --filter @gutenberg/cli run build",
+    "cli:format": "pnpm --filter @gutenberg/cli run format",
+    "cli:lint": "pnpm --filter @gutenberg/cli run lint",
+    "cli:start": "pnpm --filter @gutenberg/cli run gutenberg"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

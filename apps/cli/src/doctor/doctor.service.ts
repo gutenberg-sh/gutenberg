@@ -64,7 +64,7 @@ export class DoctorService {
 
       return ok_check(
         'solana_private_key',
-        `Loaded wallet ${wallet.publicKey.toBase58()} from VERITAS_SOLANA_PRIVATE_KEY`,
+        `Loaded wallet ${wallet.publicKey.toBase58()} from GUTENBERG_SOLANA_PRIVATE_KEY`,
       );
     } catch (error) {
       return error_check('solana_private_key', error);
@@ -119,7 +119,7 @@ export class DoctorService {
         'registry_program_id',
         this.registryProgramId
           ? error
-          : new Error('VERITAS_REGISTRY_PROGRAM_ID is required'),
+          : new Error('GUTENBERG_REGISTRY_PROGRAM_ID is required'),
       );
     }
   }

@@ -15,7 +15,7 @@ export class SolanaWalletRepository {
     try {
       return Keypair.fromSecretKey(bs58.decode(this.solanaPrivateKey));
     } catch (error) {
-      throw new Error('Invalid VERITAS_SOLANA_PRIVATE_KEY', { cause: error });
+      throw new Error('Invalid GUTENBERG_SOLANA_PRIVATE_KEY', { cause: error });
     }
   }
 }

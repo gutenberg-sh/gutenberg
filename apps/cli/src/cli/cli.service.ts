@@ -58,7 +58,7 @@ export class CliService {
         console.log(`Uploaded ${this.format_bytes(result.total_bytes)}`);
         console.log(`Files: ${result.file_count}`);
         console.log(`Manifest: ${result.manifest_uri}`);
-        console.log(`Open with: veritas open ${result.manifest_uri}`);
+        console.log(`Open with: gutenberg open ${result.manifest_uri}`);
       },
     });
 
@@ -98,8 +98,8 @@ export class CliService {
     });
 
     await run([doctor, publish, open], {
-      name: 'veritas',
-      description: 'Immutable Markdown publishing on S3-compatible storage',
+      name: 'gutenberg',
+      description: 'Verifiable publishing for the Solana ecosystem',
       version: '0.0.0',
     });
   }
@@ -122,7 +122,7 @@ export class CliService {
     entry: string;
     content: string;
   }): Promise<string> {
-    const dir = await mkdtemp(join(tmpdir(), 'veritas-open-'));
+    const dir = await mkdtemp(join(tmpdir(), 'gutenberg-open-'));
     const basename = result.entry.split('/').filter(Boolean).at(-1) ?? 'index.md';
     const path = join(dir, `${result.name}-${result.version}-${basename}`);
 

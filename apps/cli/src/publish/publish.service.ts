@@ -3,8 +3,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { KeysService } from '../keys/keys.service';
 import {
   manifest_type,
-  type VeritasManifestFileV0,
-  type VeritasUnsignedManifestV0,
+  type GutenbergManifestFileV0,
+  type GutenbergUnsignedManifestV0,
 } from '../manifest/manifest.types';
 import { ManifestService } from '../manifest/manifest.service';
 import { RegistryService } from '../registry/registry.service';
@@ -53,7 +53,7 @@ export class PublishService {
       throw new Error('Publish folder does not contain any files');
     }
 
-    const manifest_files: Record<`/${string}`, VeritasManifestFileV0> = {};
+    const manifest_files: Record<`/${string}`, GutenbergManifestFileV0> = {};
     let total_bytes = 0;
 
     for (const file of files) {
@@ -67,7 +67,7 @@ export class PublishService {
       };
     }
 
-    const unsigned_manifest: VeritasUnsignedManifestV0 = {
+    const unsigned_manifest: GutenbergUnsignedManifestV0 = {
       type: manifest_type,
       name: options.name,
       version: options.version,
@@ -80,20 +80,18 @@ export class PublishService {
       unsigned_manifest,
       keypair.private_key,
     );
-    const manifest_uri = await this.contentStore.put_manifest(
-      this.manifestService.canonical_json(manifest),
-    );
-    const release = this.registryService.sign_release_event(
-      {
-        type: 'veritas.release.v0',
-        name: manifest.name,
-        version: manifest.version,
-        manifest: manifest_uri,
-        publisher: manifest.publisher,
-        created_at: new Date().toISOString(),
-      },
-      keypair.private_key,
-    );
+    const manifest_json = this.manifestService.canonical_json(manifest);
+    const manifest_hash = this.manifestService.sha256_hash(manifest_json);
+    const manifest_uri = await this.contentStore.put_manifest(manifest_json);
+    const release = {
+      type: 'gutenberg.release.v0',
+      name: manifest.name,
+      version: manifest.version,
+      manifest: manifest_uri,
+      manifest_hash,
+      publisher: manifest.publisher,
+      created_at: new Date().toISOString(),
+    } as const;
 
     await this.registryService.append_release(release);
 

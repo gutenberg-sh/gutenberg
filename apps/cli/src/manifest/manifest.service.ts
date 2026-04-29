@@ -9,9 +9,9 @@ import {
   signature_prefix,
   type SolanaPublicKey,
   type Sha256Hash,
-  type VeritasManifestFileV0,
-  type VeritasManifestV0,
-  type VeritasUnsignedManifestV0,
+  type GutenbergManifestFileV0,
+  type GutenbergManifestV0,
+  type GutenbergUnsignedManifestV0,
 } from './manifest.types';
 
 @Injectable()
@@ -21,16 +21,16 @@ export class ManifestService {
   }
 
   verify_file_hash(
-    file: VeritasManifestFileV0,
+    file: GutenbergManifestFileV0,
     data: Buffer | string,
   ): boolean {
     return this.sha256_hash(data) === file.hash;
   }
 
   sign_manifest(
-    unsigned_manifest: VeritasUnsignedManifestV0,
+    unsigned_manifest: GutenbergUnsignedManifestV0,
     private_key: KeyObject,
-  ): VeritasManifestV0 {
+  ): GutenbergManifestV0 {
     if (
       private_key.type !== 'private' ||
       private_key.asymmetricKeyType !== 'ed25519'
@@ -52,7 +52,7 @@ export class ManifestService {
     };
   }
 
-  verify_manifest(manifest: unknown): manifest is VeritasManifestV0 {
+  verify_manifest(manifest: unknown): manifest is GutenbergManifestV0 {
     try {
       this.assert_valid_manifest(manifest);
 
@@ -76,7 +76,7 @@ export class ManifestService {
 
   assert_valid_manifest(
     manifest: unknown,
-  ): asserts manifest is VeritasManifestV0 {
+  ): asserts manifest is GutenbergManifestV0 {
     this.assert_record(manifest, 'manifest');
     this.assert_exact_keys(manifest, manifest_keys, 'manifest');
 
@@ -89,7 +89,7 @@ export class ManifestService {
 
   assert_valid_unsigned_manifest(
     manifest: unknown,
-  ): asserts manifest is VeritasUnsignedManifestV0 {
+  ): asserts manifest is GutenbergUnsignedManifestV0 {
     this.assert_record(manifest, 'manifest');
 
     const keys = new Set(manifest_keys);
@@ -141,7 +141,7 @@ export class ManifestService {
 
   private assert_valid_manifest_fields(
     manifest: Record<string, unknown>,
-  ): asserts manifest is VeritasUnsignedManifestV0 {
+  ): asserts manifest is GutenbergUnsignedManifestV0 {
     if (manifest.type !== manifest_type) {
       throw new Error(`Manifest type must be ${manifest_type}`);
     }
@@ -182,7 +182,7 @@ export class ManifestService {
 
   private assert_valid_files(
     files: unknown,
-  ): asserts files is VeritasUnsignedManifestV0['files'] {
+  ): asserts files is GutenbergUnsignedManifestV0['files'] {
     this.assert_record(files, 'manifest files');
 
     if (Object.keys(files).length === 0) {

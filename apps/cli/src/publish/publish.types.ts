@@ -1,8 +1,8 @@
 import type {
   ContentUri,
-  VeritasManifestV0,
+  GutenbergManifestV0,
 } from '../manifest/manifest.types';
-import type { VeritasReleaseEventV0 } from '../registry/registry.types';
+import type { GutenbergReleaseEventV0 } from '../registry/registry.types';
 
 export type PublishOptions = {
   folder: string;
@@ -12,9 +12,9 @@ export type PublishOptions = {
 };
 
 export type PublishResult = {
-  manifest: VeritasManifestV0;
+  manifest: GutenbergManifestV0;
   manifest_uri: ContentUri;
-  release: VeritasReleaseEventV0;
+  release: GutenbergReleaseEventV0;
   file_count: number;
   total_bytes: number;
 };

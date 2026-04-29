@@ -1,16 +1,16 @@
 {
-  "name": "@veritas/cli",
+  "name": "@gutenberg/cli",
   "version": "0.0.0",
   "private": true,
   "type": "commonjs",
   "bin": {
-    "veritas": "./dist/src/cli.js"
+    "gutenberg": "./dist/src/cli.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "format": "eslint . --fix --ignore-pattern 'dist/**' --ignore-pattern '*.json' && prettier --write .",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
-    "veritas": "pnpm run build && node dist/src/cli.js"
+    "gutenberg": "pnpm run build && node dist/src/cli.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1039.0",

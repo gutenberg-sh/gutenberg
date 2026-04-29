@@ -17,7 +17,7 @@ import type {
   FindReleaseInput,
   HasReleaseInput,
   ReleaseRegistryRepository,
-  VeritasReleaseEventV0,
+  GutenbergReleaseEventV0,
 } from './registry.types';
 import { release_event_type } from './registry.types';
 
@@ -40,7 +40,7 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
     }
   }
 
-  async publish_release(event: VeritasReleaseEventV0): Promise<void> {
+  async publish_release(event: GutenbergReleaseEventV0): Promise<void> {
     const program_id = this.require_program_id();
     const wallet = this.solanaWalletRepository.load_keypair();
     const release_address = this.release_address({
@@ -86,7 +86,7 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
     };
   }
 
-  async list_releases(): Promise<VeritasReleaseEventV0[]> {
+  async list_releases(): Promise<GutenbergReleaseEventV0[]> {
     const program_id = this.require_program_id();
     const accounts = await this.connection.getProgramAccounts(program_id);
 
@@ -97,7 +97,7 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
 
   async find_release(
     input: FindReleaseInput,
-  ): Promise<VeritasReleaseEventV0 | undefined> {
+  ): Promise<GutenbergReleaseEventV0 | undefined> {
     if (input.publisher && input.version) {
       const release_address = this.release_address({
         publisher: input.publisher,
@@ -153,7 +153,7 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
     const [address] = PublicKey.findProgramAddressSync(
       [
         Buffer.from('release'),
-        seed_hash(input.publisher),
+        new PublicKey(input.publisher).toBuffer(),
         seed_hash(input.name),
         seed_hash(input.version),
       ],
@@ -167,7 +167,7 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
     const program_id = this.registryProgramId;
 
     if (!program_id) {
-      throw new Error('VERITAS_REGISTRY_PROGRAM_ID is required');
+      throw new Error('GUTENBERG_REGISTRY_PROGRAM_ID is required');
     }
 
     return new PublicKey(program_id);
@@ -175,23 +175,21 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
 }
 
 function encode_publish_release_instruction(
-  event: VeritasReleaseEventV0,
+  event: GutenbergReleaseEventV0,
 ): Buffer {
   return Buffer.concat([
     instruction_discriminator('publish_release'),
     encode_string(event.name),
     encode_string(event.version),
     encode_string(event.manifest),
-    encode_string(event.publisher),
-    encode_string(event.signature),
+    encode_string(event.manifest_hash),
     encode_string(event.created_at),
-    seed_hash(event.publisher),
     seed_hash(event.name),
     seed_hash(event.version),
   ]);
 }
 
-function decode_release_account(data: Buffer): VeritasReleaseEventV0 {
+function decode_release_account(data: Buffer): GutenbergReleaseEventV0 {
   const reader = new AccountReader(data);
   const discriminator = reader.read_bytes(8);
 
@@ -199,26 +197,25 @@ function decode_release_account(data: Buffer): VeritasReleaseEventV0 {
     throw new Error('Invalid Solana release account discriminator');
   }
 
-  reader.read_bytes(32);
+  const publisher = new PublicKey(reader.read_bytes(32)).toBase58();
   const name = reader.read_string();
   const version = reader.read_string();
   const manifest = reader.read_string();
-  const publisher = reader.read_string();
-  const signature = reader.read_string();
+  const manifest_hash = reader.read_string();
   const created_at = reader.read_string();
 
   return {
     type: release_event_type,
     name,
     version,
-    manifest: manifest as VeritasReleaseEventV0['manifest'],
+    manifest: manifest as GutenbergReleaseEventV0['manifest'],
+    manifest_hash: manifest_hash as GutenbergReleaseEventV0['manifest_hash'],
     publisher,
     created_at,
-    signature: signature as VeritasReleaseEventV0['signature'],
   };
 }
 
-function decode_release_account_safe(data: Buffer): VeritasReleaseEventV0[] {
+function decode_release_account_safe(data: Buffer): GutenbergReleaseEventV0[] {
   try {
     return [decode_release_account(data)];
   } catch {
@@ -247,8 +244,8 @@ function seed_hash(value: string): Buffer {
 }
 
 function compare_release_events(
-  a: VeritasReleaseEventV0,
-  b: VeritasReleaseEventV0,
+  a: GutenbergReleaseEventV0,
+  b: GutenbergReleaseEventV0,
 ): number {
   const by_created_at = Date.parse(a.created_at) - Date.parse(b.created_at);
 
