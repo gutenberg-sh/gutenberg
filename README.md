@@ -28,7 +28,7 @@ Copy the example environment file and fill in the required values:
 cp .env.example .env
 ```
 
-Required values:
+Fill in `.env`:
 
 ```txt
 GUTENBERG_STORAGE_ENDPOINT=http://127.0.0.1:9000
@@ -116,20 +116,11 @@ pnpm run cli:lint
 
 ## How Publishing Works
 
-Publishing a Markdown folder does the following:
+Publishing a Markdown folder:
 
-- Uploads Markdown files to S3-compatible storage using content-addressed keys
-- Creates a signed manifest that points at those immutable file objects
-- Uploads the manifest to S3-compatible storage
-- Writes a release account to the Solana registry for `publisher + name + version`
+- Stores files in S3-compatible storage using content-addressed keys
+- Creates a signed manifest with hashes for every file
+- Stores the manifest off-chain
+- Registers the release on Solana for `publisher + name + version`
 
-On-chain release accounts store the publisher public key, site name, version, manifest URI, manifest hash, and creation timestamp. The publisher is always the transaction signer and payer. The manifest hash pins the exact signed manifest bytes registered on-chain. The manifest is signed by that publisher and contains hashes for every Markdown file, so readers can verify that the registered manifest and fetched content were not tampered with. The Markdown files and manifest content stay in S3-compatible storage.
-
-## Doctor Checks
-
-`doctor` validates the publisher-local setup before publishing:
-
-- S3-compatible bucket access
-- Solana private key decoding
-- Solana RPC connectivity
-- Registry program id parsing
+The Solana registry stores the publisher, site name, version, manifest URI, manifest hash, and timestamp. Readers can fetch the manifest and files, then verify that the content matches what the publisher signed.
