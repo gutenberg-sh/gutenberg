@@ -23,7 +23,7 @@ const envFilePath = [
   resolve(process.cwd(), '..', '..', '.env'),
 ].find((path) => existsSync(path));
 
-load_dotenv({ path: envFilePath });
+load_dotenv({ path: envFilePath, quiet: true });
 
 @Global()
 @Module({
