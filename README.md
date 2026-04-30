@@ -20,7 +20,9 @@
 
 ## Why we build this
 
-**State actors** and **overreaching institutions** can use law, finance, and infrastructure to make inconvenient publishing disappear. Gutenberg is built for **anonymous** publishing, **permanent** storage, and **censorship-resistant** discovery.
+Whether you like it or not, governments and major outlets enforce a certain narrative. Work that contradicts it gets taken down, sued, or buried.
+
+Gutenberg lets you publish freely, privately, and permanently: content is written to durable storage and registered on a public chain, signed by the author. Once published, no host, editor, or court can censor the original.
 
 ## Prerequisites
 
