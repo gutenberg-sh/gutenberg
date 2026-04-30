@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="assets/gutenberg-banner.png" alt="Gutenberg — publish freely on Solana" width="720" />
+  <img src="assets/gutenberg-banner.jpg" alt="Gutenberg" width="720" />
 </p>
 
 <h1 align="center">Gutenberg</h1>
 
 <p align="center">
-  <strong>Publish freely, privately, and permanently on Solana.</strong>
+  <strong>Gutenberg lets anyone publish freely, privately, and permanently on Solana.</strong>
 </p>
 
 <p align="center">
