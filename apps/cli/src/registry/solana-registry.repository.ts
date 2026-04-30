@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  ComputeBudgetProgram,
   Connection,
   LAMPORTS_PER_SOL,
   PublicKey,
@@ -108,6 +109,98 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
     });
   }
 
+  async unpublish_release(input: {
+    name: string;
+    version: string;
+  }): Promise<void> {
+    const wallet = this.solanaWalletRepository.load_keypair();
+    const transaction = new Transaction().add(
+      this.create_unpublish_instruction(wallet.publicKey, input),
+    );
+
+    await sendAndConfirmTransaction(this.connection, transaction, [wallet], {
+      commitment: 'confirmed',
+    });
+  }
+
+  async unpublish_releases_batch(input: {
+    name: string;
+    versions: string[];
+  }): Promise<void> {
+    const unique_sorted = [...new Set(input.versions)].sort();
+
+    if (unique_sorted.length === 0) {
+      throw new Error('No versions to unpublish');
+    }
+
+    const wallet = this.solanaWalletRepository.load_keypair();
+    const transaction = new Transaction();
+
+    const compute_units = Math.min(
+      1_400_000,
+      40_000 + unique_sorted.length * 130_000,
+    );
+
+    transaction.add(
+      ComputeBudgetProgram.setComputeUnitLimit({
+        units: compute_units,
+      }),
+    );
+
+    for (const version of unique_sorted) {
+      transaction.add(
+        this.create_unpublish_instruction(wallet.publicKey, {
+          name: input.name,
+          version,
+        }),
+      );
+    }
+
+    await sendAndConfirmTransaction(this.connection, transaction, [wallet], {
+      commitment: 'confirmed',
+    });
+  }
+
+  private create_unpublish_instruction(
+    publisher: PublicKey,
+    input: { name: string; version: string },
+  ): TransactionInstruction {
+    const program_id = this.require_program_id();
+    const name_authority_address = this.name_authority_address(input.name);
+    const release_address = this.release_address({
+      publisher: publisher.toBase58(),
+      name: input.name,
+      version: input.version,
+    });
+
+    return new TransactionInstruction({
+      programId: program_id,
+      keys: [
+        {
+          pubkey: publisher,
+          isSigner: true,
+          isWritable: true,
+        },
+        {
+          pubkey: name_authority_address,
+          isSigner: false,
+          isWritable: true,
+        },
+        {
+          pubkey: release_address,
+          isSigner: false,
+          isWritable: true,
+        },
+        {
+          pubkey: SystemProgram.programId,
+          isSigner: false,
+          isWritable: false,
+        },
+      ],
+      data: encode_unpublish_release_instruction(input),
+    });
+  }
+
   async get_wallet_balance(): Promise<{ public_key: PublicKey; sol: number }> {
     const wallet = this.solanaWalletRepository.load_keypair();
     const balance = await this.connection.getBalance(wallet.publicKey);
@@ -208,6 +301,19 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
   private require_program_id(): PublicKey {
     return new PublicKey(GUTENBERG_REGISTRY_PROGRAM_ID);
   }
+}
+
+function encode_unpublish_release_instruction(input: {
+  name: string;
+  version: string;
+}): Buffer {
+  return Buffer.concat([
+    instruction_discriminator('unpublish_release'),
+    encode_string(input.name),
+    encode_string(input.version),
+    seed_hash(input.name),
+    seed_hash(input.version),
+  ]);
 }
 
 function encode_publish_release_instruction(

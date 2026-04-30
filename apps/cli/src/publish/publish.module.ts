@@ -7,10 +7,11 @@ import { StorageModule } from '../storage/storage.module';
 
 import { PublishService } from './publish.service';
 import { SiteFilesRepository } from './site-files.repository';
+import { UnpublishService } from './unpublish.service';
 
 @Module({
   imports: [KeysModule, ManifestModule, RegistryModule, StorageModule],
-  providers: [PublishService, SiteFilesRepository],
-  exports: [PublishService, SiteFilesRepository],
+  providers: [PublishService, UnpublishService, SiteFilesRepository],
+  exports: [PublishService, UnpublishService, SiteFilesRepository],
 })
 export class PublishModule {}

@@ -8,12 +8,15 @@ import { spawn } from 'node:child_process';
 import { DoctorService } from '../doctor/doctor.service';
 import { OpenService } from '../open/open.service';
 import { PublishService } from '../publish/publish.service';
+import { UnpublishService } from '../publish/unpublish.service';
+
 @Injectable()
 export class CliService {
   constructor(
     private readonly doctorService: DoctorService,
     private readonly openService: OpenService,
     private readonly publishService: PublishService,
+    private readonly unpublishService: UnpublishService,
   ) {}
 
   async run(): Promise<void> {
@@ -67,6 +70,40 @@ export class CliService {
       },
     });
 
+    const unpublish = command({
+      name: 'unpublish',
+      desc: 'Remove release(s) from the Solana registry and reclaim account rent',
+      options: {
+        pkg: positional('pkg')
+          .desc('name@version for one release, or site name alone to unpublish every version')
+          .required(),
+      },
+      handler: async (options) => {
+        const trimmed = options.pkg.trim();
+
+        if (trimmed.includes('@')) {
+          const { name, version } = parse_name_at_version(
+            trimmed,
+            'unpublish',
+          );
+
+          await this.unpublishService.unpublish_site({ name, version });
+
+          console.log(`Unpublished ${name}@${version}`);
+        } else {
+          if (!site_name_pattern.test(trimmed)) {
+            throw new Error(
+              `unpublish: site name must match release naming rules, got "${trimmed}"`,
+            );
+          }
+
+          await this.unpublishService.unpublish_all_for_name(trimmed);
+
+          console.log(`Unpublished all versions of ${trimmed}`);
+        }
+      },
+    });
+
     const open = command({
       name: 'open',
       desc: 'Open and verify a registered site name or manifest https URL',
@@ -107,7 +144,7 @@ export class CliService {
       },
     });
 
-    await run([doctor, publish, open], {
+    await run([doctor, publish, unpublish, open], {
       name: 'gutenberg',
       description: 'Verifiable publishing for the Solana ecosystem',
       version: '0.0.0',

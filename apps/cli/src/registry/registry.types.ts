@@ -35,6 +35,14 @@ export type ReleaseRegistryRepository = {
     publisher: SolanaPublicKey;
   }): Promise<void>;
   publish_release(event: GutenbergReleaseEvent): Promise<void>;
+  unpublish_release(input: {
+    name: string;
+    version: string;
+  }): Promise<void>;
+  unpublish_releases_batch(input: {
+    name: string;
+    versions: string[];
+  }): Promise<void>;
   list_releases(): Promise<GutenbergReleaseEvent[]>;
   find_release(
     input: FindReleaseInput,

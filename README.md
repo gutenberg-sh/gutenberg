@@ -65,8 +65,6 @@ pnpm solana:airdrop -- 5
 
 ### CLI
 
-The CLI publishes folders of writing, registers immutable releases, and opens verified releases.
-
 Check local publisher configuration:
 
 ```bash
@@ -79,11 +77,18 @@ Publish the demo folder:
 pnpm cli:dev publish gutenberg-demo@1.0.0 examples/gutenberg-demo
 ```
 
-Open and verify the registered release (pin a version with `@` or omit it to use the latest release for that name):
+Open and verify the registered release:
 
 ```bash
 pnpm cli:dev open gutenberg-demo@1.0.0
 pnpm cli:dev open gutenberg-demo
+```
+
+Remove Solana registry rows and reclaim rent:
+
+```bash
+pnpm cli:dev unpublish gutenberg-demo@1.0.0
+pnpm cli:dev unpublish gutenberg-demo
 ```
 
 ### Build And Lint

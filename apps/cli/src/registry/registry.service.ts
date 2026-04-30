@@ -38,6 +38,20 @@ export class RegistryService {
     await this.releaseRegistryRepository.publish_release(event);
   }
 
+  async unpublish_release(input: {
+    name: string;
+    version: string;
+  }): Promise<void> {
+    await this.releaseRegistryRepository.unpublish_release(input);
+  }
+
+  async unpublish_releases_batch(input: {
+    name: string;
+    versions: string[];
+  }): Promise<void> {
+    await this.releaseRegistryRepository.unpublish_releases_batch(input);
+  }
+
   async list_releases(): Promise<GutenbergReleaseEvent[]> {
     const releases = await this.releaseRegistryRepository.list_releases();
 
