@@ -5,23 +5,13 @@ import { ErrorView } from '@/components/ErrorView';
 import { FileNav } from '@/components/FileNav';
 import { MarkdownContent } from '@/components/MarkdownContent';
 import { ReleaseHeader } from '@/components/ReleaseHeader';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VerifyStatus } from '@/components/VerifyStatus';
-import { useVerifiedRelease } from '@/hooks/useVerifiedRelease';
+import {
+  useVerifiedRelease,
+  type ReleaseSource,
+} from '@/hooks/useVerifiedRelease';
 import type { GutenbergManifest, VerifiedRelease } from '@/lib/types';
-
-type ReleaseSource =
-  | {
-      kind: 'release';
-      name: string;
-      version?: string;
-      publisher?: string;
-    }
-  | {
-      kind: 'manifest';
-      manifest_uri: string;
-    };
 
 export function VerifiedReleaseView({
   source,
@@ -36,32 +26,34 @@ export function VerifiedReleaseView({
 
   if (state.status === 'loading') {
     return (
-      <div className="grid gap-6">
-        <Card>
-          <CardHeader className="gap-3">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-64" />
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardContent className="grid gap-3 py-6">
-            <p className="text-sm font-medium">Verification</p>
+      <div className="grid gap-10">
+        <ReleaseHeaderSkeleton />
+        <div className="grid gap-8 lg:grid-cols-[16rem_1fr] lg:gap-12">
+          <div className="grid gap-3">
+            <Skeleton className="h-3 w-16" />
+            <div className="grid gap-2 border-y border-border/70 py-3">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-28" />
+            </div>
+          </div>
+          <div className="grid gap-4">
             <VerifyStatus steps={state.steps} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (state.status === 'error' || !state.result) {
     return (
-      <div className="grid gap-6">
-        <Card>
-          <CardContent className="grid gap-3 py-6">
-            <p className="text-sm font-medium">Verification</p>
-            <VerifyStatus steps={state.steps} />
-          </CardContent>
-        </Card>
+      <div className="grid gap-10">
+        <section
+          aria-label="Verification"
+          className="grid gap-3 border-y border-border/70 py-6"
+        >
+          <VerifyStatus steps={state.steps} />
+        </section>
         <ErrorView
           title="Verification failed"
           message={state.error ?? 'Unknown error'}
@@ -76,6 +68,29 @@ export function VerifiedReleaseView({
       base_path={base_path}
       current_path={current_path}
     />
+  );
+}
+
+function ReleaseHeaderSkeleton() {
+  return (
+    <section className="grid gap-6 border-y border-border/70 py-6">
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-5 w-32 rounded-full" />
+        <Skeleton className="h-3 w-44" />
+      </div>
+      <div className="grid gap-2">
+        <Skeleton className="h-9 w-72" />
+        <Skeleton className="h-4 w-96 max-w-full" />
+      </div>
+      <div className="grid gap-3 border-t border-border/70 pt-3 sm:grid-cols-2">
+        {Array.from({ length: 4 }).map((_, idx) => (
+          <div key={idx} className="grid gap-1.5 px-1 py-1.5">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-4 w-full max-w-[280px]" />
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -116,14 +131,14 @@ function VerifiedReleaseRendered({
   const ext = extension_of(target_path);
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-10">
       <ReleaseHeader
         manifest={manifest}
         manifest_uri={release.manifest_uri}
         release_pda={release.release_pda}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[16rem_1fr]">
+      <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-12">
         <FileNav
           files={all_paths}
           base_path={base_path}

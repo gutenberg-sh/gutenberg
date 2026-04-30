@@ -92,16 +92,11 @@ Publish the demo folder:
 pnpm cli:dev -- publish gutenberg-demo@1.0.0 examples/gutenberg-demo
 ```
 
-Open a release in the gateway. The CLI builds the gateway URL from
-`GUTENBERG_GATEWAY_URL` and opens your browser; verification (manifest
-signature, bundle hash, file hashes) happens entirely in the browser. Use
-`--no-browser` to print the URL only, `--gateway` to override the base URL,
-and `--publisher` to skip the `getProgramAccounts` scan on public RPCs:
+Open a release in the gateway:
 
 ```bash
 pnpm cli:dev -- open gutenberg-demo@1.0.0
-pnpm cli:dev -- open gutenberg-demo --publisher 46gAcDFFDPMmvrXVurDgDtRZUqMvioW4xK7xTsc4RLNS
-pnpm cli:dev -- open https://gateway.irys.xyz/<manifest-tx-id> --no-browser
+pnpm cli:dev -- open gutenberg-demo
 ```
 
 Remove a registry release:

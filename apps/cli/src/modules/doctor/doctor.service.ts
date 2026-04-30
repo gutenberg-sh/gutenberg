@@ -6,7 +6,11 @@ import {
   SOLANA_RPC_URL,
 } from '../../common/config/config.tokens';
 import { SolanaRegistryRepository } from '../registry/solana-registry.repository';
-import { SolanaWalletRepository } from '../solana/solana-wallet.repository';
+import {
+  type LoadedWallet,
+  SolanaWalletRepository,
+} from '../solana/solana-wallet.repository';
+import { wallet_storage_path } from '../solana/wallet-storage';
 import { StorageService } from '../storage/storage.service';
 
 import type { DoctorCheck, DoctorResult } from './doctor.types';
@@ -24,23 +28,62 @@ export class DoctorService {
   ) {}
 
   async check(): Promise<DoctorResult> {
+    const wallet = await this.try_load_wallet();
     const checks: DoctorCheck[] = [
       ok_check(
         'irys_config',
         `network ${this.irys_network}, read gateway ${this.arweave_gateway_url}`,
       ),
-      await this.check_irys_bundler(),
-      await this.check_irys_balance(),
-      this.check_solana_private_key(),
+      this.check_solana_publisher_key(wallet),
       await this.check_solana_rpc(),
-      await this.check_solana_wallet_balance(),
       this.check_registry_program_id(),
     ];
+
+    if (wallet) {
+      checks.push(await this.check_irys_bundler());
+      checks.push(await this.check_irys_balance());
+      checks.push(await this.check_solana_wallet_balance());
+    }
 
     return {
       ok: checks.every((check) => check.status !== 'error'),
       checks,
     };
+  }
+
+  private async try_load_wallet(): Promise<LoadedWallet | undefined> {
+    try {
+      return await this.wallet_repository.try_load_keypair();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+
+      throw new Error(`Failed to read configured wallet: ${message}`, {
+        cause: error,
+      });
+    }
+  }
+
+  private check_solana_publisher_key(
+    wallet: LoadedWallet | undefined,
+  ): DoctorCheck {
+    if (!wallet) {
+      return warn_check(
+        'solana_publisher_key',
+        `No publisher key configured. Run \`gutenberg publish ...\` to paste one and save it to ${wallet_storage_path}.`,
+      );
+    }
+
+    const source =
+      wallet.source === 'env'
+        ? 'GUTENBERG_SOLANA_PRIVATE_KEY'
+        : wallet.source === 'stored'
+          ? wallet_storage_path
+          : 'interactive prompt';
+
+    return ok_check(
+      'solana_publisher_key',
+      `Loaded wallet ${wallet.keypair.publicKey.toBase58()} from ${source}`,
+    );
   }
 
   private async check_irys_bundler(): Promise<DoctorCheck> {
@@ -82,19 +125,6 @@ export class DoctorService {
       );
     } catch (error) {
       return error_check('irys_balance', error);
-    }
-  }
-
-  private check_solana_private_key(): DoctorCheck {
-    try {
-      const wallet = this.wallet_repository.load_keypair();
-
-      return ok_check(
-        'solana_private_key',
-        `Loaded wallet ${wallet.publicKey.toBase58()} from GUTENBERG_SOLANA_PRIVATE_KEY`,
-      );
-    } catch (error) {
-      return error_check('solana_private_key', error);
     }
   }
 

@@ -1,31 +1,5 @@
 const site_name_pattern = /^[a-z0-9][a-z0-9._-]*$/;
 
-export function parse_open_source(raw: string): {
-  source: string;
-  version?: string;
-} {
-  const trimmed = raw.trim();
-
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-    return { source: trimmed };
-  }
-
-  const at = trimmed.indexOf('@');
-
-  if (at <= 0 || at === trimmed.length - 1) {
-    return { source: trimmed };
-  }
-
-  const name = trimmed.slice(0, at);
-  const version = trimmed.slice(at + 1);
-
-  if (!version || !site_name_pattern.test(name)) {
-    return { source: trimmed };
-  }
-
-  return { source: name, version };
-}
-
 export function parse_name_at_version(
   spec: string,
   label: string,

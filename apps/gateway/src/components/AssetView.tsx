@@ -1,7 +1,7 @@
-import { Download, FileText, ImageIcon } from 'lucide-react';
+import { Download, FileText, Image as ImageIcon } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 
-import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const TEXT_EXTS = new Set([
   '.txt',
@@ -45,7 +45,10 @@ export function AssetView({
   const blob_url = useMemo(() => {
     const blob = new Blob(
       [
-        bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
+        bytes.buffer.slice(
+          bytes.byteOffset,
+          bytes.byteOffset + bytes.byteLength,
+        ) as ArrayBuffer,
       ],
       { type: mime },
     );
@@ -63,17 +66,13 @@ export function AssetView({
 
   if (IMAGE_EXTS.has(ext)) {
     return (
-      <figure className="grid gap-2">
+      <figure className="grid gap-3">
+        <Caption icon={ImageIcon} path={path} bytes={bytes} />
         <img
           src={blob_url}
           alt={path}
-          className="max-h-[70vh] rounded-lg border bg-muted/50 object-contain"
+          className="max-h-[72vh] w-full rounded-lg border border-border/70 bg-muted/30 object-contain"
         />
-        <figcaption className="flex items-center gap-2 text-xs text-muted-foreground">
-          <ImageIcon className="size-3.5" aria-hidden />
-          <code className="font-mono">{path}</code>
-          <span>· {format_bytes(bytes.byteLength)}</span>
-        </figcaption>
       </figure>
     );
   }
@@ -88,13 +87,14 @@ export function AssetView({
     }
 
     return (
-      <div className="grid gap-2">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <FileText className="size-3.5" aria-hidden />
-          <code className="font-mono">{path}</code>
-          <span>· {format_bytes(bytes.byteLength)}</span>
-        </div>
-        <pre className="max-h-[70vh] overflow-auto rounded-lg border bg-muted/50 p-4 text-xs">
+      <div className="grid gap-3">
+        <Caption icon={FileText} path={path} bytes={bytes} />
+        <pre
+          className={cn(
+            'max-h-[72vh] overflow-auto rounded-lg border border-border/70 bg-muted/40 p-4',
+            'font-mono text-[12.5px] leading-relaxed tabular',
+          )}
+        >
           <code>{text}</code>
         </pre>
       </div>
@@ -102,18 +102,48 @@ export function AssetView({
   }
 
   return (
-    <div className="grid gap-3 rounded-lg border bg-card p-6 text-center">
-      <p className="text-sm text-muted-foreground">
-        Binary asset at <code className="font-mono">{path}</code> (
-        {format_bytes(bytes.byteLength)})
+    <div className="grid gap-4 border-y border-border/70 py-8 text-center">
+      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        Binary asset
       </p>
-      <Button asChild variant="outline" className="justify-self-center">
-        <a href={blob_url} download={filename}>
-          <Download className="size-4" aria-hidden />
+      <p className="font-mono text-[13px] tabular text-foreground">{path}</p>
+      <p className="text-[12px] text-muted-foreground tabular">
+        {format_bytes(bytes.byteLength)}
+      </p>
+      <div>
+        <a
+          href={blob_url}
+          download={filename}
+          className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-foreground transition-colors hover:border-foreground/30 active:translate-y-[1px]"
+        >
+          <Download className="size-3.5" strokeWidth={1.75} aria-hidden />
           Download
         </a>
-      </Button>
+      </div>
     </div>
+  );
+}
+
+function Caption({
+  icon: Icon,
+  path,
+  bytes,
+}: {
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  path: string;
+  bytes: Uint8Array;
+}) {
+  return (
+    <figcaption className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-muted-foreground">
+      <span className="inline-flex items-center gap-1.5 text-foreground">
+        <Icon className="size-3.5" aria-hidden />
+        <code className="font-mono tabular">{path}</code>
+      </span>
+      <span aria-hidden className="text-muted-foreground/40">
+        ·
+      </span>
+      <span className="tabular">{format_bytes(bytes.byteLength)}</span>
+    </figcaption>
   );
 }
 

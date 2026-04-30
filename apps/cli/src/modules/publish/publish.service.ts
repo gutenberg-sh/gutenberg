@@ -30,7 +30,7 @@ export class PublishService {
       this.site_files_repository.resolve_folder(options.folder),
     );
 
-    const keypair = this.keys_service.load_publisher_key();
+    const keypair = await this.keys_service.load_publisher_key();
 
     await this.registry_service.assert_name_claimable({
       name: options.name,

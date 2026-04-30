@@ -1,162 +1,128 @@
-import { ExternalLink, Search } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
 const NAME_RE = /^[a-z0-9][a-z0-9._-]*$/;
 
 export function LookupForm() {
   const navigate = useNavigate();
   const [release_spec, set_release_spec] = useState('');
-  const [publisher, set_publisher] = useState('');
-  const [manifest_url, set_manifest_url] = useState('');
   const [error, set_error] = useState<string | undefined>();
 
-  const submit_release = (event: FormEvent) => {
+  const submit = (event: FormEvent) => {
     event.preventDefault();
     set_error(undefined);
 
     const trimmed = release_spec.trim();
     const at = trimmed.indexOf('@');
-    const name = at > 0 ? trimmed.slice(0, at) : trimmed;
-    const version = at > 0 ? trimmed.slice(at + 1) : undefined;
+
+    if (at === trimmed.length - 1) {
+      set_error('Releases are addressed as name@version.');
+      return;
+    }
+
+    const has_version = at > 0;
+    const name = has_version ? trimmed.slice(0, at) : trimmed;
+    const version = has_version ? trimmed.slice(at + 1) : undefined;
 
     if (!NAME_RE.test(name)) {
       set_error(
-        'Release name must use lowercase letters, numbers, dots, underscores, or hyphens',
+        'Name must be lowercase letters, numbers, dots, underscores, or hyphens.',
       );
       return;
     }
 
-    const params = new URLSearchParams();
-    const trimmed_publisher = publisher.trim();
-
-    if (trimmed_publisher.length > 0) {
-      params.set('p', trimmed_publisher);
-    }
-
-    const query = params.toString() ? `?${params.toString()}` : '';
-    const path = version
-      ? `/r/${encodeURIComponent(name)}/${encodeURIComponent(version)}${query}`
-      : `/r/${encodeURIComponent(name)}${query}`;
-
-    void navigate(path);
+    void navigate(
+      version === undefined
+        ? `/r/${encodeURIComponent(name)}`
+        : `/r/${encodeURIComponent(name)}/${encodeURIComponent(version)}`,
+    );
   };
 
-  const submit_manifest = (event: FormEvent) => {
-    event.preventDefault();
-    set_error(undefined);
-
-    const trimmed = manifest_url.trim();
-
-    try {
-      const url = new URL(trimmed);
-
-      if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-        set_error('Manifest URL must be http(s)');
-        return;
-      }
-    } catch {
-      set_error('Manifest URL is not a valid URL');
-      return;
-    }
-
-    const params = new URLSearchParams({ uri: trimmed });
-    void navigate(`/m?${params.toString()}`);
-  };
+  const has_error = Boolean(error);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Open a release</CardTitle>
-        <CardDescription>
-          Verify a Gutenberg release locally in your browser. Lookup by
-          registered <code>name</code> (with optional <code>@version</code>) or
-          paste a manifest URL.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-6">
-        <form className="grid gap-3" onSubmit={submit_release}>
-          <div className="grid gap-1.5">
-            <Label htmlFor="release-spec">Release</Label>
-            <Input
-              id="release-spec"
-              placeholder="my-site or my-site@1.0.0"
-              autoComplete="off"
-              spellCheck={false}
-              value={release_spec}
-              onChange={(event) => set_release_spec(event.target.value)}
-              required
-            />
-          </div>
-          <div className="grid gap-1.5">
-            <Label htmlFor="publisher">Publisher (optional)</Label>
-            <Input
-              id="publisher"
-              placeholder="Solana public key (recommended on public RPCs)"
-              autoComplete="off"
-              spellCheck={false}
-              value={publisher}
-              onChange={(event) => set_publisher(event.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Without a publisher we scan all program accounts via{' '}
-              <code>getProgramAccounts</code>. Some public RPCs disable that
-              method.
-            </p>
-          </div>
-          <Button type="submit" className="justify-self-start">
-            <Search className="size-4" aria-hidden />
-            Open release
-          </Button>
-        </form>
+    <form
+      onSubmit={submit}
+      noValidate
+      className={cn(
+        'group/form relative grid gap-3 rounded-2xl border border-border/70 bg-card/60 p-5 shadow-paper backdrop-blur-sm sm:p-6',
+      )}
+    >
+      <div className="flex items-baseline justify-between gap-3">
+        <label
+          htmlFor="release-spec"
+          className="text-[13px] font-medium text-foreground"
+        >
+          Open a release
+        </label>
+        <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground/80">
+          name@version or name
+        </span>
+      </div>
 
-        <Separator />
+      <div
+        className={cn(
+          'group flex items-stretch gap-px rounded-xl border bg-background/80 transition-colors',
+          'focus-within:border-foreground/40 focus-within:ring-2 focus-within:ring-ring/40',
+          has_error
+            ? 'border-destructive/70 focus-within:border-destructive/80 focus-within:ring-destructive/30'
+            : 'border-border',
+        )}
+      >
+        <span
+          aria-hidden
+          className="pointer-events-none flex select-none items-center pl-3.5 pr-1 font-mono text-[13px] text-muted-foreground/70"
+        >
+          /r/
+        </span>
+        <input
+          id="release-spec"
+          type="text"
+          autoComplete="off"
+          spellCheck={false}
+          aria-invalid={has_error || undefined}
+          aria-describedby={has_error ? 'release-spec-error' : undefined}
+          placeholder="gutenberg-demo@1.0.0"
+          value={release_spec}
+          onChange={(event) => set_release_spec(event.target.value)}
+          required
+          className="min-w-0 flex-1 bg-transparent py-3 pr-3 font-mono text-[13.5px] tabular text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+        />
+        <button
+          type="submit"
+          className={cn(
+            'group/btn m-1 inline-flex items-center gap-2 rounded-lg bg-foreground px-3.5 text-[13px] font-medium text-background transition-all',
+            'hover:bg-foreground/92 active:translate-y-[1px] active:scale-[0.985]',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+          )}
+        >
+          Verify
+          <ArrowRight
+            className="size-3.5 transition-transform group-hover/btn:translate-x-0.5"
+            strokeWidth={2}
+            aria-hidden
+          />
+        </button>
+      </div>
 
-        <form className="grid gap-3" onSubmit={submit_manifest}>
-          <div className="grid gap-1.5">
-            <Label htmlFor="manifest-url">Manifest URL</Label>
-            <Input
-              id="manifest-url"
-              placeholder="https://gateway.irys.xyz/<tx-id>"
-              autoComplete="off"
-              spellCheck={false}
-              value={manifest_url}
-              onChange={(event) => set_manifest_url(event.target.value)}
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              Skips the registry lookup. Signature + bundle hash are still
-              verified, but you trust this URL points at the right manifest.
-            </p>
-          </div>
-          <Button
-            type="submit"
-            variant="secondary"
-            className="justify-self-start"
+      <div className="flex min-h-[18px] items-center justify-between gap-3 text-[12px]">
+        {has_error ? (
+          <p
+            id="release-spec-error"
+            role="alert"
+            className="text-destructive"
           >
-            <ExternalLink className="size-4" aria-hidden />
-            Open manifest
-          </Button>
-        </form>
-
-        {error ? (
-          <p className="text-sm text-destructive" role="alert">
             {error}
           </p>
-        ) : null}
-      </CardContent>
-    </Card>
+        ) : (
+          <p className="text-muted-foreground/80">
+            Verification runs locally. We never proxy the bundle.
+          </p>
+        )}
+      </div>
+    </form>
   );
 }

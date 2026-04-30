@@ -62,8 +62,8 @@ load_dotenv({ path: env_file_path, quiet: true });
     {
       provide: SOLANA_PRIVATE_KEY,
       inject: [ConfigService],
-      useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('GUTENBERG_SOLANA_PRIVATE_KEY'),
+      useFactory: (config: ConfigService): string | undefined =>
+        config.get<string>('GUTENBERG_SOLANA_PRIVATE_KEY'),
     },
     {
       provide: GATEWAY_URL,

@@ -15,9 +15,16 @@ const ACCOUNT_DISCRIMINATOR_RELEASE = sync_sha256(
   new TextEncoder().encode('account:Release'),
 ).subarray(0, 8);
 
+/**
+ * Solana JSON-RPC encodes account `data` as a `[content, encoding]` tuple
+ * (e.g. `["5TFglKe8…", "base64"]`), not as separate fields. We always request
+ * `encoding: 'base64'`, so the second element is just a sanity check.
+ */
 type RpcAccount = {
-  data: string;
-  encoding: string;
+  data: [string, string];
+  executable?: boolean;
+  lamports?: number;
+  owner?: string;
 };
 
 type RpcResponse<T> = {
@@ -61,28 +68,11 @@ export function find_release_pda(input: {
 }
 
 /**
- * Fetch + decode the registry's `Release` account at the given PDA.
- * Returns `undefined` if the account does not exist.
+ * Scan all release accounts under `program_id` via `getProgramAccounts`.
+ * The RPC must allow `getProgramAccounts` for this program; some public
+ * providers disable it for arbitrary programs.
  */
-export async function fetch_release(
-  release_pda: string,
-  rpc_url: string,
-): Promise<GutenbergReleaseEvent | undefined> {
-  const account = await get_account_info(release_pda, rpc_url);
-
-  if (!account) {
-    return undefined;
-  }
-
-  return decode_release_account(account);
-}
-
-/**
- * Scan all release accounts under `program_id` (via `getProgramAccounts`).
- * Some public RPCs disable this method; if you know the publisher, prefer
- * deriving the PDA directly via `find_release_pda` + `fetch_release`.
- */
-export async function list_releases(input: {
+async function list_releases(input: {
   rpc_url: string;
   program_id: string;
 }): Promise<GutenbergReleaseEvent[]> {
@@ -125,14 +115,12 @@ export async function list_releases(input: {
   const events: GutenbergReleaseEvent[] = [];
 
   for (const entry of body.result) {
-    if (entry.account.encoding !== 'base64') {
-      continue;
-    }
-
     try {
-      events.push(decode_release_account(base64_decode(entry.account.data)));
+      events.push(
+        decode_release_account(decode_account_data(entry.account.data)),
+      );
     } catch {
-      // skip accounts we can't decode
+      // skip accounts we can't decode (different account type, malformed, etc.)
     }
   }
 
@@ -141,12 +129,12 @@ export async function list_releases(input: {
   );
 }
 
-/** Find the most-recent release matching `name` (and optional version). */
-export async function find_latest_release_by_name(input: {
+/** Find the registry release for the given `name@version`, if it exists. */
+export async function find_release_by_name_at_version(input: {
   rpc_url: string;
   program_id: string;
   name: string;
-  version?: string;
+  version: string;
 }): Promise<GutenbergReleaseEvent | undefined> {
   const releases = await list_releases({
     rpc_url: input.rpc_url,
@@ -155,54 +143,38 @@ export async function find_latest_release_by_name(input: {
 
   return releases
     .filter(
-      (event) =>
-        event.name === input.name &&
-        (input.version === undefined || event.version === input.version),
+      (event) => event.name === input.name && event.version === input.version,
     )
     .at(-1);
 }
 
-async function get_account_info(
-  address: string,
-  rpc_url: string,
-): Promise<Uint8Array | undefined> {
-  const id = ++request_id;
-  const response = await fetch(rpc_url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id,
-      method: 'getAccountInfo',
-      params: [address, { encoding: 'base64', commitment: 'confirmed' }],
-    }),
+/**
+ * Find the most recently created registry release for `name`.
+ * `list_releases` returns events sorted ascending by `created_at`,
+ * so the last filtered match is the latest version.
+ */
+export async function find_latest_release_by_name(input: {
+  rpc_url: string;
+  program_id: string;
+  name: string;
+}): Promise<GutenbergReleaseEvent | undefined> {
+  const releases = await list_releases({
+    rpc_url: input.rpc_url,
+    program_id: input.program_id,
   });
 
-  if (!response.ok) {
-    throw new Error(
-      `Solana RPC ${rpc_url} returned ${response.status} ${response.statusText}`,
-    );
+  return releases.filter((event) => event.name === input.name).at(-1);
+}
+
+/** Decode the `[content, encoding]` tuple Solana returns under `account.data`. */
+function decode_account_data(data: RpcAccount['data']): Uint8Array {
+  const [content, encoding] = data;
+
+  if (encoding !== 'base64') {
+    throw new Error(`Unexpected RPC encoding: ${encoding}`);
   }
 
-  const body = (await response.json()) as RpcResponse<{
-    value: RpcAccount | null;
-  }>;
-
-  if (body.error) {
-    throw new Error(`Solana RPC error: ${body.error.message}`);
-  }
-
-  const value = body.result.value;
-
-  if (!value) {
-    return undefined;
-  }
-
-  if (value.encoding !== 'base64') {
-    throw new Error(`Unexpected RPC encoding: ${value.encoding}`);
-  }
-
-  return base64_decode(value.data);
+  return base64_decode(content);
 }
 
 function decode_release_account(data: Uint8Array): GutenbergReleaseEvent {

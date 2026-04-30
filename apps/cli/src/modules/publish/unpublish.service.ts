@@ -15,7 +15,7 @@ export class UnpublishService {
     version: string;
   }): Promise<void> {
     await this.registry_service.assert_can_publish();
-    const { publisher } = this.keys_service.load_publisher_key();
+    const { publisher } = await this.keys_service.load_publisher_key();
     const release = await this.registry_service.find_release({
       name: input.name,
       version: input.version,
@@ -33,7 +33,7 @@ export class UnpublishService {
 
   async unpublish_all_for_name(name: string): Promise<void> {
     await this.registry_service.assert_can_publish();
-    const { publisher } = this.keys_service.load_publisher_key();
+    const { publisher } = await this.keys_service.load_publisher_key();
     const releases = await this.registry_service.list_releases();
     const versions = [
       ...new Set(

@@ -201,7 +201,7 @@ export class StorageService {
   }
 
   private async build_client(): Promise<BaseNodeIrys> {
-    const keypair = this.wallet_repository.load_keypair();
+    const keypair = await this.wallet_repository.load_keypair();
     const wallet_secret = bs58.encode(keypair.secretKey);
 
     const builder = Uploader(Solana)

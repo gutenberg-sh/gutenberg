@@ -5,11 +5,7 @@ import {
   strip_utf8_bom,
   verify_manifest_signature,
 } from './manifest';
-import {
-  fetch_release,
-  find_latest_release_by_name,
-  find_release_pda,
-} from './registry';
+import { find_release_pda, find_release_by_name_at_version } from './registry';
 import { fetch_blob } from './storage';
 import { extract_tar_bundle } from './tar';
 import type {
@@ -24,36 +20,12 @@ export type VerifyContext = {
   program_id: string;
 };
 
-export type ResolveByNameInput = {
-  name: string;
-  version?: string;
-  publisher?: string;
-};
-
-/** Resolve a release by name (and optional version/publisher) to a registry event. */
-export async function resolve_release_event(
-  input: ResolveByNameInput,
+/** Resolve a release by name@version to its on-chain registry event + PDA. */
+export async function resolve_release(
+  input: { name: string; version: string },
   ctx: VerifyContext,
 ): Promise<{ release: GutenbergReleaseEvent; release_pda: string }> {
-  if (input.publisher && input.version) {
-    const pda = find_release_pda({
-      publisher: input.publisher,
-      name: input.name,
-      version: input.version,
-      program_id: ctx.program_id,
-    });
-    const event = await fetch_release(pda, ctx.rpc_url);
-
-    if (!event) {
-      throw new Error(
-        `No release found for ${input.name}@${input.version} from ${input.publisher}`,
-      );
-    }
-
-    return { release: event, release_pda: pda };
-  }
-
-  const event = await find_latest_release_by_name({
+  const event = await find_release_by_name_at_version({
     rpc_url: ctx.rpc_url,
     program_id: ctx.program_id,
     name: input.name,
@@ -61,27 +33,23 @@ export async function resolve_release_event(
   });
 
   if (!event) {
-    throw new Error(
-      input.version
-        ? `No release found for ${input.name}@${input.version}`
-        : `No release found for ${input.name}`,
-    );
+    throw new Error(`No release found for ${input.name}@${input.version}`);
   }
 
-  const pda = find_release_pda({
+  const release_pda = find_release_pda({
     publisher: event.publisher,
     name: event.name,
     version: event.version,
     program_id: ctx.program_id,
   });
 
-  return { release: event, release_pda: pda };
+  return { release: event, release_pda };
 }
 
-/** Fetch + verify a manifest by its content URI, optionally bound to a registry event. */
+/** Fetch + verify the manifest referenced by a registry event. */
 export async function verify_manifest_uri(input: {
   manifest_uri: string;
-  expected_release?: GutenbergReleaseEvent;
+  expected_release: GutenbergReleaseEvent;
   ctx: VerifyContext;
 }): Promise<{ manifest: GutenbergManifest }> {
   const manifest_bytes = await fetch_blob(
@@ -99,20 +67,18 @@ export async function verify_manifest_uri(input: {
     throw new Error('Manifest is not valid JSON');
   }
 
-  if (input.expected_release) {
-    let canonical: string;
+  let canonical: string;
 
-    try {
-      canonical = canonical_json(parsed);
-    } catch {
-      throw new Error('Manifest hash does not match the registered release');
-    }
+  try {
+    canonical = canonical_json(parsed);
+  } catch {
+    throw new Error('Manifest hash does not match the registered release');
+  }
 
-    const hash = await sha256_hash(canonical);
+  const hash = await sha256_hash(canonical);
 
-    if (hash !== input.expected_release.manifest_hash) {
-      throw new Error('Manifest hash does not match the registered release');
-    }
+  if (hash !== input.expected_release.manifest_hash) {
+    throw new Error('Manifest hash does not match the registered release');
   }
 
   assert_valid_manifest(parsed);
@@ -121,14 +87,12 @@ export async function verify_manifest_uri(input: {
     throw new Error('Manifest signature verification failed');
   }
 
-  if (input.expected_release) {
-    if (
-      parsed.publisher !== input.expected_release.publisher ||
-      parsed.name !== input.expected_release.name ||
-      parsed.version !== input.expected_release.version
-    ) {
-      throw new Error('Manifest does not match the registered release');
-    }
+  if (
+    parsed.publisher !== input.expected_release.publisher ||
+    parsed.name !== input.expected_release.name ||
+    parsed.version !== input.expected_release.version
+  ) {
+    throw new Error('Manifest does not match the registered release');
   }
 
   return { manifest: parsed };

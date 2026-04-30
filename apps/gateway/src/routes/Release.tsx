@@ -1,5 +1,4 @@
-import { useMemo } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { ErrorView } from '@/components/ErrorView';
 import { VerifiedReleaseView } from '@/components/VerifiedReleaseView';
@@ -8,17 +7,9 @@ const NAME_RE = /^[a-z0-9][a-z0-9._-]*$/;
 
 export function ReleaseRoute() {
   const params = useParams();
-  const [search] = useSearchParams();
-
   const name = params.name;
   const version = params.version;
   const splat = params['*'];
-  const publisher = search.get('p') ?? undefined;
-
-  const source_key = useMemo(
-    () => `release:${name ?? ''}@${version ?? ''}|${publisher ?? ''}`,
-    [name, version, publisher],
-  );
 
   if (!name || !NAME_RE.test(name)) {
     return (
@@ -29,23 +20,24 @@ export function ReleaseRoute() {
     );
   }
 
-  const base_path = version
-    ? `/r/${encodeURIComponent(name)}/${encodeURIComponent(version)}`
-    : `/r/${encodeURIComponent(name)}`;
+  if (!version) {
+    return (
+      <ErrorView
+        title="Missing version"
+        message="Releases are addressed as name@version (e.g. gutenberg-demo@1.0.0)."
+      />
+    );
+  }
 
+  const base_path = `/r/${encodeURIComponent(name)}/${encodeURIComponent(version)}`;
   const current_path: `/${string}` | undefined = splat
     ? `/${splat}`
     : undefined;
 
   return (
     <VerifiedReleaseView
-      key={source_key}
-      source={{
-        kind: 'release',
-        name,
-        version: version || undefined,
-        publisher,
-      }}
+      key={`${name}@${version}`}
+      source={{ name, version }}
       base_path={base_path}
       current_path={current_path}
     />

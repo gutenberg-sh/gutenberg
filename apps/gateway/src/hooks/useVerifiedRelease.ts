@@ -1,25 +1,14 @@
 import { useEffect, useReducer } from 'react';
 
 import { env } from '@/env';
-import type { GutenbergReleaseEvent, VerifiedRelease } from '@/lib/types';
-import {
-  resolve_release_event,
-  verify_bundle,
-  verify_manifest_uri,
-} from '@/lib/verify';
+import type { VerifiedRelease } from '@/lib/types';
+import { resolve_release, verify_bundle, verify_manifest_uri } from '@/lib/verify';
 import type { VerifyStep, VerifyStepState } from '@/components/VerifyStatus';
 
-type ReleaseSource =
-  | {
-      kind: 'release';
-      name: string;
-      version?: string;
-      publisher?: string;
-    }
-  | {
-      kind: 'manifest';
-      manifest_uri: string;
-    };
+export type ReleaseSource = {
+  name: string;
+  version: string;
+};
 
 type State = {
   status: 'loading' | 'success' | 'error';
@@ -29,7 +18,6 @@ type State = {
 };
 
 type Action =
-  | { kind: 'reset' }
   | {
       kind: 'step';
       id: string;
@@ -40,26 +28,13 @@ type Action =
   | { kind: 'success'; result: VerifiedRelease }
   | { kind: 'error'; message: string; failing_step_id?: string };
 
-const INITIAL_STEPS_RELEASE: readonly VerifyStep[] = [
-  {
-    id: 'registry',
-    label: 'Resolving registry release',
-    state: 'pending',
-  },
-  { id: 'manifest', label: 'Fetching + verifying manifest', state: 'pending' },
-  { id: 'bundle', label: 'Verifying bundle + file hashes', state: 'pending' },
-];
-
-const INITIAL_STEPS_MANIFEST: readonly VerifyStep[] = [
+const INITIAL_STEPS: readonly VerifyStep[] = [
+  { id: 'registry', label: 'Resolving registry release', state: 'pending' },
   { id: 'manifest', label: 'Fetching + verifying manifest', state: 'pending' },
   { id: 'bundle', label: 'Verifying bundle + file hashes', state: 'pending' },
 ];
 
 function reducer(state: State, action: Action): State {
-  if (action.kind === 'reset') {
-    return state;
-  }
-
   if (action.kind === 'step') {
     return {
       ...state,
@@ -90,24 +65,15 @@ function reducer(state: State, action: Action): State {
   };
 }
 
-export function useVerifiedRelease(source: ReleaseSource | undefined): State {
-  const initial_steps =
-    source?.kind === 'manifest'
-      ? INITIAL_STEPS_MANIFEST
-      : INITIAL_STEPS_RELEASE;
-
+export function useVerifiedRelease(source: ReleaseSource): State {
   const [state, dispatch] = useReducer(reducer, {
     status: 'loading',
-    steps: initial_steps.map((step) => ({ ...step })),
+    steps: INITIAL_STEPS.map((step) => ({ ...step })),
   });
 
-  const source_key = source ? source_to_key(source) : 'none';
+  const source_key = `${source.name}@${source.version}`;
 
   useEffect(() => {
-    if (!source) {
-      return;
-    }
-
     let cancelled = false;
     let current_step_id: string | undefined;
     const ctx = {
@@ -126,55 +92,37 @@ export function useVerifiedRelease(source: ReleaseSource | undefined): State {
 
     void (async () => {
       try {
-        let manifest_uri: string;
-        let expected_release: GutenbergReleaseEvent | undefined;
-        let release_pda: string | undefined;
-
-        if (source.kind === 'release') {
-          begin_step('registry');
-          const resolved = await resolve_release_event(
-            {
-              name: source.name,
-              version: source.version,
-              publisher: source.publisher,
-            },
-            ctx,
-          );
-          if (cancelled) return;
-
-          manifest_uri = resolved.release.manifest;
-          expected_release = resolved.release;
-          release_pda = resolved.release_pda;
-          finish_step(
-            'registry',
-            `${resolved.release.name}@${resolved.release.version}`,
-          );
-        } else {
-          manifest_uri = source.manifest_uri;
-        }
+        begin_step('registry');
+        const { release, release_pda } = await resolve_release(
+          { name: source.name, version: source.version },
+          ctx,
+        );
+        if (cancelled) return;
+        finish_step('registry', `${release.name}@${release.version}`);
 
         begin_step('manifest');
         const { manifest } = await verify_manifest_uri({
-          manifest_uri,
-          expected_release,
+          manifest_uri: release.manifest,
+          expected_release: release,
           ctx,
         });
         if (cancelled) return;
-        finish_step('manifest', short_uri(manifest_uri));
+        finish_step('manifest', short_uri(release.manifest));
 
         begin_step('bundle');
         const files = await verify_bundle({ manifest, ctx });
         if (cancelled) return;
         finish_step('bundle', `${files.size} files`);
 
-        const result: VerifiedRelease = {
-          manifest,
-          manifest_uri,
-          release_pda,
-          files,
-        };
-
-        dispatch({ kind: 'success', result });
+        dispatch({
+          kind: 'success',
+          result: {
+            manifest,
+            manifest_uri: release.manifest,
+            release_pda,
+            files,
+          },
+        });
       } catch (err) {
         if (cancelled) return;
         dispatch({
@@ -192,14 +140,6 @@ export function useVerifiedRelease(source: ReleaseSource | undefined): State {
   }, [source_key]);
 
   return state;
-}
-
-function source_to_key(source: ReleaseSource): string {
-  if (source.kind === 'manifest') {
-    return `manifest:${source.manifest_uri}`;
-  }
-
-  return `release:${source.name}@${source.version ?? '*'}|${source.publisher ?? '*'}`;
 }
 
 function short_uri(uri: string): string {

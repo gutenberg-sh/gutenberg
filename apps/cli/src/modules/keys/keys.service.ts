@@ -15,8 +15,8 @@ const ed25519_spki_prefix = Buffer.from('302a300506032b6570032100', 'hex');
 export class KeysService {
   constructor(private readonly wallet_repository: SolanaWalletRepository) {}
 
-  load_publisher_key(): PublisherKeypair {
-    const wallet = this.wallet_repository.load_keypair();
+  async load_publisher_key(): Promise<PublisherKeypair> {
+    const wallet = await this.wallet_repository.load_keypair();
     const seed = wallet.secretKey.slice(0, 32);
     const public_key_bytes = wallet.publicKey.toBytes();
 

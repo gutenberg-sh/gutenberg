@@ -65,7 +65,7 @@ export class SolanaRegistryRepository {
   }
 
   async get_wallet_balance(): Promise<{ public_key: PublicKey; sol: number }> {
-    const wallet = this.wallet_repository.load_keypair();
+    const wallet = await this.wallet_repository.load_keypair();
     const balance = await this.connection.getBalance(wallet.publicKey);
 
     return {
@@ -81,7 +81,7 @@ export class SolanaRegistryRepository {
   }
 
   async publish_release(event: GutenbergReleaseEvent): Promise<void> {
-    const wallet = this.wallet_repository.load_keypair();
+    const wallet = await this.wallet_repository.load_keypair();
     const transaction = new Transaction().add(
       new TransactionInstruction({
         programId: this.program_id(),
@@ -117,7 +117,7 @@ export class SolanaRegistryRepository {
   }
 
   async unpublish_release(input: UnpublishInput): Promise<void> {
-    const wallet = this.wallet_repository.load_keypair();
+    const wallet = await this.wallet_repository.load_keypair();
     const transaction = new Transaction().add(
       this.create_unpublish_instruction(wallet.publicKey, input),
     );
@@ -134,7 +134,7 @@ export class SolanaRegistryRepository {
       throw new Error('No versions to unpublish');
     }
 
-    const wallet = this.wallet_repository.load_keypair();
+    const wallet = await this.wallet_repository.load_keypair();
     const transaction = new Transaction();
 
     transaction.add(
