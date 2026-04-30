@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { KeyObject } from 'node:crypto';
 
 import type {
   GutenbergManifestFile,
@@ -13,7 +14,19 @@ import { StorageService } from '../storage/storage.service';
 import { create_site_tarball } from '../../common/helpers/site-bundle';
 
 import { SiteFilesRepository } from './site-files.repository';
-import type { PublishOptions, PublishResult } from './publish.types';
+import type {
+  PublishCostPreview,
+  PublishHooks,
+  PublishOptions,
+  PublishResult,
+} from './publish.types';
+
+export class PublishCancelledError extends Error {
+  constructor() {
+    super('Publish cancelled by user');
+    this.name = 'PublishCancelledError';
+  }
+}
 
 @Injectable()
 export class PublishService {
@@ -25,7 +38,10 @@ export class PublishService {
     private readonly storage_service: StorageService,
   ) {}
 
-  async publish_site(options: PublishOptions): Promise<PublishResult> {
+  async publish_site(
+    options: PublishOptions,
+    hooks: PublishHooks = {},
+  ): Promise<PublishResult> {
     const root = await this.site_files_repository.assert_directory(
       this.site_files_repository.resolve_folder(options.folder),
     );
@@ -72,17 +88,48 @@ export class PublishService {
 
     const tarball = await create_site_tarball(root, files);
     const bundle_hash = this.manifest_service.sha256_hash(tarball);
-    const bundle_uri = await this.storage_service.put_blob(tarball);
+    const created_at = new Date().toISOString();
 
-    const unsigned_manifest: GutenbergUnsignedManifest = {
-      bundle_uri,
+    const base_manifest_fields = {
       bundle_hash,
       name: options.name,
       version: options.version,
       entry: options.entry ?? '/index.md',
       files: manifest_files,
       publisher: keypair.publisher,
-      created_at: new Date().toISOString(),
+      created_at,
+    } as const;
+
+    const estimated_manifest_bytes = this.estimate_manifest_size(
+      {
+        ...base_manifest_fields,
+        bundle_uri: this.storage_service.placeholder_content_uri(),
+      },
+      keypair.private_key,
+    );
+
+    if (hooks.confirm_cost) {
+      const total_upload_bytes = tarball.byteLength + estimated_manifest_bytes;
+      const cost = await this.storage_service.estimate_cost(total_upload_bytes);
+      const preview: PublishCostPreview = {
+        bundle_bytes: tarball.byteLength,
+        manifest_bytes: estimated_manifest_bytes,
+        total_bytes: total_upload_bytes,
+        file_count: files.length,
+        cost,
+      };
+
+      const confirmed = await hooks.confirm_cost(preview);
+
+      if (!confirmed) {
+        throw new PublishCancelledError();
+      }
+    }
+
+    const bundle_uri = await this.storage_service.put_blob(tarball);
+    const unsigned_manifest: GutenbergUnsignedManifest = {
+      ...base_manifest_fields,
+      bundle_uri,
     };
     const manifest = this.manifest_service.sign_manifest(
       unsigned_manifest,
@@ -110,5 +157,25 @@ export class PublishService {
       file_count: files.length,
       total_bytes,
     };
+  }
+
+  /**
+   * Canonical JSON byte length of a fully-signed manifest. Ed25519 signatures
+   * are fixed-size, so signing with a placeholder bundle URI of the same
+   * shape as real URIs matches the final manifest byte size exactly.
+   */
+  private estimate_manifest_size(
+    unsigned_manifest: GutenbergUnsignedManifest,
+    private_key: KeyObject,
+  ): number {
+    const signed = this.manifest_service.sign_manifest(
+      unsigned_manifest,
+      private_key,
+    );
+
+    return Buffer.byteLength(
+      this.manifest_service.canonical_json(signed),
+      'utf8',
+    );
   }
 }

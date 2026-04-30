@@ -13,6 +13,14 @@ import type { ContentUri } from '../../common/types/manifest.types';
 import { SolanaWalletRepository } from '../solana/solana-wallet.repository';
 
 const ARWEAVE_TX_ID_PATTERN = /^[A-Za-z0-9+/=_-]{32,128}$/;
+const PLACEHOLDER_TX_ID = 'x'.repeat(43);
+
+export type UploadCostEstimate = {
+  bytes: number;
+  atomic_units: string;
+  display_amount: string;
+  ticker: string;
+};
 
 function content_type_for_filename(filename: string): string {
   if (filename.endsWith('.json')) {
@@ -175,6 +183,34 @@ export class StorageService {
     const irys = await this.get_client();
 
     return irys.getBalance();
+  }
+
+  /**
+   * Estimate the cost of uploading {@link bytes} bytes via Irys, expressed both
+   * in atomic units (lamports for SOL) and a human-readable amount.
+   */
+  async estimate_cost(bytes: number): Promise<UploadCostEstimate> {
+    const irys = await this.get_client();
+    const atomic = await irys.getPrice(bytes);
+    const display = irys.utils.fromAtomic(atomic);
+
+    return {
+      bytes,
+      atomic_units: atomic.toFixed(0),
+      display_amount: display.toString(),
+      ticker: irys.tokenConfig.ticker,
+    };
+  }
+
+  /**
+   * A representative content URI that has the same shape and approximate length
+   * as URIs returned by {@link upload}. Useful for size estimation before the
+   * real upload happens.
+   */
+  placeholder_content_uri(): ContentUri {
+    const base = this.arweave_gateway.replace(/\/$/, '');
+
+    return `${base}/${PLACEHOLDER_TX_ID}`;
   }
 
   /**
