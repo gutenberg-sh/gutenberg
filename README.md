@@ -18,10 +18,6 @@
 
 ---
 
-## Overview
-
-**Gutenberg lets anyone publish freely, privately, and permanently on Solana.** This repo is the CLI, the on-chain registry program, and local tooling to run the stack.
-
 ## Why we build this
 
 **State actors** and **overreaching institutions** can use law, finance, and infrastructure to make inconvenient publishing disappear. Gutenberg is built for **anonymous** publishing, **permanent** storage, and **censorship-resistant** discovery.
