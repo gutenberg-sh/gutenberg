@@ -28,13 +28,18 @@ export class CliService {
   async run(): Promise<void> {
     const doctor = command({
       name: 'doctor',
-      desc: 'Check S3-compatible storage and Solana publisher configuration',
+      desc: 'Check Irys/Arweave storage and Solana publisher configuration',
       options: {},
       handler: async () => {
         const result = await this.doctorService.check();
 
         for (const check of result.checks) {
-          const label = check.status === 'ok' ? 'OK' : 'ERROR';
+          const label =
+            check.status === 'ok'
+              ? 'OK'
+              : check.status === 'warn'
+                ? 'WARN'
+                : 'ERROR';
           console.log(`[${label}] ${check.name}: ${check.message}`);
         }
 
@@ -46,48 +51,66 @@ export class CliService {
 
     const publish = command({
       name: 'publish',
-      desc: 'Publish a Markdown folder (tar bundle + manifest) to S3-compatible storage',
+      desc: 'Publish a Markdown folder (tar + manifest) via Irys and register on Solana',
       options: {
+        pkg: positional('pkg')
+          .desc('Site name and version, npm-style: name@version')
+          .required(),
         folder: positional('folder')
           .desc('Markdown folder to publish')
           .required(),
-        name: string().desc('Site name').required(),
-        version: string('version')
-          .desc('Immutable site version')
-          .required(),
       },
       handler: async (options) => {
+        const { name, version } = parse_name_at_version(options.pkg, 'publish');
+
         const result = await this.publishService.publish_site({
           folder: options.folder,
-          name: options.name,
-          version: options.version,
+          name,
+          version,
         });
 
         console.log(`Uploaded ${this.format_bytes(result.total_bytes)}`);
         console.log(`Files: ${result.file_count}`);
         console.log(`Manifest: ${result.manifest_uri}`);
-        console.log(`Open with: gutenberg open ${result.manifest_uri}`);
+        console.log(`Open with: gutenberg open ${name}@${version}`);
       },
     });
 
     const open = command({
       name: 'open',
-      desc: 'Open and verify a registered site name or s3:// manifest URI',
+      desc: 'Open and verify a registered site name or manifest https URL',
       options: {
         source: positional('source')
           .desc(
-            'Site name or manifest URI (e.g. example or s3://bucket/manifests/...)',
+            'Site name, name@version, or manifest https URL',
           )
           .required(),
-        version: string('version').desc('Specific site version'),
+        release_version: string('release-version').desc(
+          'Site version (only when source is a plain name without @)',
+        ),
         print: boolean().desc(
           'Print the verified Markdown entry instead of opening an editor',
         ),
       },
       handler: async (options) => {
+        const parsed = parse_open_source(options.source);
+        const version_from_flag = options.release_version;
+
+        if (
+          parsed.version !== undefined &&
+          version_from_flag !== undefined &&
+          parsed.version !== version_from_flag
+        ) {
+          throw new Error(
+            'Version mismatch: source uses name@version but --release-version differs; use only one',
+          );
+        }
+
+        const version = version_from_flag ?? parsed.version;
+
         const result = await this.openService.open_site({
-          source: options.source,
-          version: options.version,
+          source: parsed.source,
+          version,
         });
 
         console.log('Verified');
@@ -208,4 +231,59 @@ export class CliService {
       });
     });
   }
+}
+
+const site_name_pattern = /^[a-z0-9][a-z0-9._-]*$/;
+
+/** Plain name, or name@version for npm-style spec (not https URLs). */
+function parse_open_source(raw: string): { source: string; version?: string } {
+  const trimmed = raw.trim();
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return { source: trimmed };
+  }
+
+  const at = trimmed.indexOf('@');
+
+  if (at <= 0 || at === trimmed.length - 1) {
+    return { source: trimmed };
+  }
+
+  const name = trimmed.slice(0, at);
+  const version = trimmed.slice(at + 1);
+
+  if (!version || !site_name_pattern.test(name)) {
+    return { source: trimmed };
+  }
+
+  return { source: name, version };
+}
+
+function parse_name_at_version(
+  spec: string,
+  label: string,
+): { name: string; version: string } {
+  const trimmed = spec.trim();
+  const at = trimmed.indexOf('@');
+
+  if (at <= 0 || at === trimmed.length - 1) {
+    throw new Error(
+      `${label}: expected name@version (e.g. my-site@1.0.0), got "${trimmed}"`,
+    );
+  }
+
+  const name = trimmed.slice(0, at);
+  const version = trimmed.slice(at + 1);
+
+  if (!site_name_pattern.test(name)) {
+    throw new Error(
+      `${label}: site name must match release naming rules, got "${name}"`,
+    );
+  }
+
+  if (!version) {
+    throw new Error(`${label}: version must not be empty`);
+  }
+
+  return { name, version };
 }

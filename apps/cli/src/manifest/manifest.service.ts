@@ -3,6 +3,7 @@ import bs58 from 'bs58';
 import { createHash, createPublicKey, sign, verify } from 'node:crypto';
 import type { KeyObject } from 'node:crypto';
 
+import { is_content_uri } from './content-uri';
 import {
   sha256_prefix,
   signature_prefix,
@@ -164,9 +165,11 @@ export class ManifestService {
 
     if (
       typeof manifest.bundle_uri !== 'string' ||
-      !/^s3:\/\/[^/]+\/.+$/.test(manifest.bundle_uri)
+      !is_content_uri(manifest.bundle_uri)
     ) {
-      throw new Error('Manifest bundle_uri must be an immutable s3:// URI');
+      throw new Error(
+        'Manifest bundle_uri must be an http(s) IPFS path-gateway URL (.../ipfs/{cid}) or Arweave/Irys URL (.../{tx id})',
+      );
     }
 
     if (

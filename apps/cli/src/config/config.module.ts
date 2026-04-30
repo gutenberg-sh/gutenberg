@@ -9,12 +9,10 @@ import { resolve } from 'node:path';
 
 import { env } from '../env';
 import {
+  ARWEAVE_GATEWAY_URL_KEY,
+  IRYS_NETWORK_KEY,
   SOLANA_PRIVATE_KEY_KEY,
   SOLANA_RPC_URL_KEY,
-  STORAGE_ACCESS_KEY_KEY,
-  STORAGE_BUCKET_KEY,
-  STORAGE_ENDPOINT_KEY,
-  STORAGE_SECRET_KEY_KEY,
 } from './config.symbols';
 
 const envFilePath = [
@@ -42,28 +40,16 @@ load_dotenv({ path: envFilePath, quiet: true });
   ],
   providers: [
     {
-      provide: STORAGE_ENDPOINT_KEY,
+      provide: ARWEAVE_GATEWAY_URL_KEY,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('GUTENBERG_STORAGE_ENDPOINT'),
+        config.getOrThrow<string>('GUTENBERG_ARWEAVE_GATEWAY'),
     },
     {
-      provide: STORAGE_BUCKET_KEY,
+      provide: IRYS_NETWORK_KEY,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('GUTENBERG_STORAGE_BUCKET'),
-    },
-    {
-      provide: STORAGE_ACCESS_KEY_KEY,
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('GUTENBERG_STORAGE_ACCESS_KEY'),
-    },
-    {
-      provide: STORAGE_SECRET_KEY_KEY,
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('GUTENBERG_STORAGE_SECRET_KEY'),
+        config.getOrThrow<'mainnet' | 'devnet'>('GUTENBERG_IRYS_NETWORK'),
     },
     {
       provide: SOLANA_RPC_URL_KEY,
@@ -80,10 +66,8 @@ load_dotenv({ path: envFilePath, quiet: true });
   ],
   exports: [
     NestConfigModule,
-    STORAGE_ENDPOINT_KEY,
-    STORAGE_BUCKET_KEY,
-    STORAGE_ACCESS_KEY_KEY,
-    STORAGE_SECRET_KEY_KEY,
+    ARWEAVE_GATEWAY_URL_KEY,
+    IRYS_NETWORK_KEY,
     SOLANA_PRIVATE_KEY_KEY,
     SOLANA_RPC_URL_KEY,
   ],

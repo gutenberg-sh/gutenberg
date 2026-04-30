@@ -2,7 +2,7 @@
 
 This is a local demo document for publishing through Gutenberg.
 
-It should be packaged into a tarball on S3-compatible storage, referenced by a signed manifest,
+It should be packaged into a tarball on Arweave (via Irys), referenced by a signed manifest,
 and registered on the local Solana registry.
 
 ## Notes

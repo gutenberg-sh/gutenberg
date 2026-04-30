@@ -1,8 +1,9 @@
 export const signature_prefix = 'ed25519:' as const;
 export const sha256_prefix = 'sha256:' as const;
 
-export type S3Uri = `s3://${string}`;
-export type ContentUri = S3Uri;
+/** Permanent content URL: `{gateway}/ipfs/{cid}` or `{gateway}/{arweave tx id}` (HTTP/S). */
+export type ContentUri = string & { readonly __brand?: 'ContentUri' };
+
 export type SolanaPublicKey = string;
 export type Ed25519Signature = `${typeof signature_prefix}${string}`;
 export type Sha256Hash = `${typeof sha256_prefix}${string}`;
@@ -12,7 +13,7 @@ export type GutenbergManifestFile = {
 };
 
 export type GutenbergUnsignedManifest = {
-  /** Single POSIX tar of all site files (content-addressed blob in storage). */
+  /** Tarball — IPFS path-gateway or Arweave permanent URL. */
   bundle_uri: ContentUri;
   bundle_hash: Sha256Hash;
   name: string;

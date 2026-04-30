@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+import { is_content_uri } from '../manifest/content-uri';
 import { ManifestService } from '../manifest/manifest.service';
 
 import {
@@ -100,11 +101,10 @@ export class RegistryService {
       throw new Error('Release event version is required');
     }
 
-    if (
-      typeof event.manifest !== 'string' ||
-      !event.manifest.startsWith('s3://')
-    ) {
-      throw new Error('Release event manifest must be an s3:// URI');
+    if (typeof event.manifest !== 'string' || !is_content_uri(event.manifest)) {
+      throw new Error(
+        'Release event manifest must be an http(s) IPFS path-gateway URI (.../ipfs/{cid}) or Arweave/Irys URI (.../{tx id})',
+      );
     }
 
     if (

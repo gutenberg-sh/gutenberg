@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import type { ContentUri } from '../manifest/manifest.types';
 import { ManifestService } from '../manifest/manifest.service';
 import { extract_site_tarball } from '../publish/site-bundle';
 import { RegistryService } from '../registry/registry.service';
@@ -21,9 +20,12 @@ export class OpenService {
   ) {}
 
   async open_site(options: OpenSiteOptions): Promise<OpenResult> {
-    if (options.source.startsWith('s3://')) {
+    if (
+      options.source.startsWith('http://') ||
+      options.source.startsWith('https://')
+    ) {
       return this.open_manifest({
-        manifest_uri: options.source as ContentUri,
+        manifest_uri: options.source,
       });
     }
 
@@ -51,15 +53,38 @@ export class OpenService {
       options.manifest_uri,
     );
 
-    if (
-      options.expected_release &&
-      this.manifestService.sha256_hash(manifest_bytes) !==
-        options.expected_release.manifest_hash
-    ) {
-      throw new Error('Manifest hash does not match the registered release');
+    const manifest_text = strip_utf8_bom(manifest_bytes.toString('utf8'));
+
+    let parsed: unknown;
+
+    try {
+      parsed = JSON.parse(manifest_text);
+    } catch {
+      throw new Error('Manifest is not valid JSON');
     }
 
-    const manifest: unknown = JSON.parse(manifest_bytes.toString('utf8'));
+    /**
+     * Publish registers sha256(canonical JSON string). Gateways may tweak raw bytes
+     * (whitespace, BOM); comparing the hash of canonical JSON matches registration.
+     */
+    if (options.expected_release) {
+      let canonical: string;
+
+      try {
+        canonical = this.manifestService.canonical_json(parsed);
+      } catch {
+        throw new Error('Manifest hash does not match the registered release');
+      }
+
+      if (
+        this.manifestService.sha256_hash(canonical) !==
+        options.expected_release.manifest_hash
+      ) {
+        throw new Error('Manifest hash does not match the registered release');
+      }
+    }
+
+    const manifest = parsed;
 
     this.manifestService.assert_valid_manifest(manifest);
 
@@ -126,4 +151,8 @@ export class OpenService {
       throw new Error('Manifest does not match the registered release');
     }
   }
+}
+
+function strip_utf8_bom(text: string): string {
+  return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
 }

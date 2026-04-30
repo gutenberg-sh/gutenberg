@@ -1,10 +1,8 @@
 import { z } from 'zod';
 
 export const env = z.object({
-  GUTENBERG_STORAGE_ENDPOINT: z.string().url(),
-  GUTENBERG_STORAGE_BUCKET: z.string(),
-  GUTENBERG_STORAGE_ACCESS_KEY: z.string(),
-  GUTENBERG_STORAGE_SECRET_KEY: z.string(),
+  GUTENBERG_ARWEAVE_GATEWAY: z.string().url(),
+  GUTENBERG_IRYS_NETWORK: z.enum(['mainnet', 'devnet']),
   GUTENBERG_SOLANA_RPC_URL: z.string().url(),
   GUTENBERG_SOLANA_PRIVATE_KEY: z.string(),
 });

@@ -1,4 +1,4 @@
-export type DoctorCheckStatus = 'ok' | 'error';
+export type DoctorCheckStatus = 'ok' | 'warn' | 'error';
 
 export type DoctorCheck = {
   name: string;

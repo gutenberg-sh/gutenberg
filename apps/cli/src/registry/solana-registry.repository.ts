@@ -219,7 +219,7 @@ function decode_release_account(data: Buffer): GutenbergReleaseEvent {
     type: release_event_type,
     name,
     version,
-    manifest: manifest as GutenbergReleaseEvent['manifest'],
+    manifest,
     manifest_hash: manifest_hash as GutenbergReleaseEvent['manifest_hash'],
     publisher,
     created_at,
