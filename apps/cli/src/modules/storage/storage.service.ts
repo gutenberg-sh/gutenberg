@@ -75,11 +75,7 @@ function extract_irys_tx_id(result: unknown): string {
   );
 }
 
-/**
- * `https://arweave.net/{id}` serves an HTML Permaweb shell for browsers, not raw bytes.
- * Irys receipts resolve through `https://gateway.irys.xyz/{id}` (redirects to CDN with JSON/tar).
- */
-function resolve_arweave_fetch_url(url: string): string {
+function resolve_arweave_fetch_url(url: string, gateway: string): string {
   let parsed: URL;
 
   try {
@@ -118,7 +114,9 @@ function resolve_arweave_fetch_url(url: string): string {
     return url;
   }
 
-  return `https://gateway.irys.xyz/${encodeURIComponent(last)}`;
+  const base = gateway.replace(/\/$/, '');
+
+  return `${base}/${encodeURIComponent(last)}`;
 }
 
 @Injectable()
@@ -146,7 +144,7 @@ export class StorageService {
   }
 
   async get_blob(uri: ContentUri): Promise<Buffer> {
-    const resolved = resolve_arweave_fetch_url(uri);
+    const resolved = resolve_arweave_fetch_url(uri, this.arweave_gateway);
     const response = await fetch(resolved, {
       redirect: 'follow',
       headers: {

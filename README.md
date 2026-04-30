@@ -76,27 +76,27 @@ Gutenberg uses the same hardcoded registry program id across localnet, devnet, a
 Check configuration:
 
 ```bash
-pnpm cli:dev doctor
+pnpm cli:dev -- doctor
 ```
 
 Publish the demo folder:
 
 ```bash
-pnpm cli:dev publish gutenberg-demo@1.0.0 examples/gutenberg-demo
+pnpm cli:dev -- publish gutenberg-demo@1.0.0 examples/gutenberg-demo
 ```
 
 Open a release in the browser (local HTTP gateway; use `--print` for entry Markdown on stdout, `--no-browser` to skip opening a tab, `--port` to change from `8787`):
 
 ```bash
-pnpm cli:dev open gutenberg-demo@1.0.0
-pnpm cli:dev open gutenberg-demo
+pnpm cli:dev -- open gutenberg-demo@1.0.0
+pnpm cli:dev -- open gutenberg-demo
 ```
 
 Remove a registry release:
 
 ```bash
-pnpm cli:dev unpublish gutenberg-demo@1.0.0
-pnpm cli:dev unpublish gutenberg-demo
+pnpm cli:dev -- unpublish gutenberg-demo@1.0.0
+pnpm cli:dev -- unpublish gutenberg-demo
 ```
 
 ## Build and lint

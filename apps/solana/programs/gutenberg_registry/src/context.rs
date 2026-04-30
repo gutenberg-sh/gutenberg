@@ -53,7 +53,12 @@ pub struct UnpublishRelease<'info> {
     #[account(mut)]
     pub publisher: Signer<'info>,
 
-    /// CHECK: PDA verified by seeds; layout deserialized as NameAuthority in unpublish_release.
+    /// CHECK: Seeds-derived NameAuthority PDA owned by this program. Left
+    /// unchecked at the type level because the handler conditionally closes
+    /// it (when release_count reaches zero) by draining lamports and
+    /// reassigning to the system program, which doesn't fit Anchor's
+    /// `close = ...` constraint. The handler verifies the account
+    /// discriminator and asserts `authority == publisher` before mutating.
     #[account(
         mut,
         seeds = [b"name", name_seed.as_ref()],
