@@ -31,3 +31,9 @@ solana-sdk = "2.3"
 [[test]]
 name = "integration"
 path = "tests/integration.rs"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [
+    'cfg(target_os, values("solana"))',
+    'cfg(feature, values("custom-heap", "custom-panic", "anchor-debug"))',
+] }

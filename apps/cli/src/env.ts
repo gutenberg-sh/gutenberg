@@ -4,9 +4,10 @@ import { PRODUCTION_DEFAULTS } from './common/config/defaults';
 import { parse_gateway_list } from './common/helpers/gateway-list';
 
 export const env = z.object({
-  GUTENBERG_ARWEAVE_GATEWAYS: z
+  GUTENBERG_IRYS_GATEWAY: z.string().url().optional(),
+  GUTENBERG_ARWEAVE_MIRRORS: z
     .string()
-    .default(PRODUCTION_DEFAULTS.GUTENBERG_ARWEAVE_GATEWAYS)
+    .default(PRODUCTION_DEFAULTS.GUTENBERG_ARWEAVE_MIRRORS)
     .transform((raw, ctx) => {
       try {
         return parse_gateway_list(raw);

@@ -32,7 +32,7 @@ const PROOF_STEPS: ReadonlyArray<{
 const EXAMPLES: ReadonlyArray<{ name: string; version: string; note: string }> =
   [
     {
-      name: 'gutenberg',
+      name: 'gutenberg-demo',
       version: '1.0.0',
       note: 'project demo',
     },
@@ -335,7 +335,7 @@ function ReleaseDiagram() {
     <div className="ring-hairline relative overflow-hidden rounded-2xl bg-card p-5 sm:p-7">
       <div className="mb-5 flex items-center justify-between gap-3">
         <span className="font-mono text-[11.5px] tabular text-foreground">
-          gutenberg<span className="text-muted-foreground">@</span>1.0.0
+          gutenberg-demo<span className="text-muted-foreground">@</span>1.0.0
         </span>
         <span className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
           Schematic

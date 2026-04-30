@@ -1,13 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import {
-  ARWEAVE_GATEWAY_URLS,
-  ARWEAVE_TRUST_MIRRORS,
+  ARWEAVE_MIRRORS,
+  IRYS_GATEWAY_URL,
   IRYS_NETWORK,
   SOLANA_RPC_URL,
 } from '../../common/config/config.tokens';
 import {
-  irys_settlement_mirror,
   parse_gateway_list,
   type IrysNetwork,
 } from '../../common/helpers/gateway-list';
@@ -27,10 +26,9 @@ export class DoctorService {
     private readonly storage_service: StorageService,
     private readonly registry_repository: SolanaRegistryRepository,
     private readonly wallet_repository: SolanaWalletRepository,
-    @Inject(ARWEAVE_GATEWAY_URLS)
-    private readonly arweave_gateways: readonly string[],
-    @Inject(ARWEAVE_TRUST_MIRRORS)
-    private readonly trust_mirrors: readonly string[],
+    @Inject(IRYS_GATEWAY_URL) private readonly irys_gateway: string,
+    @Inject(ARWEAVE_MIRRORS)
+    private readonly arweave_mirrors: readonly string[],
     @Inject(IRYS_NETWORK)
     private readonly irys_network: IrysNetwork,
     @Inject(SOLANA_RPC_URL) private readonly solana_rpc_url: string,
@@ -39,8 +37,10 @@ export class DoctorService {
   async check(): Promise<DoctorResult> {
     const wallet = await this.try_load_wallet();
     const checks: DoctorCheck[] = [
-      this.check_gateway_config(),
-      this.check_browser_gateway_alignment(),
+      this.check_canonical_gateway(),
+      this.check_mirrors(),
+      this.check_browser_canonical_alignment(),
+      this.check_browser_mirrors_alignment(),
       this.check_solana_publisher_key(wallet),
       await this.check_solana_rpc(),
       this.check_registry_program_id(),
@@ -70,59 +70,76 @@ export class DoctorService {
     }
   }
 
-  private check_gateway_config(): DoctorCheck {
-    const trust_hosts = this.trust_mirrors.map(safe_host).join(', ');
-    const settlement = irys_settlement_mirror(this.irys_network);
-    const settlement_already_listed = this.trust_mirrors.some(
-      (m) => m.replace(/\/$/, '') === settlement,
-    );
-    const settlement_note = settlement_already_listed
-      ? ' (also present in trust mirrors)'
-      : '';
-
+  private check_canonical_gateway(): DoctorCheck {
     return ok_check(
-      'gateway_config',
-      `Irys network ${this.irys_network}; trust mirrors (${this.trust_mirrors.length}): ${trust_hosts}; settlement mirror: ${safe_host(settlement)}${settlement_note}`,
+      'canonical_gateway',
+      `Canonical Irys gateway (${this.irys_network}): ${safe_host(this.irys_gateway)}`,
     );
   }
 
-  private check_browser_gateway_alignment(): DoctorCheck {
-    const raw = process.env.VITE_GUTENBERG_ARWEAVE_GATEWAYS;
-
-    if (!raw) {
+  private check_mirrors(): DoctorCheck {
+    if (this.arweave_mirrors.length === 0) {
       return warn_check(
-        'browser_gateway_alignment',
-        'VITE_GUTENBERG_ARWEAVE_GATEWAYS is not set; the browser gateway will refuse to start. Configure it to mirror the CLI list (and include the Irys network gateway when publishing via Irys).',
+        'mirrors',
+        'No Arweave mirrors configured — reads depend entirely on Irys availability. Add at least one fallback (arweave.net, ar-io.dev, g8way.io, …) to GUTENBERG_ARWEAVE_MIRRORS.',
       );
     }
 
-    let browser_list: string[];
+    const hosts = this.arweave_mirrors.map(safe_host).join(', ');
 
-    try {
-      browser_list = parse_gateway_list(raw);
-    } catch (error) {
-      return error_check('browser_gateway_alignment', error);
+    return ok_check(
+      'mirrors',
+      `${this.arweave_mirrors.length} Arweave mirror(s) configured: ${hosts}`,
+    );
+  }
+
+  private check_browser_canonical_alignment(): DoctorCheck {
+    const raw = process.env.VITE_GUTENBERG_IRYS_GATEWAY;
+
+    if (!raw || raw.trim().length === 0) {
+      return error_check_message(
+        'browser_canonical_alignment',
+        'VITE_GUTENBERG_IRYS_GATEWAY is not set; the browser gateway will refuse to start. Set it to the same canonical Irys URL as the CLI.',
+      );
     }
 
-    const settlement = irys_settlement_mirror(this.irys_network);
-    const includes_settlement = browser_list.some(
-      (m) => m.replace(/\/$/, '') === settlement,
-    );
+    const browser_canonical = raw.trim().replace(/\/$/, '');
+    const cli_canonical = this.irys_gateway.replace(/\/$/, '');
 
-    if (!includes_settlement) {
-      const action =
-        this.irys_network === 'devnet'
-          ? `add ${settlement} to VITE_GUTENBERG_ARWEAVE_GATEWAYS — Irys devnet uploads never settle to Arweave mainnet, so the browser cannot resolve them through any other gateway.`
-          : `add ${settlement} to VITE_GUTENBERG_ARWEAVE_GATEWAYS — Irys mainnet uploads need the Irys gateway to resolve until they propagate to Arweave proper (hours-to-days).`;
-
-      return this.irys_network === 'devnet'
-        ? error_check_message('browser_gateway_alignment', action)
-        : warn_check('browser_gateway_alignment', action);
+    if (browser_canonical !== cli_canonical) {
+      return warn_check(
+        'browser_canonical_alignment',
+        `Browser canonical (${safe_host(browser_canonical)}) does not match CLI canonical (${safe_host(cli_canonical)}). Newly published content will be unreachable in the browser until propagation.`,
+      );
     }
 
     return ok_check(
-      'browser_gateway_alignment',
-      `Browser gateway list reaches ${safe_host(settlement)} for Irys ${this.irys_network} uploads`,
+      'browser_canonical_alignment',
+      `Browser canonical Irys gateway matches CLI: ${safe_host(cli_canonical)}`,
+    );
+  }
+
+  private check_browser_mirrors_alignment(): DoctorCheck {
+    const raw = process.env.VITE_GUTENBERG_ARWEAVE_MIRRORS;
+
+    if (!raw || raw.trim().length === 0) {
+      return warn_check(
+        'browser_mirrors_alignment',
+        'VITE_GUTENBERG_ARWEAVE_MIRRORS is not set; the browser will only resolve via the canonical Irys gateway. Configure mirrors so readers can route around Irys when it is unreachable.',
+      );
+    }
+
+    let mirrors: string[];
+
+    try {
+      mirrors = parse_gateway_list(raw);
+    } catch (error) {
+      return error_check('browser_mirrors_alignment', error);
+    }
+
+    return ok_check(
+      'browser_mirrors_alignment',
+      `Browser configured with ${mirrors.length} mirror(s): ${mirrors.map(safe_host).join(', ')}`,
     );
   }
 

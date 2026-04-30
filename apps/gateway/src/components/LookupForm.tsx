@@ -82,7 +82,7 @@ export function LookupForm() {
           spellCheck={false}
           aria-invalid={has_error || undefined}
           aria-describedby={has_error ? 'release-spec-error' : undefined}
-          placeholder="gutenberg@1.0.0"
+          placeholder="gutenberg-demo@1.0.0"
           value={release_spec}
           onFocus={() => set_focused(true)}
           onBlur={() => set_focused(false)}

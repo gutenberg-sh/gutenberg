@@ -5,9 +5,13 @@ import { parse_gateway_list } from '@/lib/gateway-list';
 const env_schema = z.object({
   VITE_GUTENBERG_REGISTRY_PROGRAM_ID: z.string().min(1),
   VITE_GUTENBERG_SOLANA_RPC_URL: z.string().url(),
-  VITE_GUTENBERG_ARWEAVE_GATEWAYS: z
+  VITE_GUTENBERG_IRYS_GATEWAY: z
     .string()
-    .min(1)
+    .url()
+    .transform((raw) => raw.replace(/\/$/, '')),
+  VITE_GUTENBERG_ARWEAVE_MIRRORS: z
+    .string()
+    .default('')
     .transform((raw, ctx) => {
       try {
         return parse_gateway_list(raw);

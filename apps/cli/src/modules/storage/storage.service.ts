@@ -5,7 +5,8 @@ import Solana from '@irys/upload-solana';
 import bs58 from 'bs58';
 
 import {
-  ARWEAVE_GATEWAY_URLS,
+  ARWEAVE_MIRRORS,
+  IRYS_GATEWAY_URL,
   IRYS_NETWORK,
   SOLANA_RPC_URL,
 } from '../../common/config/config.tokens';
@@ -84,7 +85,8 @@ export class StorageService {
   constructor(
     private readonly wallet_repository: SolanaWalletRepository,
     @Inject(SOLANA_RPC_URL) private readonly rpc_url: string,
-    @Inject(ARWEAVE_GATEWAY_URLS) private readonly arweave_gateways: readonly string[],
+    @Inject(IRYS_GATEWAY_URL) private readonly irys_gateway: string,
+    @Inject(ARWEAVE_MIRRORS) private readonly arweave_mirrors: readonly string[],
     @Inject(IRYS_NETWORK)
     private readonly network: 'mainnet' | 'devnet',
   ) {}
@@ -99,8 +101,16 @@ export class StorageService {
     return this.upload(bytes, 'application/json');
   }
 
-  get_gateways(): readonly string[] {
-    return this.arweave_gateways;
+  get_irys_gateway(): string {
+    return this.irys_gateway;
+  }
+
+  get_arweave_mirrors(): readonly string[] {
+    return this.arweave_mirrors;
+  }
+
+  get_effective_gateways(): readonly string[] {
+    return [this.irys_gateway, ...this.arweave_mirrors];
   }
 
   resolve_content_url(uri: string, gateway?: string): string {
@@ -109,7 +119,7 @@ export class StorageService {
     }
 
     const tx_id = tx_id_from_content_uri(uri);
-    const base = (gateway ?? this.arweave_gateways[0]!).replace(/\/$/, '');
+    const base = (gateway ?? this.irys_gateway).replace(/\/$/, '');
 
     return `${base}/${encodeURIComponent(tx_id)}`;
   }
@@ -124,9 +134,10 @@ export class StorageService {
       return this.fetch_one(uri);
     }
 
+    const ordered = this.get_effective_gateways();
     const errors: string[] = [];
 
-    for (const gateway of this.arweave_gateways) {
+    for (const gateway of ordered) {
       const url = this.resolve_content_url(uri, gateway);
 
       try {
@@ -149,7 +160,7 @@ export class StorageService {
     }
 
     throw new Error(
-      `Failed to fetch ${uri} from all ${this.arweave_gateways.length} gateways:\n  - ${errors.join('\n  - ')}`,
+      `Failed to fetch ${uri} from canonical Irys + ${this.arweave_mirrors.length} mirror(s):\n  - ${errors.join('\n  - ')}`,
     );
   }
 

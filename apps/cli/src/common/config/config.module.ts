@@ -9,15 +9,15 @@ import { resolve } from 'node:path';
 
 import { env } from '../../env';
 import {
-  compose_effective_gateways,
   parse_gateway_list,
   type IrysNetwork,
 } from '../helpers/gateway-list';
 
+import { IRYS_GATEWAY_BY_NETWORK } from './defaults';
 import {
-  ARWEAVE_GATEWAY_URLS,
-  ARWEAVE_TRUST_MIRRORS,
+  ARWEAVE_MIRRORS,
   GATEWAY_URL,
+  IRYS_GATEWAY_URL,
   IRYS_NETWORK,
   SOLANA_PRIVATE_KEY,
   SOLANA_RPC_URL,
@@ -48,25 +48,29 @@ load_dotenv({ path: env_file_path, quiet: true });
   ],
   providers: [
     {
-      provide: ARWEAVE_TRUST_MIRRORS,
+      provide: IRYS_GATEWAY_URL,
       inject: [ConfigService],
-      useFactory: (config: ConfigService): readonly string[] => {
-        const raw = config.getOrThrow<string>('GUTENBERG_ARWEAVE_GATEWAYS');
+      useFactory: (config: ConfigService): string => {
+        const explicit = config.get<string>('GUTENBERG_IRYS_GATEWAY');
 
-        return Object.freeze(parse_gateway_list(raw));
-      },
-    },
-    {
-      provide: ARWEAVE_GATEWAY_URLS,
-      inject: [ConfigService],
-      useFactory: (config: ConfigService): readonly string[] => {
-        const raw = config.getOrThrow<string>('GUTENBERG_ARWEAVE_GATEWAYS');
+        if (explicit && explicit.length > 0) {
+          return explicit.replace(/\/$/, '');
+        }
+
         const network = config.getOrThrow<IrysNetwork>(
           'GUTENBERG_IRYS_NETWORK',
         );
-        const trust_mirrors = parse_gateway_list(raw);
 
-        return Object.freeze(compose_effective_gateways(trust_mirrors, network));
+        return IRYS_GATEWAY_BY_NETWORK[network];
+      },
+    },
+    {
+      provide: ARWEAVE_MIRRORS,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): readonly string[] => {
+        const raw = config.getOrThrow<string>('GUTENBERG_ARWEAVE_MIRRORS');
+
+        return Object.freeze(parse_gateway_list(raw));
       },
     },
     {
@@ -96,9 +100,9 @@ load_dotenv({ path: env_file_path, quiet: true });
   ],
   exports: [
     NestConfigModule,
-    ARWEAVE_GATEWAY_URLS,
-    ARWEAVE_TRUST_MIRRORS,
+    ARWEAVE_MIRRORS,
     GATEWAY_URL,
+    IRYS_GATEWAY_URL,
     IRYS_NETWORK,
     SOLANA_PRIVATE_KEY,
     SOLANA_RPC_URL,

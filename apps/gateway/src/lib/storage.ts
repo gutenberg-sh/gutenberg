@@ -2,6 +2,19 @@ import { is_content_uri, tx_id_from_content_uri } from './content-uri';
 
 const GATEWAY_FETCH_TIMEOUT_MS = 8_000;
 
+export type GatewayKind = 'canonical' | 'mirror';
+
+export type GatewayEntry = {
+  kind: GatewayKind;
+  url: string;
+};
+
+export type ResolvedGatewayLink = {
+  kind: GatewayKind;
+  gateway: string;
+  url: string;
+};
+
 export function resolve_content_url(uri: string, gateway: string): string {
   if (is_content_uri(uri)) {
     const tx_id = tx_id_from_content_uri(uri);
@@ -13,17 +26,44 @@ export function resolve_content_url(uri: string, gateway: string): string {
   return uri;
 }
 
-export function resolve_content_urls(
+export function build_gateway_entries(
+  irys_gateway: string,
+  arweave_mirrors: readonly string[],
+): readonly GatewayEntry[] {
+  const seen = new Set<string>();
+  const out: GatewayEntry[] = [];
+
+  const canonical = irys_gateway.replace(/\/$/, '');
+  out.push({ kind: 'canonical', url: canonical });
+  seen.add(canonical);
+
+  for (const m of arweave_mirrors) {
+    const trimmed = m.replace(/\/$/, '');
+
+    if (seen.has(trimmed)) {
+      continue;
+    }
+
+    seen.add(trimmed);
+    out.push({ kind: 'mirror', url: trimmed });
+  }
+
+  return out;
+}
+
+export function resolve_content_links(
   uri: string,
-  gateways: readonly string[],
-): readonly { gateway: string; url: string }[] {
-  if (!is_content_uri(uri) || gateways.length === 0) {
+  irys_gateway: string,
+  arweave_mirrors: readonly string[],
+): readonly ResolvedGatewayLink[] {
+  if (!is_content_uri(uri)) {
     return [];
   }
 
-  return gateways.map((gateway) => ({
-    gateway,
-    url: resolve_content_url(uri, gateway),
+  return build_gateway_entries(irys_gateway, arweave_mirrors).map((entry) => ({
+    kind: entry.kind,
+    gateway: entry.url,
+    url: resolve_content_url(uri, entry.url),
   }));
 }
 
@@ -35,21 +75,19 @@ export type GatewayValidator = (
 
 export async function fetch_blob(
   uri: string,
-  arweave_gateways: readonly string[],
+  irys_gateway: string,
+  arweave_mirrors: readonly string[],
   validate?: GatewayValidator,
 ): Promise<Uint8Array> {
   if (!is_content_uri(uri)) {
     return fetch_one(uri);
   }
 
-  if (arweave_gateways.length === 0) {
-    throw new Error('No Arweave gateways configured');
-  }
-
+  const ordered = build_gateway_entries(irys_gateway, arweave_mirrors);
   const errors: string[] = [];
 
-  for (const gateway of arweave_gateways) {
-    const url = resolve_content_url(uri, gateway);
+  for (const entry of ordered) {
+    const url = resolve_content_url(uri, entry.url);
 
     try {
       const bytes = await fetch_one(url);
@@ -58,7 +96,7 @@ export async function fetch_blob(
         const verdict = await validate(bytes);
 
         if (verdict !== true) {
-          errors.push(`${safe_host(gateway)}: ${verdict}`);
+          errors.push(`${safe_host(entry.url)} (${entry.kind}): ${verdict}`);
           continue;
         }
       }
@@ -66,12 +104,12 @@ export async function fetch_blob(
       return bytes;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      errors.push(`${safe_host(gateway)}: ${message}`);
+      errors.push(`${safe_host(entry.url)} (${entry.kind}): ${message}`);
     }
   }
 
   throw new Error(
-    `Failed to fetch ${uri} from all ${arweave_gateways.length} gateways:\n  - ${errors.join('\n  - ')}`,
+    `Failed to fetch ${uri} from canonical Irys + ${arweave_mirrors.length} mirror(s):\n  - ${errors.join('\n  - ')}`,
   );
 }
 

@@ -31,12 +31,12 @@ export function VerifiedReleaseView({
 
   if (state.status === 'loading') {
     return (
-      <Container className="grid gap-12 pb-20 pt-12 lg:gap-16 lg:pb-28 lg:pt-16">
+      <Container className="grid gap-8 pb-20 pt-8 lg:gap-10 lg:pb-28 lg:pt-10">
         <ReleaseHeaderSkeleton />
-        <div className="grid gap-10 border-t border-border pt-12 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-14 lg:pt-16">
+        <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-12">
           <div className="grid content-start gap-3">
             <Skeleton className="h-3 w-16" />
-            <div className="grid gap-3 border-y border-border py-4">
+            <div className="grid gap-3 py-4">
               <Skeleton className="h-3.5 w-32" />
               <Skeleton className="h-3.5 w-24" />
               <Skeleton className="h-3.5 w-28" />
@@ -52,9 +52,9 @@ export function VerifiedReleaseView({
 
   if (state.status === 'error' || !state.result) {
     return (
-      <Container className="grid gap-12 pb-20 pt-12 lg:gap-16 lg:pb-28 lg:pt-16">
+      <Container className="grid gap-8 pb-20 pt-8 lg:gap-10 lg:pb-28 lg:pt-10">
         <VerifyStatus steps={state.steps} />
-        <div className="border-t border-border pt-12 lg:pt-16">
+        <div>
           <ErrorView
             title="Verification failed"
             message={state.error ?? 'Unknown error'}
@@ -62,8 +62,8 @@ export function VerifiedReleaseView({
               state.partial_manifest_uri ? (
                 <GatewayLinks
                   uri={state.partial_manifest_uri}
-                  gateways={env.VITE_GUTENBERG_ARWEAVE_GATEWAYS}
-                  label="Try the manifest via"
+                  irys_gateway={env.VITE_GUTENBERG_IRYS_GATEWAY}
+                  arweave_mirrors={env.VITE_GUTENBERG_ARWEAVE_MIRRORS}
                 />
               ) : undefined
             }
@@ -84,22 +84,18 @@ export function VerifiedReleaseView({
 
 function ReleaseHeaderSkeleton() {
   return (
-    <section className="grid gap-7">
-      <div className="flex items-center gap-3">
-        <Skeleton className="h-5 w-20 rounded-full" />
-        <Skeleton className="h-3 w-44" />
+    <section className="grid gap-5">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <Skeleton className="h-6 w-20 rounded-full" />
+        <Skeleton className="h-5 w-36 rounded-md" />
+        <Skeleton className="h-3.5 w-28" />
       </div>
       <div className="grid gap-2.5">
-        <Skeleton className="h-10 w-72 max-w-full" />
-        <Skeleton className="h-4 w-96 max-w-full" />
+        <Skeleton className="h-9 w-72 max-w-full" />
+        <Skeleton className="h-3.5 w-44" />
       </div>
-      <div className="grid gap-3 border-y border-border py-4 sm:grid-cols-2">
-        {Array.from({ length: 4 }).map((_, idx) => (
-          <div key={idx} className="grid gap-1.5 py-1.5 sm:px-3">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-4 w-full max-w-[280px]" />
-          </div>
-        ))}
+      <div className="border-t border-border pt-3">
+        <Skeleton className="h-3 w-44" />
       </div>
     </section>
   );
@@ -142,10 +138,10 @@ function VerifiedReleaseRendered({
   }
 
   return (
-    <Container className="grid gap-12 pb-20 pt-12 lg:gap-16 lg:pb-28 lg:pt-16">
+    <Container className="grid gap-8 pb-20 pt-8 lg:gap-10 lg:pb-28 lg:pt-10">
       <ReleaseHeader release={release} />
 
-      <div className="grid gap-10 border-t border-border pt-12 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-14 lg:pt-16">
+      <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-12">
         <FileNav
           files={all_paths}
           base_path={base_path}
@@ -190,8 +186,8 @@ function ActiveFile({
         extras={
           <GatewayLinks
             uri={target_file.uri}
-            gateways={env.VITE_GUTENBERG_ARWEAVE_GATEWAYS}
-            label="Try this file via"
+            irys_gateway={env.VITE_GUTENBERG_IRYS_GATEWAY}
+            arweave_mirrors={env.VITE_GUTENBERG_ARWEAVE_MIRRORS}
           />
         }
       />

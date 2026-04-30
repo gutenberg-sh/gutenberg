@@ -17,7 +17,8 @@ import type {
 
 export type VerifyContext = {
   rpc_url: string;
-  arweave_gateways: readonly string[];
+  irys_gateway: string;
+  arweave_mirrors: readonly string[];
   program_id: string;
 };
 
@@ -45,7 +46,8 @@ export async function verify_manifest_uri(input: {
 }): Promise<{ manifest: GutenbergManifest }> {
   const manifest_bytes = await fetch_blob(
     input.expected_release.manifest,
-    input.ctx.arweave_gateways,
+    input.ctx.irys_gateway,
+    input.ctx.arweave_mirrors,
     async (bytes) => {
       const text = strip_utf8_bom(new TextDecoder('utf-8').decode(bytes));
       let candidate: unknown;
@@ -144,19 +146,24 @@ export async function load_file_bytes(input: {
   expected_size_bytes: number;
   ctx: VerifyContext;
 }): Promise<Uint8Array> {
-  return fetch_blob(input.uri, input.ctx.arweave_gateways, async (bytes) => {
-    if (bytes.byteLength !== input.expected_size_bytes) {
-      return `size mismatch (expected ${input.expected_size_bytes}, got ${bytes.byteLength})`;
-    }
+  return fetch_blob(
+    input.uri,
+    input.ctx.irys_gateway,
+    input.ctx.arweave_mirrors,
+    async (bytes) => {
+      if (bytes.byteLength !== input.expected_size_bytes) {
+        return `size mismatch (expected ${input.expected_size_bytes}, got ${bytes.byteLength})`;
+      }
 
-    const actual_hash = await sha256_hash(bytes);
+      const actual_hash = await sha256_hash(bytes);
 
-    if (actual_hash !== input.expected_hash) {
-      return 'file hash does not match manifest';
-    }
+      if (actual_hash !== input.expected_hash) {
+        return 'file hash does not match manifest';
+      }
 
-    return true;
-  });
+      return true;
+    },
+  );
 }
 
 export function assemble_verified_release(input: {

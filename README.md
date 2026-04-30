@@ -49,8 +49,8 @@ cp .env.example .env
 
 ```txt
 # CLI
-GUTENBERG_ARWEAVE_GATEWAYS=https://arweave.net,https://ar-io.dev,https://g8way.io,https://permagate.io
 GUTENBERG_IRYS_NETWORK=devnet
+GUTENBERG_ARWEAVE_MIRRORS=https://arweave.net,https://ar-io.dev,https://g8way.io,https://permagate.io
 GUTENBERG_SOLANA_RPC_URL=http://127.0.0.1:8899
 GUTENBERG_SOLANA_PRIVATE_KEY=<base58-encoded-solana-secret-key>
 GUTENBERG_GATEWAY_URL=http://localhost:5173
@@ -58,18 +58,20 @@ GUTENBERG_GATEWAY_URL=http://localhost:5173
 # Gateway
 VITE_GUTENBERG_REGISTRY_PROGRAM_ID=NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517
 VITE_GUTENBERG_SOLANA_RPC_URL=http://127.0.0.1:8899
-VITE_GUTENBERG_ARWEAVE_GATEWAYS=https://arweave.net,https://ar-io.dev,https://g8way.io,https://permagate.io,https://devnet.irys.xyz
+VITE_GUTENBERG_IRYS_GATEWAY=https://devnet.irys.xyz
+VITE_GUTENBERG_ARWEAVE_MIRRORS=https://arweave.net,https://ar-io.dev,https://g8way.io,https://permagate.io
 VITE_GUTENBERG_EXPLORER_URL=https://explorer.solana.com/address/{address}?cluster=devnet
 ```
 
 ### Read-side gateway model
 
-Both `GUTENBERG_ARWEAVE_GATEWAYS` and `VITE_GUTENBERG_ARWEAVE_GATEWAYS` accept a comma-separated list of read-side gateways tried in order with per-gateway timeout, so no single operator blocks resolution. Two distinct concerns:
+Gutenberg uses Irys as both bundler-of-record and canonical resolver: every release is published through Irys, and every read starts there. Native Arweave gateways are configured separately as **mirrors** — independent fallbacks tried only when the canonical Irys gateway is unreachable, slow, or rejects a request. The hash chain (on-chain `content_hash` → manifest hash → file hashes) means whichever gateway responds, the bytes are verified locally before render — mirrors only ever add availability, never trust.
 
-- **Trust mirrors.** What you list in env. Decentralized, user-controlled, no Irys baked in by default. The verifier hashes whatever any of them returns, so adding mirrors only ever increases availability — never trust.
-- **Settlement mirror.** Where Irys-bundled data lives *before* it propagates to Arweave (mainnet) or *instead of* propagating (devnet). The CLI knows the upload bundler it just used and automatically appends the matching Irys gateway (`https://gateway.irys.xyz` for mainnet, `https://devnet.irys.xyz` for devnet) to its effective fetch list. You don't configure this — it's an implementation detail of the upload pipeline.
+- **`GUTENBERG_IRYS_GATEWAY`** (CLI, optional). Override the canonical resolver. By default the CLI derives it from `GUTENBERG_IRYS_NETWORK` (`https://gateway.irys.xyz` for mainnet, `https://devnet.irys.xyz` for devnet). Override only if you operate a private Irys node.
+- **`VITE_GUTENBERG_IRYS_GATEWAY`** (browser, **required**). The browser has no concept of Irys network, so it must be set explicitly. Match whatever the CLI is publishing to — otherwise newly published content will be unreachable in the browser until it propagates from Irys to native Arweave (hours-to-days on mainnet; never on devnet).
+- **`GUTENBERG_ARWEAVE_MIRRORS` / `VITE_GUTENBERG_ARWEAVE_MIRRORS`**. Comma-separated list of native Arweave gateways. Tried after the canonical gateway. They cannot resolve Irys devnet uploads (which never settle to Arweave mainnet) but route around any single mirror operator. Leave empty for Irys-only reads.
 
-The browser gateway cannot derive the settlement mirror itself (no concept of which bundler wrote the data), so `VITE_GUTENBERG_ARWEAVE_GATEWAYS` should include the Irys network gateway matching whichever Irys network the CLI publishes to. The CLI doctor warns when your browser env is missing it. If you switch publishing to Irys mainnet, replace `https://devnet.irys.xyz` with `https://gateway.irys.xyz` here. Once mainnet bundles propagate to Arweave proper (hours-to-days) the native gateways resolve them too and the Irys mirror becomes belt-and-suspenders.
+The browser surfaces this distinction directly: the release header lists the canonical Irys gateway in its own row and labels every other gateway as a "Mirror".
 
 ## Local Solana registry
 
@@ -116,11 +118,12 @@ The registry is append-only by design: there is no `unpublish` command. Once a r
 The gateway performs all verification in the browser using WebCrypto (SHA-256),
 `@noble/curves` (Ed25519), and direct Solana JSON-RPC calls — no Solana SDK or
 Node dependencies in the bundle. Files are content-addressed (`ar://<txid>`)
-and fetched lazily through the configured Arweave gateway list (first hit wins,
-others are tried on failure); only the page being read crosses the wire, and
-each file is hashed against the manifest before it renders. The release header
-exposes the manifest `ar://` and one-click "open via" links per configured
-gateway so readers can route around any individual operator.
+and fetched lazily: first the canonical Irys gateway, then any configured
+mirrors on failure. Only the page being read crosses the wire, and each file
+is hashed against the manifest before it renders. The release header exposes
+the manifest `ar://` together with the canonical Irys link and a separately
+labeled list of mirror links, so readers can clearly see which operator they
+are trusting and route around any individual one.
 
 ```bash
 pnpm gateway:dev

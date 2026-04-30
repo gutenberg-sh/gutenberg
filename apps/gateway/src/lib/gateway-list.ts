@@ -29,12 +29,6 @@ export function parse_gateway_list(raw: string): string[] {
     out.push(trimmed);
   }
 
-  if (out.length === 0) {
-    throw new Error(
-      'Gateway list is empty. Provide at least one https://… gateway.',
-    );
-  }
-
   return out;
 }
 

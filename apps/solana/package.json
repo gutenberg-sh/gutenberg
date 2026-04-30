@@ -6,10 +6,5 @@
     "anchor:build": "PATH=\"$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH\" \"$HOME/.cargo/bin/anchor\" build && PATH=\"$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH\" cargo build-sbf --manifest-path programs/gutenberg_registry/Cargo.toml --sbf-out-dir target/deploy",
     "anchor:deploy": "pnpm run anchor:build && PATH=\"$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH\" \"$HOME/.cargo/bin/anchor\" deploy",
     "anchor:test": "PATH=\"$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH\" cargo build-sbf --manifest-path programs/gutenberg_registry/Cargo.toml --sbf-out-dir target/deploy && PATH=\"$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH\" cargo test --manifest-path programs/gutenberg_registry/Cargo.toml --test integration"
-  },
-  "dependencies": {
-    "@solana/web3.js": "^1.98.4",
-    "bs58": "6.0.0",
-    "dotenv": "17.4.2"
   }
 }
