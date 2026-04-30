@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/gutenberg-banner.jpg" alt="Gutenberg" width="720" />
+  <img src="assets/gutenberg-banner.jpg" alt="Gutenberg — publish freely, privately, and permanently on Solana" width="720" />
 </p>
 
 <h1 align="center">Gutenberg</h1>
@@ -20,7 +20,11 @@
 
 ## Overview
 
-Gutenberg is a monorepo for publishing static sites and packages to permanent storage (Arweave via Irys) with release metadata anchored on Solana. The CLI handles bundling, upload, registry transactions, and a local gateway for reading published content.
+**Gutenberg lets anyone publish freely, privately, and permanently on Solana.** This repo is the CLI, the on-chain registry program, and local tooling to run the stack.
+
+## Why we build this
+
+**State actors** and **overreaching institutions** can use law, finance, and infrastructure to make inconvenient publishing disappear. Gutenberg is built for **anonymous** publishing, **permanent** storage, and **censorship-resistant** discovery.
 
 ## Prerequisites
 
@@ -30,6 +34,8 @@ Gutenberg is a monorepo for publishing static sites and packages to permanent st
 - **Anchor CLI** — build and deploy the registry program
 
 ## Installing dependencies
+
+To install all workspace dependencies, run:
 
 ```bash
 pnpm install
