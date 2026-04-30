@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { is_content_uri } from '../manifest/content-uri';
+import type { SolanaPublicKey } from '../manifest/manifest.types';
 import { ManifestService } from '../manifest/manifest.service';
 
 import {
@@ -22,6 +23,13 @@ export class RegistryService {
 
   async assert_can_publish(): Promise<void> {
     await this.releaseRegistryRepository.assert_can_publish();
+  }
+
+  async assert_name_claimable(input: {
+    name: string;
+    publisher: SolanaPublicKey;
+  }): Promise<void> {
+    await this.releaseRegistryRepository.assert_name_claimable(input);
   }
 
   async append_release(event: GutenbergReleaseEvent): Promise<void> {

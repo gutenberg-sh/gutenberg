@@ -19,38 +19,6 @@ To install all workspace dependencies, run:
 pnpm install
 ```
 
-That links the `gutenberg` CLI into `node_modules/.bin`.
-
-Build the CLI (`pnpm cli:build`), then run commands with `pnpm exec gutenberg …`, or put `node_modules/.bin` on your `PATH` and run `gutenberg …` directly.
-
-While you change CLI code, use the Nest CLI watch mode (same as in a typical Nest app):
-
-```bash
-pnpm cli:dev
-```
-
-That runs `nest start --watch` (via `apps/cli/scripts/nest-dev.cjs`, which invokes the Nest CLI with `node` so it resolves reliably under pnpm). It rebuilds with `tsc` and restarts when sources change.
-
-To watch and repeatedly run a specific Gutenberg subcommand, pass it after `cli:dev`:
-
-```bash
-pnpm cli:dev open gutenberg-demo
-pnpm cli:dev doctor
-```
-
-For a one-off run without watch, use the compiled CLI:
-
-```bash
-pnpm exec gutenberg open gutenberg-demo
-```
-
-To install the built CLI globally (optional):
-
-```bash
-pnpm cli:build
-pnpm --filter @gutenberg/cli link --global
-```
-
 ## Environment Setup
 
 Copy the example environment file and fill in the required values:

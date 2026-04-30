@@ -43,6 +43,17 @@ pub mod gutenberg_registry {
             GutenbergError::InvalidSeedHash
         );
 
+        let name_authority = &mut ctx.accounts.name_authority;
+        let publisher_key = ctx.accounts.publisher.key();
+        if name_authority.authority == Pubkey::default() {
+            name_authority.authority = publisher_key;
+        } else {
+            require!(
+                name_authority.authority == publisher_key,
+                GutenbergError::NameAlreadyClaimed
+            );
+        }
+
         let release = &mut ctx.accounts.release;
         release.publisher = ctx.accounts.publisher.key();
         release.name = name;
@@ -70,6 +81,15 @@ pub struct PublishRelease<'info> {
     pub publisher: Signer<'info>,
 
     #[account(
+        init_if_needed,
+        payer = publisher,
+        space = NameAuthority::SPACE,
+        seeds = [b"name", name_hash.as_ref()],
+        bump,
+    )]
+    pub name_authority: Account<'info, NameAuthority>,
+
+    #[account(
         init,
         payer = publisher,
         space = Release::SPACE,
@@ -84,6 +104,15 @@ pub struct PublishRelease<'info> {
     pub release: Account<'info, Release>,
 
     pub system_program: Program<'info, System>,
+}
+
+#[account]
+pub struct NameAuthority {
+    pub authority: Pubkey,
+}
+
+impl NameAuthority {
+    pub const SPACE: usize = 8 + 32;
 }
 
 #[account]
@@ -130,4 +159,6 @@ pub enum GutenbergError {
     CreatedAtTooLong,
     #[msg("Seed hash does not match instruction data")]
     InvalidSeedHash,
+    #[msg("This release name is already claimed by another publisher")]
+    NameAlreadyClaimed,
 }

@@ -33,6 +33,11 @@ export class PublishService {
 
     const keypair = this.keysService.load_publisher_key();
 
+    await this.registryService.assert_name_claimable({
+      name: options.name,
+      publisher: keypair.publisher,
+    });
+
     if (
       await this.registryService.has_release({
         name: options.name,

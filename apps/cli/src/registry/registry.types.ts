@@ -30,6 +30,10 @@ export type HasReleaseInput = {
 
 export type ReleaseRegistryRepository = {
   assert_can_publish(): Promise<void>;
+  assert_name_claimable(input: {
+    name: string;
+    publisher: SolanaPublicKey;
+  }): Promise<void>;
   publish_release(event: GutenbergReleaseEvent): Promise<void>;
   list_releases(): Promise<GutenbergReleaseEvent[]>;
   find_release(

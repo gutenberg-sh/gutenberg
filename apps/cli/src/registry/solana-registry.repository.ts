@@ -12,6 +12,7 @@ import { createHash } from 'node:crypto';
 
 import { SolanaWalletRepository } from '../solana/solana-wallet.repository';
 
+import type { SolanaPublicKey } from '../manifest/manifest.types';
 import type {
   FindReleaseInput,
   HasReleaseInput,
@@ -30,6 +31,30 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
     private readonly solanaWalletRepository: SolanaWalletRepository,
   ) {}
 
+  async assert_name_claimable(input: {
+    name: string;
+    publisher: SolanaPublicKey;
+  }): Promise<void> {
+    const addr = this.name_authority_address(input.name);
+    const account = await this.connection.getAccountInfo(addr);
+
+    if (!account) {
+      return;
+    }
+
+    const authority = decode_name_authority_account(account.data);
+
+    if (!authority) {
+      return;
+    }
+
+    if (authority.toBase58() !== input.publisher) {
+      throw new Error(
+        `Release name "${input.name}" is already claimed by publisher ${authority.toBase58()}`,
+      );
+    }
+  }
+
   async assert_can_publish(): Promise<void> {
     const { public_key, sol } = await this.get_wallet_balance();
 
@@ -43,6 +68,7 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
   async publish_release(event: GutenbergReleaseEvent): Promise<void> {
     const program_id = this.require_program_id();
     const wallet = this.solanaWalletRepository.load_keypair();
+    const name_authority_address = this.name_authority_address(event.name);
     const release_address = this.release_address({
       publisher: event.publisher,
       name: event.name,
@@ -54,6 +80,11 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
         {
           pubkey: wallet.publicKey,
           isSigner: true,
+          isWritable: true,
+        },
+        {
+          pubkey: name_authority_address,
+          isSigner: false,
           isWritable: true,
         },
         {
@@ -144,6 +175,16 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
     return this.require_program_id();
   }
 
+  name_authority_address(name: string): PublicKey {
+    const program_id = this.require_program_id();
+    const [address] = PublicKey.findProgramAddressSync(
+      [Buffer.from('name'), seed_hash(name)],
+      program_id,
+    );
+
+    return address;
+  }
+
   release_address(input: {
     publisher: string;
     name: string;
@@ -181,6 +222,20 @@ function encode_publish_release_instruction(
     seed_hash(event.name),
     seed_hash(event.version),
   ]);
+}
+
+function decode_name_authority_account(data: Buffer): PublicKey | undefined {
+  if (data.byteLength < 40) {
+    return undefined;
+  }
+
+  const expected = account_discriminator('NameAuthority');
+
+  if (!data.subarray(0, 8).equals(expected)) {
+    return undefined;
+  }
+
+  return new PublicKey(data.subarray(8, 40));
 }
 
 function decode_release_account(data: Buffer): GutenbergReleaseEvent {
