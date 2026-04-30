@@ -1,4 +1,0 @@
-export const ARWEAVE_GATEWAY_URL_KEY = Symbol('ARWEAVE_GATEWAY_URL_KEY');
-export const IRYS_NETWORK_KEY = Symbol('IRYS_NETWORK_KEY');
-export const SOLANA_RPC_URL_KEY = Symbol('SOLANA_RPC_URL_KEY');
-export const SOLANA_PRIVATE_KEY_KEY = Symbol('SOLANA_PRIVATE_KEY_KEY');

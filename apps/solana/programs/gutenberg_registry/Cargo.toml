@@ -22,3 +22,12 @@ default = []
 [dependencies]
 anchor-lang = { version = "0.32.1", features = ["init-if-needed"] }
 solana-sha256-hasher = "2.3.0"
+
+[dev-dependencies]
+borsh = "0.10"
+litesvm = "0.7"
+solana-sdk = "2.3"
+
+[[test]]
+name = "integration"
+path = "tests/integration.rs"

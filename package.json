@@ -16,6 +16,7 @@
     "solana:validator": "solana-test-validator",
     "solana:build": "pnpm --filter @gutenberg/solana run anchor:build",
     "solana:deploy": "pnpm --filter @gutenberg/solana run anchor:deploy",
+    "solana:test": "pnpm --filter @gutenberg/solana run anchor:test",
     "cli:dev": "pnpm --filter @gutenberg/cli run start:dev",
     "cli:build": "pnpm --filter @gutenberg/cli run build",
     "cli:start": "pnpm exec gutenberg",

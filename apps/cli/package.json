@@ -4,7 +4,7 @@
   "private": true,
   "type": "commonjs",
   "bin": {
-    "gutenberg": "./dist/src/cli.js"
+    "gutenberg": "./dist/src/main.js"
   },
   "scripts": {
     "build": "nest build",
