@@ -9,10 +9,9 @@ import { ReleaseRoute } from '@/routes/Release';
 
 export function App() {
   return (
-    <div className="relative flex min-h-[100dvh] flex-col">
-      <span aria-hidden className="grain" />
+    <div className="relative flex min-h-dvh flex-col bg-background">
       <SiteHeader />
-      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-6 pb-20 pt-10 sm:pt-14 lg:px-10">
+      <main className="relative flex flex-1 flex-col">
         <Routes>
           <Route path="/" element={<LandingRoute />} />
           <Route path="/r/:name" element={<LatestReleaseRoute />} />

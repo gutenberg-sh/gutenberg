@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#0a0b0e" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fafbfc" media="(prefers-color-scheme: light)" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Gutenberg — verified releases on Solana</title>
     <meta
@@ -16,8 +18,28 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      (function () {
+        try {
+          var t = document.documentElement;
+          var saved = localStorage.getItem('gutenberg-theme');
+          var prefersDark = window.matchMedia(
+            '(prefers-color-scheme: dark)'
+          ).matches;
+          if (saved === 'dark' || (saved !== 'light' && prefersDark)) {
+            t.classList.add('dark');
+            t.classList.remove('light');
+          } else {
+            t.classList.add('light');
+            t.classList.remove('dark');
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      })();
+    </script>
   </head>
-  <body class="bg-background text-foreground antialiased">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

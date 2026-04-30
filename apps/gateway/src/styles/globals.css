@@ -3,11 +3,24 @@
 
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+/* Dark variant fires for explicit `.dark` AND for system pref when not opted out via `.light`. */
+@custom-variant dark {
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:not(.light, .light *)) {
+      @slot;
+    }
+  }
+}
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-foreground-soft: var(--foreground-soft);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -23,10 +36,9 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-ink: var(--ink);
-  --color-paper: var(--paper);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -42,68 +54,120 @@
     'Times New Roman', Times, serif;
 }
 
+/* ─── Light (default) ────────────────────────────────────────────────────── */
+/*
+ * Surfaces (used sparingly — most content lives on `background`):
+ *   background  → page floor; the dominant tone
+ *   surface     → quiet inline panels
+ *   card        → primary lifted blocks (lookup form)
+ *   elevated    → highest, popovers / hovered rows
+ *
+ * Text — three legibility tiers:
+ *   foreground       → titles, key data
+ *   foreground-soft  → body copy, ledes
+ *   muted-foreground → labels, captions, eyebrows
+ */
 :root {
-  --radius: 0.75rem;
-  /* Warm-neutral paper for light, single calibrated emerald accent. */
-  --paper: oklch(0.987 0.004 85);
-  --ink: oklch(0.18 0.008 80);
+  --radius: 0.625rem;
 
-  --background: oklch(0.987 0.004 85);
-  --foreground: oklch(0.18 0.008 80);
+  --background: oklch(0.992 0.002 270);
+  --surface: oklch(0.965 0.003 260);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.008 80);
+  --elevated: oklch(1 0 0);
+  --foreground: oklch(0.13 0.014 260);
+  --foreground-soft: oklch(0.34 0.012 260);
+  --card-foreground: oklch(0.13 0.014 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.008 80);
+  --popover-foreground: oklch(0.13 0.014 260);
 
-  --primary: oklch(0.22 0.008 80);
-  --primary-foreground: oklch(0.987 0.004 85);
+  --primary: oklch(0.16 0.014 260);
+  --primary-foreground: oklch(0.99 0.002 270);
 
-  --secondary: oklch(0.96 0.006 85);
-  --secondary-foreground: oklch(0.22 0.008 80);
+  --secondary: oklch(0.96 0.003 260);
+  --secondary-foreground: oklch(0.18 0.012 260);
 
-  --muted: oklch(0.955 0.005 85);
-  --muted-foreground: oklch(0.5 0.012 85);
+  --muted: oklch(0.96 0.003 260);
+  --muted-foreground: oklch(0.5 0.012 260);
 
-  --accent: oklch(0.55 0.11 162);
-  --accent-foreground: oklch(0.987 0.004 85);
+  /* Single, calibrated accent. Used sparingly. */
+  --accent: oklch(0.62 0.17 150);
+  --accent-foreground: oklch(0.13 0.014 260);
 
-  --destructive: oklch(0.52 0.18 27);
-  --destructive-foreground: oklch(0.987 0.004 85);
+  --destructive: oklch(0.55 0.2 26);
+  --destructive-foreground: oklch(0.99 0.002 270);
 
-  --border: oklch(0.91 0.005 85);
-  --input: oklch(0.91 0.005 85);
-  --ring: oklch(0.55 0.11 162 / 60%);
+  --border: oklch(0.92 0.004 260);
+  --border-strong: oklch(0.84 0.005 260);
+  --input: oklch(0.92 0.004 260);
+  --ring: oklch(0.62 0.17 150 / 55%);
 }
 
+/* ─── Dark (system or explicit) ──────────────────────────────────────────── */
+:root.dark,
 .dark {
-  --paper: oklch(0.135 0.005 260);
-  --ink: oklch(0.97 0.005 80);
+  --background: oklch(0.135 0.008 260);
+  --surface: oklch(0.175 0.008 260);
+  --card: oklch(0.205 0.008 260);
+  --elevated: oklch(0.235 0.008 260);
+  --foreground: oklch(0.985 0.003 270);
+  --foreground-soft: oklch(0.78 0.008 260);
+  --card-foreground: oklch(0.985 0.003 270);
+  --popover: oklch(0.215 0.008 260);
+  --popover-foreground: oklch(0.985 0.003 270);
 
-  --background: oklch(0.135 0.005 260);
-  --foreground: oklch(0.97 0.005 80);
-  --card: oklch(0.18 0.006 260);
-  --card-foreground: oklch(0.97 0.005 80);
-  --popover: oklch(0.18 0.006 260);
-  --popover-foreground: oklch(0.97 0.005 80);
+  --primary: oklch(0.985 0.003 270);
+  --primary-foreground: oklch(0.135 0.008 260);
 
-  --primary: oklch(0.97 0.005 80);
-  --primary-foreground: oklch(0.135 0.005 260);
+  --secondary: oklch(0.225 0.008 260);
+  --secondary-foreground: oklch(0.985 0.003 270);
 
-  --secondary: oklch(0.24 0.006 260);
-  --secondary-foreground: oklch(0.97 0.005 80);
+  --muted: oklch(0.225 0.008 260);
+  --muted-foreground: oklch(0.6 0.012 260);
 
-  --muted: oklch(0.24 0.006 260);
-  --muted-foreground: oklch(0.66 0.012 260);
+  --accent: oklch(0.84 0.18 150);
+  --accent-foreground: oklch(0.135 0.008 260);
 
-  --accent: oklch(0.72 0.13 162);
-  --accent-foreground: oklch(0.135 0.005 260);
-
-  --destructive: oklch(0.66 0.18 22);
-  --destructive-foreground: oklch(0.135 0.005 260);
+  --destructive: oklch(0.7 0.2 22);
+  --destructive-foreground: oklch(0.135 0.008 260);
 
   --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.72 0.13 162 / 60%);
+  --border-strong: oklch(1 0 0 / 14%);
+  --input: oklch(1 0 0 / 11%);
+  --ring: oklch(0.84 0.18 150 / 55%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: oklch(0.135 0.008 260);
+    --surface: oklch(0.175 0.008 260);
+    --card: oklch(0.205 0.008 260);
+    --elevated: oklch(0.235 0.008 260);
+    --foreground: oklch(0.985 0.003 270);
+    --foreground-soft: oklch(0.78 0.008 260);
+    --card-foreground: oklch(0.985 0.003 270);
+    --popover: oklch(0.215 0.008 260);
+    --popover-foreground: oklch(0.985 0.003 270);
+
+    --primary: oklch(0.985 0.003 270);
+    --primary-foreground: oklch(0.135 0.008 260);
+
+    --secondary: oklch(0.225 0.008 260);
+    --secondary-foreground: oklch(0.985 0.003 270);
+
+    --muted: oklch(0.225 0.008 260);
+    --muted-foreground: oklch(0.6 0.012 260);
+
+    --accent: oklch(0.84 0.18 150);
+    --accent-foreground: oklch(0.135 0.008 260);
+
+    --destructive: oklch(0.7 0.2 22);
+    --destructive-foreground: oklch(0.135 0.008 260);
+
+    --border: oklch(1 0 0 / 9%);
+    --border-strong: oklch(1 0 0 / 14%);
+    --input: oklch(1 0 0 / 11%);
+    --ring: oklch(0.84 0.18 150 / 55%);
+  }
 }
 
 @layer base {
@@ -113,22 +177,23 @@
   html,
   body,
   #root {
-    @apply min-h-[100dvh];
+    @apply min-h-dvh;
   }
   html {
+    color-scheme: light dark;
     scroll-behavior: smooth;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-feature-settings:
       'ss01' 1,
       'cv11' 1;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground;
     font-family: var(--font-sans);
     font-feature-settings: 'ss01' 1, 'cv11' 1;
   }
-  /* Numerics: tabular by default site-wide for stable hash/version columns. */
   code,
   pre,
   kbd,
@@ -136,61 +201,80 @@
   .tabular {
     font-variant-numeric: tabular-nums;
   }
-  /* Display headings: tighter optical tracking with Geist's higher weights. */
   h1,
   h2,
-  h3 {
-    letter-spacing: -0.01em;
+  h3,
+  h4 {
+    letter-spacing: -0.02em;
   }
   h1 {
     text-wrap: balance;
+    letter-spacing: -0.034em;
   }
-  /* Paragraphs in long copy: avoid orphans. */
   p {
     text-wrap: pretty;
   }
-  /* Render selection in our accent so highlights feel intentional. */
   ::selection {
     background-color: var(--accent);
     color: var(--accent-foreground);
   }
+  *:focus-visible {
+    outline: none;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border: 3px solid var(--background);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 @layer utilities {
-  /* Editorial serif body for verified release markdown. */
   .font-serif {
     font-family: var(--font-serif);
   }
-  /* Subtle paper grain overlay; fixed and pointer-events-none for perf. */
-  .grain {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 50;
-    opacity: 0.035;
-    mix-blend-mode: multiply;
-    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  /* Hairline ring for cards. No paper-tinted shadow, no glow. */
+  .ring-hairline {
+    box-shadow: 0 0 0 1px var(--border);
   }
-  .dark .grain {
-    opacity: 0.06;
-    mix-blend-mode: screen;
-  }
-  /* Tinted card shadow that matches the warm paper hue. */
-  .shadow-paper {
+  /* Quiet lift used on focused or primary surfaces. */
+  .lift {
     box-shadow:
-      0 1px 0 0 oklch(0 0 0 / 0.02),
-      0 12px 32px -16px oklch(0.18 0.008 80 / 0.12);
+      0 0 0 1px var(--border),
+      0 8px 28px -20px oklch(0 0 0 / 0.25);
   }
-  .dark .shadow-paper {
+  .dark .lift {
     box-shadow:
-      0 1px 0 0 oklch(1 0 0 / 0.04) inset,
-      0 12px 32px -16px oklch(0 0 0 / 0.6);
+      0 0 0 1px var(--border),
+      0 12px 36px -20px oklch(0 0 0 / 0.7);
   }
-  /* Keep prose comfortable and editorial. */
+  /* Inline keyboard hint chip. */
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    padding: 0 0.4rem;
+    border-radius: 0.4rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1;
+    color: var(--muted-foreground);
+  }
+  /* Editorial reading column for verified release markdown. */
   .prose-editorial {
     font-family: var(--font-serif);
     font-size: 1.0625rem;
-    line-height: 1.7;
+    line-height: 1.72;
   }
   .prose-editorial h1,
   .prose-editorial h2,
@@ -202,5 +286,15 @@
   .prose-editorial pre,
   .prose-editorial kbd {
     font-family: var(--font-mono);
+  }
+  /* Soft pulse used by VerifyStatus's running step. */
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 0.85;
+    }
+    50% {
+      opacity: 1;
+    }
   }
 }

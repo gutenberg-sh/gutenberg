@@ -16,50 +16,58 @@ export function FileNav({
   }
 
   return (
-    <nav
-      aria-label="Pages"
-      className="lg:sticky lg:top-24"
-    >
-      <p className="mb-3 flex items-baseline justify-between text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground/80">
+    <nav aria-label="Pages" className="lg:sticky lg:top-24">
+      <p className="mb-3 flex items-baseline justify-between text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground/80">
         <span>Index</span>
         <span className="font-mono tabular text-muted-foreground/70 normal-case tracking-normal">
-          {files.length}
+          {files.length.toString().padStart(2, '0')}
         </span>
       </p>
-      <ul className="grid gap-px border-y border-border/70">
-        {files.map((path) => {
+      <ul className="grid">
+        {files.map((path, idx) => {
           const active = path === current_path;
           const label = path === '/' ? 'index' : path.replace(/^\//, '');
           const href = `${base_path}${encode_site_path(path)}`;
+          const number = (idx + 1).toString().padStart(2, '0');
 
           return (
             <li
               key={path}
-              className={cn(
-                'relative',
-                'after:absolute after:inset-x-0 after:bottom-[-1px] after:h-px after:bg-border/40',
-              )}
+              className="border-t border-border/60 last:border-b last:border-border/60"
             >
               <Link
                 to={href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'group flex items-center gap-2 px-2 py-2 font-mono text-[12.5px] tabular transition-colors',
+                  'group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 py-2.5 transition-colors',
                   active
                     ? 'text-foreground'
-                    : 'text-muted-foreground hover:text-foreground',
+                    : 'text-foreground-soft hover:text-foreground',
                 )}
               >
                 <span
                   aria-hidden
                   className={cn(
-                    'inline-block h-3.5 w-[2px] shrink-0 rounded-full transition-colors',
+                    'inline-block w-[18px] font-mono text-[10.5px] tabular',
+                    active
+                      ? 'text-accent'
+                      : 'text-muted-foreground/60 group-hover:text-foreground/70',
+                  )}
+                >
+                  {number}
+                </span>
+                <span className="truncate font-mono text-[12.5px] tabular">
+                  {label}
+                </span>
+                <span
+                  aria-hidden
+                  className={cn(
+                    'inline-block h-3 w-[2px] rounded-full transition-colors',
                     active
                       ? 'bg-accent'
-                      : 'bg-border group-hover:bg-foreground/40',
+                      : 'bg-transparent group-hover:bg-foreground/30',
                   )}
                 />
-                <span className="truncate">{label}</span>
               </Link>
             </li>
           );

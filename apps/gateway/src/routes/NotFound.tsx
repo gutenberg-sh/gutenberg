@@ -1,45 +1,39 @@
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import { Container } from '@/components/Layout';
+
 export function NotFoundRoute() {
   return (
-    <section className="grid items-center gap-12 border-y border-border/70 py-16 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-20 lg:py-24">
-      <div className="grid gap-6">
-        <p className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-          <span
-            aria-hidden
-            className="inline-block size-1.5 rounded-full bg-destructive/70"
-          />
-          404 · No such page
-        </p>
-        <h1 className="text-[36px] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-[48px]">
-          That URL doesn&apos;t resolve.
-        </h1>
-        <p className="max-w-[58ch] text-[15px] leading-relaxed text-muted-foreground sm:text-[16px]">
-          Releases are addressed as{' '}
-          <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[13px]">
-            /r/&lt;name&gt;/&lt;version&gt;
-          </code>
-          . If you typed the path by hand, double-check the name and version,
-          then try again from the lookup page.
-        </p>
-        <div>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 rounded-md bg-foreground px-3.5 py-2 text-[13px] font-medium text-background transition-all hover:bg-foreground/92 active:translate-y-[1px] active:scale-[0.985]"
-          >
-            <ArrowLeft className="size-3.5" strokeWidth={2} aria-hidden />
-            Back to lookup
-          </Link>
-        </div>
-      </div>
-
-      <p
-        aria-hidden
-        className="font-serif text-[clamp(120px,18vw,200px)] leading-none tracking-[-0.04em] text-foreground/[0.06] select-none italic"
-      >
-        404
+    <Container as="section" className="grid gap-7 py-24 lg:py-32">
+      <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+        404 / Not found
       </p>
-    </section>
+      <h1 className="text-[2.25rem] font-semibold leading-[1.05] tracking-[-0.034em] text-foreground sm:text-[3rem] lg:text-[3.5rem]">
+        That URL doesn&apos;t resolve.
+      </h1>
+      <p className="max-w-[58ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
+        Releases are addressed as{' '}
+        <code className="rounded-md border border-border bg-card px-1.5 py-0.5 font-mono text-[13px] tabular text-foreground">
+          /r/&lt;name&gt;/&lt;version&gt;
+        </code>
+        . Double-check the name and version, then try again from the lookup
+        page.
+      </p>
+      <div className="mt-2 flex items-center gap-3">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 rounded-lg bg-foreground px-3.5 py-2 text-[13px] font-medium text-background transition-colors hover:bg-foreground/92 active:translate-y-px"
+        >
+          <ArrowLeft className="size-3.5" strokeWidth={2} aria-hidden />
+          Back to lookup
+        </Link>
+        <span className="hidden items-center gap-1.5 text-[12px] text-muted-foreground sm:inline-flex">
+          or press
+          <span className="kbd">⌘</span>
+          <span className="kbd">K</span>
+        </span>
+      </div>
+    </Container>
   );
 }

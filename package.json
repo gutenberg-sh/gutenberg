@@ -3,6 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leonmeka/gutenberg.git"
+  },
+  "homepage": "https://github.com/leonmeka/gutenberg#readme",
+  "bugs": {
+    "url": "https://github.com/leonmeka/gutenberg/issues"
+  },
   "packageManager": "pnpm@10.33.1",
   "type": "module",
   "engines": {

@@ -71,7 +71,7 @@ export function AssetView({
         <img
           src={blob_url}
           alt={path}
-          className="max-h-[72vh] w-full rounded-lg border border-border/70 bg-muted/30 object-contain"
+          className="max-h-[72vh] w-full rounded-xl border border-border bg-muted/30 object-contain"
         />
       </figure>
     );
@@ -91,7 +91,7 @@ export function AssetView({
         <Caption icon={FileText} path={path} bytes={bytes} />
         <pre
           className={cn(
-            'max-h-[72vh] overflow-auto rounded-lg border border-border/70 bg-muted/40 p-4',
+            'max-h-[72vh] overflow-auto rounded-xl border border-border bg-muted/40 p-4',
             'font-mono text-[12.5px] leading-relaxed tabular',
           )}
         >
@@ -102,21 +102,21 @@ export function AssetView({
   }
 
   return (
-    <div className="grid gap-4 border-y border-border/70 py-8 text-center">
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+    <div className="grid gap-5 border-y border-border/70 py-10 text-center">
+      <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
         Binary asset
       </p>
-      <p className="font-mono text-[13px] tabular text-foreground">{path}</p>
-      <p className="text-[12px] text-muted-foreground tabular">
+      <p className="font-mono text-[13.5px] tabular text-foreground">{path}</p>
+      <p className="font-mono text-[12px] tabular text-muted-foreground">
         {format_bytes(bytes.byteLength)}
       </p>
       <div>
         <a
           href={blob_url}
           download={filename}
-          className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-foreground transition-colors hover:border-foreground/30 active:translate-y-[1px]"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-foreground transition-colors hover:border-border-strong active:translate-y-px"
         >
-          <Download className="size-3.5" strokeWidth={1.75} aria-hidden />
+          <Download className="size-3.5" strokeWidth={1.85} aria-hidden />
           Download
         </a>
       </div>
@@ -136,13 +136,13 @@ function Caption({
   return (
     <figcaption className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-muted-foreground">
       <span className="inline-flex items-center gap-1.5 text-foreground">
-        <Icon className="size-3.5" aria-hidden />
+        <Icon className="size-3.5" strokeWidth={1.75} aria-hidden />
         <code className="font-mono tabular">{path}</code>
       </span>
       <span aria-hidden className="text-muted-foreground/40">
         ·
       </span>
-      <span className="tabular">{format_bytes(bytes.byteLength)}</span>
+      <span className="font-mono tabular">{format_bytes(bytes.byteLength)}</span>
     </figcaption>
   );
 }

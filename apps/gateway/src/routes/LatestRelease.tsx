@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 
 import { ErrorView } from '@/components/ErrorView';
+import { Container } from '@/components/Layout';
 import { env } from '@/env';
 import { find_latest_release_by_name } from '@/lib/registry';
 
@@ -20,11 +21,18 @@ export function LatestReleaseRoute() {
 
   const valid_name = name && NAME_RE.test(name) ? name : undefined;
 
+  // Reset state synchronously when valid_name changes (canonical "derive
+  // state from props" pattern) so we never flash the previous result.
+  const [last_valid_name, set_last_valid_name] = useState(valid_name);
+  if (last_valid_name !== valid_name) {
+    set_last_valid_name(valid_name);
+    set_state({ status: 'loading' });
+  }
+
   useEffect(() => {
     if (!valid_name) return;
 
     let cancelled = false;
-    set_state({ status: 'loading' });
 
     void (async () => {
       try {
@@ -60,10 +68,12 @@ export function LatestReleaseRoute() {
 
   if (!name || !NAME_RE.test(name)) {
     return (
-      <ErrorView
-        title="Invalid release name"
-        message={`"${name ?? ''}" is not a valid release name.`}
-      />
+      <Container className="py-20 lg:py-28">
+        <ErrorView
+          title="Invalid release name"
+          message={`"${name ?? ''}" is not a valid release name.`}
+        />
+      </Container>
     );
   }
 
@@ -78,32 +88,38 @@ export function LatestReleaseRoute() {
 
   if (state.status === 'error') {
     return (
-      <ErrorView
-        title="Could not resolve latest release"
-        message={state.message}
-      />
+      <Container className="py-20 lg:py-28">
+        <ErrorView
+          title="Could not resolve latest release"
+          message={state.message}
+        />
+      </Container>
     );
   }
 
   return (
-    <section
-      aria-live="polite"
-      className="grid items-start gap-6 border-y border-border/70 py-10 lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-12"
-    >
-      <div className="inline-flex size-12 items-center justify-center rounded-full border border-border/70 bg-card text-muted-foreground">
-        <Loader2 className="size-5 animate-spin" strokeWidth={1.75} aria-hidden />
+    <Container as="section" className="py-20 lg:py-28">
+      <div
+        aria-live="polite"
+        className="grid items-start gap-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-7"
+      >
+        <Loader2
+          className="size-5 animate-spin text-muted-foreground"
+          strokeWidth={1.75}
+          aria-hidden
+        />
+        <div className="grid gap-3">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+            Resolving latest version
+          </p>
+          <h2 className="text-[26px] font-semibold leading-[1.1] tracking-tight text-foreground sm:text-[32px]">
+            {name}
+          </h2>
+          <p className="max-w-[60ch] text-[15px] leading-[1.6] text-foreground-soft">
+            Looking up the most recent release on the Solana registry.
+          </p>
+        </div>
       </div>
-      <div className="grid gap-2">
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-          Resolving latest version
-        </p>
-        <h2 className="text-[26px] font-semibold leading-tight tracking-[-0.015em] sm:text-[30px]">
-          {name}
-        </h2>
-        <p className="max-w-[60ch] text-[15px] leading-relaxed text-muted-foreground">
-          Looking up the most recent release on the Solana registry.
-        </p>
-      </div>
-    </section>
+    </Container>
   );
 }

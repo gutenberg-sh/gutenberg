@@ -1,152 +1,436 @@
-import { ArrowUpRight, FileSignature, Fingerprint, Layers } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import { Container } from '@/components/Layout';
 import { LookupForm } from '@/components/LookupForm';
 
-const TRUST_BULLETS: ReadonlyArray<{
+const PROOF_STEPS: ReadonlyArray<{
+  index: string;
   label: string;
   detail: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }> = [
   {
+    index: '01',
     label: 'Manifest signature',
-    detail: 'Ed25519 signature checked against the publisher key on chain.',
-    icon: FileSignature,
+    detail:
+      'The publisher signs a canonical JSON manifest with their Solana key (Ed25519). We re-check that signature against the on-chain key.',
   },
   {
+    index: '02',
     label: 'Bundle hash',
-    detail: 'The whole release archive is rehashed and matched to the manifest.',
-    icon: Layers,
+    detail:
+      'The whole release archive — a tar — is hashed with SHA-256 and matched against the digest the publisher signed.',
   },
   {
-    label: 'File hashes',
-    detail: 'Every file you read is rehashed before it touches the renderer.',
-    icon: Fingerprint,
+    index: '03',
+    label: 'Per-file hashes',
+    detail:
+      'Every file in the bundle is hashed individually before it is rendered. If a single byte was tampered with, nothing mounts.',
   },
 ];
 
 const EXAMPLES: ReadonlyArray<{ name: string; version: string; note: string }> =
   [
     {
-      name: 'gutenberg-demo',
+      name: 'gutenberg',
       version: '1.0.0',
-      note: 'small markdown release',
+      note: 'project demo',
     },
   ];
 
+const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
+  {
+    q: 'What can I publish?',
+    a: (
+      <>
+        Anything that fits in a tar — markdown, images, PDFs, raw text,
+        archives. The gateway renders markdown directly and lets readers
+        download other file types verbatim.
+      </>
+    ),
+  },
+  {
+    q: 'Where is the content stored?',
+    a: (
+      <>
+        On Arweave, addressed by content hash. The Solana program only stores a
+        small record (publisher, version, manifest URI). The bundle itself is
+        durable and host-independent.
+      </>
+    ),
+  },
+  {
+    q: 'Can a publisher revoke a release?',
+    a: (
+      <>
+        They can remove the on-chain record so the gateway stops surfacing it,
+        but the bundle and signed manifest live on. Anyone who has the manifest
+        URI can still verify and read it offline.
+      </>
+    ),
+  },
+  {
+    q: 'What if a publisher key leaks?',
+    a: (
+      <>
+        Old releases stay valid — they were signed by that key at that time.
+        Future releases should be signed by a new key, registered to the same
+        name only if the publisher controls the registry record.
+      </>
+    ),
+  },
+];
+
 export function LandingRoute() {
   return (
-    <div className="grid gap-16 lg:gap-24">
-      <section className="grid items-start gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-16">
+    <div className="flex flex-col">
+      {/* ─── Hero ───────────────────────────────────────────────────────── */}
+      <Container className="grid items-start gap-14 pb-24 pt-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-20 lg:pb-32 lg:pt-24">
         <div className="grid gap-7">
-          <p className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-            <span
-              aria-hidden
-              className="inline-block size-1.5 rounded-full bg-accent"
-            />
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
             Gutenberg gateway
           </p>
 
-          <h1 className="text-[2.4rem] font-semibold leading-[1.04] tracking-[-0.025em] sm:text-[3.1rem] lg:text-[3.6rem]">
-            Read what was{' '}
-            <span className="font-serif italic font-normal text-foreground/90">
-              actually
-            </span>{' '}
-            published.
+          <h1 className="text-[2.5rem] font-semibold leading-none tracking-[-0.035em] text-foreground sm:text-[3.25rem] lg:text-[4.25rem]">
+            Read what was actually published.
           </h1>
 
-          <p className="max-w-[58ch] text-base leading-relaxed text-muted-foreground sm:text-[17px]">
+          <p className="max-w-[58ch] text-[16.5px] leading-[1.55] text-foreground-soft sm:text-[18px]">
             Open any release recorded on the Gutenberg registry. Your browser
             fetches the manifest and the bundle, recomputes every hash, and
-            checks the publisher&apos;s signature{' '}
-            <span className="text-foreground">before</span> rendering a single
+            checks the publisher&apos;s signature before rendering a single
             byte.
           </p>
 
-          <ul className="mt-2 grid gap-3 text-[13px] sm:grid-cols-3">
-            {TRUST_BULLETS.map(({ label, detail, icon: Icon }) => (
-              <li
-                key={label}
-                className="grid gap-1.5 border-t border-border/80 pt-3"
-              >
-                <span className="inline-flex items-center gap-2 text-foreground">
-                  <Icon
-                    className="size-3.5 text-accent"
-                    strokeWidth={1.75}
-                    aria-hidden
-                  />
-                  <span className="font-medium">{label}</span>
-                </span>
-                <span className="text-muted-foreground leading-snug">
-                  {detail}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <p className="text-[12.5px] text-muted-foreground">
+            No SDKs in the bundle
+            <Sep />
+            No proxy or analytics
+            <Sep />
+            Just WebCrypto + RPC
+          </p>
         </div>
 
         <div className="lg:sticky lg:top-24">
-          <div className="grid gap-3">
-            <LookupForm />
-            <div className="grid gap-2 px-1">
-              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground/80">
-                Try an example
-              </p>
-              <ul className="grid gap-1.5">
-                {EXAMPLES.map((ex) => (
-                  <li key={`${ex.name}@${ex.version}`}>
-                    <Link
-                      to={`/r/${ex.name}/${ex.version}`}
-                      className="group flex items-center justify-between gap-3 rounded-md border border-border/70 bg-card/40 px-3 py-2 text-[13px] transition-colors hover:border-accent/60 hover:bg-card"
-                    >
-                      <span className="flex items-baseline gap-2">
-                        <span className="font-mono text-[12.5px] tabular text-foreground">
-                          {ex.name}
-                          <span className="text-muted-foreground">@</span>
-                          {ex.version}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground">
-                          {ex.note}
-                        </span>
+          <LookupForm />
+          <div className="mt-5 px-1">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+              Try an example
+            </p>
+            <ul className="mt-3 grid gap-1.5">
+              {EXAMPLES.map((ex) => (
+                <li key={`${ex.name}@${ex.version}`}>
+                  <Link
+                    to={`/r/${ex.name}/${ex.version}`}
+                    className="group flex items-center justify-between gap-3 rounded-xl border border-border px-3.5 py-2.5 text-[13px] transition-colors hover:border-border-strong"
+                  >
+                    <span className="flex min-w-0 items-baseline gap-2 truncate">
+                      <span className="truncate font-mono text-[12.5px] tabular text-foreground">
+                        {ex.name}
+                        <span className="text-muted-foreground">@</span>
+                        {ex.version}
                       </span>
-                      <ArrowUpRight
-                        className="size-3.5 -translate-x-0.5 text-muted-foreground transition-transform group-hover:translate-x-0 group-hover:text-foreground"
-                        strokeWidth={1.75}
-                        aria-hidden
-                      />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                      <span className="hidden text-[11.5px] text-muted-foreground sm:inline">
+                        {ex.note}
+                      </span>
+                    </span>
+                    <ArrowUpRight
+                      className="size-3.5 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
+                      strokeWidth={1.75}
+                      aria-hidden
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
-      </section>
+      </Container>
 
-      {/* Printer's rule + a quiet promise. No card. Just spacing & type. */}
-      <section
-        aria-labelledby="promise-heading"
-        className="grid gap-6 border-t border-border/70 pt-10"
-      >
-        <div className="grid gap-2 lg:max-w-[58ch]">
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-            How
+      <Section eyebrow="01 / Why" title="Publishing should outlive its publisher.">
+        <p className="max-w-[60ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
+          Whether you like it or not, governments and major outlets enforce a
+          certain narrative. Work that contradicts it gets taken down, sued, or
+          buried. Gutenberg lets you publish freely, privately, and
+          permanently — content is written to durable storage and registered
+          on a public chain, signed by the author. Once published, no host,
+          editor, or court can censor the original.
+        </p>
+
+        <dl className="mt-10 grid divide-y divide-border border-y border-border text-[14.5px]">
+          {[
+            {
+              k: 'Freely',
+              v: 'No platform gatekeeper sits between writer and reader.',
+            },
+            {
+              k: 'Privately',
+              v: 'Only the publisher key can sign. Identity is a key, not a profile.',
+            },
+            {
+              k: 'Permanently',
+              v: 'Bundles live on Arweave. Signatures live on Solana. Either survives the other.',
+            },
+          ].map((row) => (
+            <div
+              key={row.k}
+              className="grid items-baseline gap-4 py-4 sm:grid-cols-[180px_minmax(0,1fr)] sm:gap-10"
+            >
+              <dt className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                {row.k}
+              </dt>
+              <dd className="text-foreground">{row.v}</dd>
+            </div>
+          ))}
+        </dl>
+      </Section>
+
+      <Section eyebrow="02 / How" title="Three checks. All local.">
+        <p className="max-w-[60ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
+          We do not proxy bundles, we do not import a Solana SDK, we do not
+          re-host content. The verification runs entirely in your browser.
+        </p>
+
+        <ol className="mt-10 grid divide-y divide-border border-y border-border">
+          {PROOF_STEPS.map(({ index, label, detail }) => (
+            <li
+              key={index}
+              className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-5 py-6 sm:gap-10"
+            >
+              <span className="font-mono text-[12px] tabular text-muted-foreground">
+                {index}
+              </span>
+              <div className="grid gap-2">
+                <h3 className="text-[17px] font-medium tracking-[-0.005em] text-foreground sm:text-[18px]">
+                  {label}
+                </h3>
+                <p className="max-w-[62ch] text-[14.5px] leading-[1.6] text-foreground-soft">
+                  {detail}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      <Section eyebrow="03 / Anatomy" title="What a release actually is.">
+        <p className="max-w-[60ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
+          Every release decomposes into three small, replaceable artifacts.
+          None of them depend on a particular host or app surviving.
+        </p>
+
+        <div className="mt-10">
+          <ReleaseDiagram />
+        </div>
+
+        <dl className="mt-8 grid divide-y divide-border border-y border-border text-[14.5px]">
+          {[
+            {
+              k: 'manifest.json',
+              t: 'Canonical metadata',
+              v: 'Name, version, entry path, file → SHA-256 map, bundle URI, publisher pubkey, Ed25519 signature.',
+            },
+            {
+              k: 'bundle.tar',
+              t: 'Content archive',
+              v: 'POSIX tar of the actual files: markdown, images, attachments. SHA-256 referenced in the manifest.',
+            },
+            {
+              k: 'release PDA',
+              t: 'On-chain record',
+              v: 'A small account on Solana keyed by (publisher, name, version) pointing at the manifest URI.',
+            },
+          ].map((row) => (
+            <div
+              key={row.k}
+              className="grid items-baseline gap-3 py-4 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-10"
+            >
+              <dt className="grid gap-1">
+                <span className="font-mono text-[12.5px] tabular text-foreground">
+                  {row.k}
+                </span>
+                <span className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                  {row.t}
+                </span>
+              </dt>
+              <dd className="text-foreground-soft">{row.v}</dd>
+            </div>
+          ))}
+        </dl>
+      </Section>
+
+      <Section eyebrow="04 / Stack" title="The whole verifier ships in the page.">
+        <p className="max-w-[64ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
+          The gateway uses <Code>WebCrypto</Code> for SHA-256, the small{' '}
+          <Code>@noble/curves</Code> library for Ed25519, a minimal POSIX{' '}
+          <Code>tar</Code> reader, and direct Solana <Code>JSON-RPC</Code>{' '}
+          calls. There is no Solana SDK and no Node runtime in the bundle. If
+          verification fails for a release, the renderer never mounts.
+        </p>
+      </Section>
+
+      <Section eyebrow="05 / FAQ" title="Things people ask.">
+        <dl className="grid divide-y divide-border border-y border-border">
+          {FAQ.map(({ q, a }) => (
+            <div
+              key={q}
+              className="grid items-baseline gap-3 py-7 sm:grid-cols-[minmax(0,0.85fr)_minmax(0,1.6fr)] sm:gap-10"
+            >
+              <dt className="text-[16.5px] font-medium tracking-[-0.005em] text-foreground sm:text-[17.5px]">
+                {q}
+              </dt>
+              <dd className="max-w-[62ch] text-[14.5px] leading-[1.65] text-foreground-soft">
+                {a}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </Section>
+    </div>
+  );
+}
+
+/* ─── Section primitive ──────────────────────────────────────────────────── *
+ * Each section sits on the same `bg-background`. Hierarchy is carried by
+ * type size and a single hairline rule along the top edge of the container.
+ */
+function Section({
+  eyebrow,
+  title,
+  children,
+}: {
+  eyebrow: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Container as="section" className="border-t border-border py-20 lg:py-28">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.5fr)] lg:gap-16">
+        <div className="grid content-start gap-5 lg:sticky lg:top-24">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+            {eyebrow}
           </p>
-          <h2
-            id="promise-heading"
-            className="text-2xl font-semibold tracking-tight sm:text-[28px]"
-          >
-            No bundler-side trust. The proofs run on your machine.
+          <h2 className="text-[28px] font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[36px] lg:text-[44px]">
+            {title}
           </h2>
         </div>
-        <p className="max-w-[60ch] text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
-          The gateway uses WebCrypto (SHA-256), <code>@noble/curves</code>{' '}
-          (Ed25519), a small POSIX <code>tar</code> reader, and direct Solana
-          JSON-RPC calls. There is no Solana SDK and no Node runtime in the
-          bundle. If verification fails for a release, the renderer never
-          mounts.
-        </p>
-      </section>
+        <div className="min-w-0">{children}</div>
+      </div>
+    </Container>
+  );
+}
+
+function Sep() {
+  return <span className="mx-2 text-muted-foreground/50">·</span>;
+}
+
+function Code({ children }: { children: React.ReactNode }) {
+  return (
+    <code className="rounded-md border border-border bg-card px-1.5 py-0.5 font-mono text-[0.85em] tabular text-foreground">
+      {children}
+    </code>
+  );
+}
+
+/* ─── Release schematic ──────────────────────────────────────────────────── */
+
+function ReleaseDiagram() {
+  return (
+    <div className="ring-hairline relative overflow-hidden rounded-2xl bg-card p-5 sm:p-7">
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <span className="font-mono text-[11.5px] tabular text-foreground">
+          gutenberg<span className="text-muted-foreground">@</span>1.0.0
+        </span>
+        <span className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          Schematic
+        </span>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,0.85fr)] sm:items-stretch sm:gap-0">
+        <div className="grid content-between gap-3 rounded-xl border border-border p-4">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[11.5px] tabular text-foreground">
+              bundle.tar
+            </span>
+            <span className="font-mono text-[10.5px] tabular text-muted-foreground">
+              SHA-256
+            </span>
+          </div>
+          <ul className="grid gap-1 font-mono text-[11.5px] tabular text-foreground-soft">
+            <li>/index.md</li>
+            <li>/about.md</li>
+            <li>/assets/cover.png</li>
+            <li className="text-muted-foreground">…</li>
+          </ul>
+        </div>
+
+        <div className="hidden items-center justify-center px-4 sm:flex">
+          <Connector />
+        </div>
+        <div className="flex items-center justify-center py-2 sm:hidden">
+          <Connector vertical />
+        </div>
+
+        <div className="grid gap-3">
+          <div className="grid gap-2 rounded-xl border border-border p-4">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[11.5px] tabular text-foreground">
+                manifest.json
+              </span>
+              <span className="font-mono text-[10.5px] tabular text-muted-foreground">
+                Ed25519
+              </span>
+            </div>
+            <p className="font-mono text-[11px] leading-relaxed tabular text-foreground-soft">
+              <span className="text-muted-foreground">name</span>: gutenberg
+              <br />
+              <span className="text-muted-foreground">version</span>: 1.0.0
+              <br />
+              <span className="text-muted-foreground">entry</span>: /index.md
+              <br />
+              <span className="text-muted-foreground">files</span>:{' '}
+              <span className="text-muted-foreground/80">{'{'}…hashes{'}'}</span>
+              <br />
+              <span className="text-muted-foreground">bundle</span>: ar://…
+              <br />
+              <span className="text-foreground">sig</span>: ed25519:…
+            </p>
+          </div>
+          <div className="grid gap-1 rounded-xl border border-border px-4 py-3">
+            <span className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+              Solana PDA
+            </span>
+            <span className="truncate font-mono text-[11.5px] tabular text-foreground">
+              [&apos;release&apos;, publisher, &apos;gutenberg&apos;,
+              &apos;1.0.0&apos;]
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
+  );
+}
+
+function Connector({ vertical = false }: { vertical?: boolean }) {
+  if (vertical) {
+    return (
+      <svg
+        viewBox="0 0 16 32"
+        className="h-8 w-4 text-border-strong"
+        aria-hidden
+      >
+        <path
+          d="M8 0 V32"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 64 16" className="h-4 w-16 text-border-strong" aria-hidden>
+      <path d="M0 8 H64" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
   );
 }

@@ -1,4 +1,4 @@
-import { Check, CircleDashed, Loader2, X } from 'lucide-react';
+import { Check, Loader2, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -16,49 +16,58 @@ export function VerifyStatus({ steps }: { steps: readonly VerifyStep[] }) {
   const done = steps.filter((s) => s.state === 'success').length;
   const has_error = steps.some((s) => s.state === 'error');
   const running = steps.find((s) => s.state === 'running');
-  const progress = total === 0 ? 0 : (done / total) * 100;
 
   return (
-    <div className="grid gap-4">
-      <div className="grid gap-1.5">
+    <div className="grid gap-5">
+      <div className="grid gap-2">
         <div className="flex items-baseline justify-between gap-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-            Local verification
+          <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+            Verifying locally
           </p>
-          <p className="text-[11px] tabular text-muted-foreground">
+          <p className="text-[11px] font-mono tabular text-muted-foreground">
             <span
-              className={cn(
-                'font-mono',
-                has_error ? 'text-destructive' : 'text-foreground',
-              )}
+              className={cn(has_error ? 'text-destructive' : 'text-foreground')}
             >
               {done}
             </span>
-            <span className="text-muted-foreground/60"> / </span>
-            <span className="font-mono tabular">{total}</span>
+            <span className="text-muted-foreground/50"> / </span>
+            {total}
           </p>
         </div>
+        {/* Segmented bar — one cell per step. */}
         <div
-          className="relative h-1 w-full overflow-hidden rounded-full bg-border/60"
           role="progressbar"
-          aria-valuenow={Math.round(progress)}
+          aria-valuenow={done}
           aria-valuemin={0}
-          aria-valuemax={100}
+          aria-valuemax={total}
+          className="grid h-1 gap-[3px]"
+          style={{ gridTemplateColumns: `repeat(${Math.max(total, 1)}, 1fr)` }}
         >
-          <div
-            className={cn(
-              'absolute inset-y-0 left-0 transition-[width] duration-500 ease-out',
-              has_error
-                ? 'bg-destructive'
-                : 'bg-foreground',
-            )}
-            style={{ width: `${progress}%` }}
-          />
+          {steps.map((step) => (
+            <span
+              key={step.id}
+              aria-label={step.label}
+              className={cn(
+                'h-1 rounded-full transition-colors duration-500',
+                step.state === 'success' &&
+                  (has_error ? 'bg-foreground/40' : 'bg-accent'),
+                step.state === 'running' &&
+                  'bg-foreground/60 [animation:pulse-soft_1.6s_ease-in-out_infinite]',
+                step.state === 'pending' && 'bg-border/80',
+                step.state === 'error' && 'bg-destructive',
+              )}
+            />
+          ))}
         </div>
         {running ? (
           <p className="text-[12px] text-muted-foreground">
-            <span className="font-medium text-foreground">{running.label}</span>
-            {running.detail ? <span> · {running.detail}</span> : null}
+            <span className="text-foreground">{running.label}</span>
+            {running.detail ? (
+              <span className="text-muted-foreground/80">
+                {' · '}
+                {running.detail}
+              </span>
+            ) : null}
           </p>
         ) : null}
       </div>
@@ -67,7 +76,7 @@ export function VerifyStatus({ steps }: { steps: readonly VerifyStep[] }) {
         {steps.map((step) => (
           <li
             key={step.id}
-            className="flex items-start gap-3 px-1 py-2.5 text-[13px]"
+            className="flex items-start gap-3 py-2.5 text-[13px]"
           >
             <StatusIcon state={step.state} />
             <div className="grid min-w-0 gap-0.5">
@@ -76,8 +85,9 @@ export function VerifyStatus({ steps }: { steps: readonly VerifyStep[] }) {
                   'leading-tight',
                   step.state === 'pending' && 'text-muted-foreground',
                   step.state === 'error' && 'text-destructive',
-                  step.state === 'success' && 'text-foreground',
-                  step.state === 'running' && 'text-foreground',
+                  step.state !== 'pending' &&
+                    step.state !== 'error' &&
+                    'text-foreground',
                 )}
               >
                 {step.label}
@@ -98,10 +108,9 @@ export function VerifyStatus({ steps }: { steps: readonly VerifyStep[] }) {
 function StatusIcon({ state }: { state: VerifyStepState }) {
   if (state === 'pending') {
     return (
-      <CircleDashed
-        className="mt-0.5 size-4 shrink-0 text-muted-foreground/60"
-        strokeWidth={1.5}
+      <span
         aria-hidden
+        className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-full border border-border bg-background"
       />
     );
   }
@@ -109,7 +118,7 @@ function StatusIcon({ state }: { state: VerifyStepState }) {
   if (state === 'running') {
     return (
       <Loader2
-        className="mt-0.5 size-4 shrink-0 animate-spin text-foreground/80"
+        className="mt-[2px] size-4 shrink-0 animate-spin text-foreground/85"
         strokeWidth={2}
         aria-hidden
       />
@@ -120,7 +129,7 @@ function StatusIcon({ state }: { state: VerifyStepState }) {
     return (
       <span
         aria-hidden
-        className="mt-[1px] inline-flex size-4 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground"
+        className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground"
       >
         <Check className="size-3" strokeWidth={3} />
       </span>
@@ -130,7 +139,7 @@ function StatusIcon({ state }: { state: VerifyStepState }) {
   return (
     <span
       aria-hidden
-      className="mt-[1px] inline-flex size-4 shrink-0 items-center justify-center rounded-full bg-destructive text-destructive-foreground"
+      className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-full bg-destructive text-destructive-foreground"
     >
       <X className="size-3" strokeWidth={3} />
     </span>

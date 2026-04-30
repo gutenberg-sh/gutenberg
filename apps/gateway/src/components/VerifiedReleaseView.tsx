@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { AssetView } from '@/components/AssetView';
 import { ErrorView } from '@/components/ErrorView';
 import { FileNav } from '@/components/FileNav';
+import { Container } from '@/components/Layout';
 import { MarkdownContent } from '@/components/MarkdownContent';
 import { ReleaseHeader } from '@/components/ReleaseHeader';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,39 +27,36 @@ export function VerifiedReleaseView({
 
   if (state.status === 'loading') {
     return (
-      <div className="grid gap-10">
+      <Container className="grid gap-12 pb-20 pt-12 lg:gap-16 lg:pb-28 lg:pt-16">
         <ReleaseHeaderSkeleton />
-        <div className="grid gap-8 lg:grid-cols-[16rem_1fr] lg:gap-12">
-          <div className="grid gap-3">
+        <div className="grid gap-10 border-t border-border pt-12 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-14 lg:pt-16">
+          <div className="grid content-start gap-3">
             <Skeleton className="h-3 w-16" />
-            <div className="grid gap-2 border-y border-border/70 py-3">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-28" />
+            <div className="grid gap-3 border-y border-border py-4">
+              <Skeleton className="h-3.5 w-32" />
+              <Skeleton className="h-3.5 w-24" />
+              <Skeleton className="h-3.5 w-28" />
             </div>
           </div>
-          <div className="grid gap-4">
+          <div className="min-w-0">
             <VerifyStatus steps={state.steps} />
           </div>
         </div>
-      </div>
+      </Container>
     );
   }
 
   if (state.status === 'error' || !state.result) {
     return (
-      <div className="grid gap-10">
-        <section
-          aria-label="Verification"
-          className="grid gap-3 border-y border-border/70 py-6"
-        >
-          <VerifyStatus steps={state.steps} />
-        </section>
-        <ErrorView
-          title="Verification failed"
-          message={state.error ?? 'Unknown error'}
-        />
-      </div>
+      <Container className="grid gap-12 pb-20 pt-12 lg:gap-16 lg:pb-28 lg:pt-16">
+        <VerifyStatus steps={state.steps} />
+        <div className="border-t border-border pt-12 lg:pt-16">
+          <ErrorView
+            title="Verification failed"
+            message={state.error ?? 'Unknown error'}
+          />
+        </div>
+      </Container>
     );
   }
 
@@ -73,18 +71,18 @@ export function VerifiedReleaseView({
 
 function ReleaseHeaderSkeleton() {
   return (
-    <section className="grid gap-6 border-y border-border/70 py-6">
+    <section className="grid gap-7">
       <div className="flex items-center gap-3">
-        <Skeleton className="h-5 w-32 rounded-full" />
+        <Skeleton className="h-5 w-20 rounded-full" />
         <Skeleton className="h-3 w-44" />
       </div>
-      <div className="grid gap-2">
-        <Skeleton className="h-9 w-72" />
+      <div className="grid gap-2.5">
+        <Skeleton className="h-10 w-72 max-w-full" />
         <Skeleton className="h-4 w-96 max-w-full" />
       </div>
-      <div className="grid gap-3 border-t border-border/70 pt-3 sm:grid-cols-2">
+      <div className="grid gap-3 border-y border-border py-4 sm:grid-cols-2">
         {Array.from({ length: 4 }).map((_, idx) => (
-          <div key={idx} className="grid gap-1.5 px-1 py-1.5">
+          <div key={idx} className="grid gap-1.5 py-1.5 sm:px-3">
             <Skeleton className="h-3 w-20" />
             <Skeleton className="h-4 w-full max-w-[280px]" />
           </div>
@@ -120,25 +118,27 @@ function VerifiedReleaseRendered({
 
   if (!target_bytes) {
     return (
-      <ErrorView
-        title="File not found"
-        message={`The release does not include ${target_path}.`}
-        back_to={base_path}
-      />
+      <Container className="py-20 lg:py-28">
+        <ErrorView
+          title="File not found"
+          message={`The release does not include ${target_path}.`}
+          back_to={base_path}
+        />
+      </Container>
     );
   }
 
   const ext = extension_of(target_path);
 
   return (
-    <div className="grid gap-10">
+    <Container className="grid gap-12 pb-20 pt-12 lg:gap-16 lg:pb-28 lg:pt-16">
       <ReleaseHeader
         manifest={manifest}
         manifest_uri={release.manifest_uri}
         release_pda={release.release_pda}
       />
 
-      <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-12">
+      <div className="grid gap-10 border-t border-border pt-12 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-14 lg:pt-16">
         <FileNav
           files={all_paths}
           base_path={base_path}
@@ -164,7 +164,7 @@ function VerifiedReleaseRendered({
           )}
         </div>
       </div>
-    </div>
+    </Container>
   );
 }
 

@@ -59,6 +59,7 @@ GUTENBERG_GATEWAY_URL=http://localhost:5173
 VITE_GUTENBERG_REGISTRY_PROGRAM_ID=NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517
 VITE_GUTENBERG_SOLANA_RPC_URL=http://127.0.0.1:8899
 VITE_GUTENBERG_ARWEAVE_GATEWAY=https://gateway.irys.xyz
+VITE_GUTENBERG_EXPLORER_URL=https://explorer.solana.com/address/{address}?cluster=devnet
 ```
 
 ## Local Solana registry
