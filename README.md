@@ -36,14 +36,6 @@ GUTENBERG_SOLANA_RPC_URL=http://127.0.0.1:8899
 GUTENBERG_SOLANA_PRIVATE_KEY=<base58-encoded-solana-secret-key>
 ```
 
-- **`GUTENBERG_ARWEAVE_GATEWAY`** — Base URL embedded in manifests and on-chain URIs: `{gateway}/{transaction id}`. Prefer **`https://gateway.irys.xyz`** so links match how **[Irys](https://irys.xyz/)** resolves uploads. Plain **`https://arweave.net/{id}`** is a browser viewer URL for many ids and does not return raw JSON/tar; the CLI **rewrites** `arweave.net` to **`gateway.irys.xyz`** when fetching so older manifests still open.
-
-- **`GUTENBERG_IRYS_NETWORK`** — `mainnet` or `devnet`; must match the Solana cluster you use with **`GUTENBERG_SOLANA_RPC_URL`**. This selects the Irys bundler endpoint used when uploading.
-
-Publishing uploads blobs through **[Irys](https://irys.xyz/)** with **SOL** from the same wallet as **`GUTENBERG_SOLANA_PRIVATE_KEY`**. You need enough SOL on-chain for registry transactions **and** to fund the Irys balance used for storage (see `pnpm run cli:start doctor`). Legacy manifests that still use **`…/ipfs/{cid}`** URLs remain valid for verification.
-
-`GUTENBERG_SOLANA_PRIVATE_KEY` is the publisher identity. Its public key is stored as the `publisher` value in manifests and on-chain release accounts, and the same wallet pays for release account creation and Irys uploads.
-
 ## Running Local Infrastructure
 
 ### Solana Registry
