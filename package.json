@@ -14,7 +14,6 @@
   },
   "scripts": {
     "solana:validator": "solana-test-validator",
-    "solana:airdrop": "pnpm --filter @gutenberg/solana run airdrop",
     "solana:build": "pnpm --filter @gutenberg/solana run anchor:build",
     "solana:deploy": "pnpm --filter @gutenberg/solana run anchor:deploy",
     "cli:dev": "pnpm --filter @gutenberg/cli run start:dev",

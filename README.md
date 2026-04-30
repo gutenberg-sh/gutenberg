@@ -71,12 +71,6 @@ pnpm solana:deploy
 
 Gutenberg uses the same hardcoded registry program id across localnet, devnet, and mainnet.
 
-Airdrop localnet SOL to the publisher wallet in `.env` (defaults to 2 SOL if you omit the amount):
-
-```bash
-pnpm solana:airdrop -- 5
-```
-
 ## CLI
 
 Check configuration:
