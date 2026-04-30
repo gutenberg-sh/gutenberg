@@ -7,12 +7,11 @@
     "gutenberg": "./dist/src/cli.js"
   },
   "scripts": {
-    "build": "node ./node_modules/@nestjs/cli/bin/nest.js build",
-    "start": "node ./node_modules/@nestjs/cli/bin/nest.js start",
-    "start:dev": "node ./scripts/nest-dev.cjs",
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
     "format": "eslint . --fix --ignore-pattern 'dist/**' --ignore-pattern '*.json' && prettier --write .",
-    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
-    "gutenberg": "node dist/src/cli.js"
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
     "@drizzle-team/brocli": "0.12.0",
