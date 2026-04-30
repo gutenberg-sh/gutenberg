@@ -1,25 +1,50 @@
 export const signature_prefix = 'ed25519:' as const;
 export const sha256_prefix = 'sha256:' as const;
 
-export type ContentUri = string & { readonly __brand?: 'ContentUri' };
+export const MANIFEST_SCHEMA_VERSION = 1 as const;
+export const STORAGE_LAYOUT_PER_FILE = 'per_file' as const;
 
 export type SolanaPublicKey = string;
 export type Ed25519Signature = `${typeof signature_prefix}${string}`;
 export type Sha256Hash = `${typeof sha256_prefix}${string}`;
 
+export type ContentUri = `ar://${string}`;
+
+export type ChainId = `solana:${string}`;
+
 export type GutenbergManifestFile = {
   hash: Sha256Hash;
+  size_bytes: number;
+  uri: ContentUri;
+  mime?: string;
+};
+
+export type GutenbergChainBinding = {
+  chain_id: ChainId;
+  program_id: SolanaPublicKey;
 };
 
 export type GutenbergUnsignedManifest = {
-  bundle_uri: ContentUri;
-  bundle_hash: Sha256Hash;
+  schema_version: typeof MANIFEST_SCHEMA_VERSION;
+  storage_layout: typeof STORAGE_LAYOUT_PER_FILE;
+
   name: string;
   version: string;
-  entry: `/${string}`;
-  files: Record<`/${string}`, GutenbergManifestFile>;
   publisher: SolanaPublicKey;
   created_at: string;
+
+  entry: `/${string}`;
+  files: Record<`/${string}`, GutenbergManifestFile>;
+
+  content_hash: Sha256Hash;
+  content_size_bytes: number;
+
+  chain: GutenbergChainBinding;
+
+  prev_version?: string;
+  license?: string;
+  language?: string;
+  tags?: string[];
 };
 
 export type GutenbergManifest = GutenbergUnsignedManifest & {

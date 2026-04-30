@@ -8,18 +8,10 @@ import { StorageModule } from '../storage/storage.module';
 import { PublishCommand } from './publish.command';
 import { PublishService } from './publish.service';
 import { SiteFilesRepository } from './site-files.repository';
-import { UnpublishCommand } from './unpublish.command';
-import { UnpublishService } from './unpublish.service';
 
 @Module({
   imports: [KeysModule, ManifestModule, RegistryModule, StorageModule],
-  providers: [
-    PublishService,
-    UnpublishService,
-    SiteFilesRepository,
-    PublishCommand,
-    UnpublishCommand,
-  ],
-  exports: [PublishCommand, UnpublishCommand],
+  providers: [PublishService, SiteFilesRepository, PublishCommand],
+  exports: [PublishCommand],
 })
 export class PublishModule {}

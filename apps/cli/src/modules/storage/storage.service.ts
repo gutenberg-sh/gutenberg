@@ -5,15 +5,21 @@ import Solana from '@irys/upload-solana';
 import bs58 from 'bs58';
 
 import {
-  ARWEAVE_GATEWAY_URL,
+  ARWEAVE_GATEWAY_URLS,
   IRYS_NETWORK,
   SOLANA_RPC_URL,
 } from '../../common/config/config.tokens';
+import {
+  content_uri_from_tx_id,
+  is_content_uri,
+  tx_id_from_content_uri,
+} from '../../common/helpers/content-uri';
 import type { ContentUri } from '../../common/types/manifest.types';
 import { SolanaWalletRepository } from '../solana/solana-wallet.repository';
 
-const ARWEAVE_TX_ID_PATTERN = /^[A-Za-z0-9+/=_-]{32,128}$/;
+const ARWEAVE_TX_ID_PATTERN = /^[A-Za-z0-9_-]{32,128}$/;
 const PLACEHOLDER_TX_ID = 'x'.repeat(43);
+const GATEWAY_FETCH_TIMEOUT_MS = 8_000;
 
 export type UploadCostEstimate = {
   bytes: number;
@@ -21,18 +27,6 @@ export type UploadCostEstimate = {
   display_amount: string;
   ticker: string;
 };
-
-function content_type_for_filename(filename: string): string {
-  if (filename.endsWith('.json')) {
-    return 'application/json';
-  }
-
-  if (filename.endsWith('.tar')) {
-    return 'application/x-tar';
-  }
-
-  return 'application/octet-stream';
-}
 
 function extract_irys_tx_id(result: unknown): string {
   const try_object = (value: unknown): string | undefined => {
@@ -83,50 +77,6 @@ function extract_irys_tx_id(result: unknown): string {
   );
 }
 
-function resolve_arweave_fetch_url(url: string, gateway: string): string {
-  let parsed: URL;
-
-  try {
-    parsed = new URL(url.trim());
-  } catch {
-    return url;
-  }
-
-  const host = parsed.hostname.toLowerCase();
-
-  if (host !== 'arweave.net' && host !== 'www.arweave.net') {
-    return url;
-  }
-
-  const segments = parsed.pathname.replace(/^\/+|\/+$/g, '').split('/');
-
-  if (segments.length === 0) {
-    return url;
-  }
-
-  const raw_segment = segments[segments.length - 1];
-
-  if (raw_segment === undefined || raw_segment.length === 0) {
-    return url;
-  }
-
-  let last: string;
-
-  try {
-    last = decodeURIComponent(raw_segment);
-  } catch {
-    last = raw_segment;
-  }
-
-  if (!ARWEAVE_TX_ID_PATTERN.test(last)) {
-    return url;
-  }
-
-  const base = gateway.replace(/\/$/, '');
-
-  return `${base}/${encodeURIComponent(last)}`;
-}
-
 @Injectable()
 export class StorageService {
   private client_promise?: Promise<BaseNodeIrys>;
@@ -134,43 +84,73 @@ export class StorageService {
   constructor(
     private readonly wallet_repository: SolanaWalletRepository,
     @Inject(SOLANA_RPC_URL) private readonly rpc_url: string,
-    @Inject(ARWEAVE_GATEWAY_URL) private readonly arweave_gateway: string,
+    @Inject(ARWEAVE_GATEWAY_URLS) private readonly arweave_gateways: readonly string[],
     @Inject(IRYS_NETWORK)
     private readonly network: 'mainnet' | 'devnet',
   ) {}
 
-  async put_blob(data: Buffer | string): Promise<ContentUri> {
-    const bytes = Buffer.isBuffer(data) ? data : Buffer.from(data);
-
-    return this.upload(bytes, 'bundle.tar');
+  async put_file(data: Buffer, mime?: string): Promise<ContentUri> {
+    return this.upload(data, mime);
   }
 
   async put_manifest(data: Buffer | string): Promise<ContentUri> {
     const bytes = Buffer.isBuffer(data) ? data : Buffer.from(data);
 
-    return this.upload(bytes, 'manifest.json');
+    return this.upload(bytes, 'application/json');
   }
 
-  async get_blob(uri: ContentUri): Promise<Buffer> {
-    const resolved = resolve_arweave_fetch_url(uri, this.arweave_gateway);
-    const response = await fetch(resolved, {
-      redirect: 'follow',
-      headers: {
-        Accept: 'application/octet-stream,application/json;q=0.9,*/*;q=0.8',
-      },
-    });
+  get_gateways(): readonly string[] {
+    return this.arweave_gateways;
+  }
 
-    if (response.status === 404) {
-      throw new Error(`Content not found: ${resolved}`);
+  resolve_content_url(uri: string, gateway?: string): string {
+    if (!is_content_uri(uri)) {
+      return uri;
     }
 
-    if (!response.ok) {
-      throw new Error(
-        `GET failed (${response.status}) for ${resolved}: ${response.statusText}`,
-      );
+    const tx_id = tx_id_from_content_uri(uri);
+    const base = (gateway ?? this.arweave_gateways[0]!).replace(/\/$/, '');
+
+    return `${base}/${encodeURIComponent(tx_id)}`;
+  }
+
+  async get_blob(
+    uri: string,
+    validate?: (
+      bytes: Buffer,
+    ) => Promise<true | string> | (true | string),
+  ): Promise<Buffer> {
+    if (!is_content_uri(uri)) {
+      return this.fetch_one(uri);
     }
 
-    return Buffer.from(await response.arrayBuffer());
+    const errors: string[] = [];
+
+    for (const gateway of this.arweave_gateways) {
+      const url = this.resolve_content_url(uri, gateway);
+
+      try {
+        const bytes = await this.fetch_one(url);
+
+        if (validate) {
+          const verdict = await validate(bytes);
+
+          if (verdict !== true) {
+            errors.push(`${new URL(gateway).host}: ${verdict}`);
+            continue;
+          }
+        }
+
+        return bytes;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        errors.push(`${new URL(gateway).host}: ${message}`);
+      }
+    }
+
+    throw new Error(
+      `Failed to fetch ${uri} from all ${this.arweave_gateways.length} gateways:\n  - ${errors.join('\n  - ')}`,
+    );
   }
 
   async check_connection(): Promise<void> {
@@ -185,10 +165,6 @@ export class StorageService {
     return irys.getBalance();
   }
 
-  /**
-   * Estimate the cost of uploading {@link bytes} bytes via Irys, expressed both
-   * in atomic units (lamports for SOL) and a human-readable amount.
-   */
   async estimate_cost(bytes: number): Promise<UploadCostEstimate> {
     const irys = await this.get_client();
     const atomic = await irys.getPrice(bytes);
@@ -202,30 +178,64 @@ export class StorageService {
     };
   }
 
-  /**
-   * A representative content URI that has the same shape and approximate length
-   * as URIs returned by {@link upload}. Useful for size estimation before the
-   * real upload happens.
-   */
   placeholder_content_uri(): ContentUri {
-    const base = this.arweave_gateway.replace(/\/$/, '');
-
-    return `${base}/${PLACEHOLDER_TX_ID}`;
+    return content_uri_from_tx_id(PLACEHOLDER_TX_ID);
   }
 
-  /**
-   * Upload bytes via Irys (Solana-paid); returns an HTTPS URL under {@link arweave_gateway}.
-   */
-  private async upload(body: Buffer, filename: string): Promise<ContentUri> {
+  static is_arweave_tx_id(value: string): boolean {
+    return ARWEAVE_TX_ID_PATTERN.test(value);
+  }
+
+  private async fetch_one(url: string): Promise<Buffer> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), GATEWAY_FETCH_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(url, {
+        redirect: 'follow',
+        signal: controller.signal,
+        headers: {
+          Accept: 'application/octet-stream,application/json;q=0.9,*/*;q=0.8',
+        },
+      });
+
+      if (response.status === 404) {
+        throw new Error(`404 not found at ${url}`);
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          `GET failed (${response.status} ${response.statusText}) at ${url}`,
+        );
+      }
+
+      return Buffer.from(await response.arrayBuffer());
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error.name === 'AbortError' || error.message.includes('aborted'))
+      ) {
+        throw new Error(`timeout after ${GATEWAY_FETCH_TIMEOUT_MS}ms`, {
+          cause: error,
+        });
+      }
+
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  private async upload(body: Buffer, mime?: string): Promise<ContentUri> {
     const irys = await this.get_client();
-    const tags = [
-      { name: 'Content-Type', value: content_type_for_filename(filename) },
-    ];
+    const tags =
+      mime !== undefined
+        ? [{ name: 'Content-Type', value: mime }]
+        : [];
     const result = await irys.upload(body, { tags });
     const tx_id = extract_irys_tx_id(result);
-    const base = this.arweave_gateway.replace(/\/$/, '');
 
-    return `${base}/${tx_id}`;
+    return content_uri_from_tx_id(tx_id);
   }
 
   private async get_client(): Promise<BaseNodeIrys> {

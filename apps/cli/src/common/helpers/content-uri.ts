@@ -1,34 +1,23 @@
-const ARWEAVE_LIKE_TX_ID = /^[A-Za-z0-9+/=_-]{32,128}$/;
+const ARWEAVE_LIKE_TX_ID = /^[A-Za-z0-9_-]{32,128}$/;
 
-function is_arweave_tx_path(u: URL): boolean {
-  const segments = u.pathname.replace(/^\/+|\/+$/g, '').split('/');
-  const raw = segments[segments.length - 1];
-
-  if (raw === undefined || raw.length === 0) {
+export function is_content_uri(uri: string): uri is `ar://${string}` {
+  if (!uri.startsWith('ar://')) {
     return false;
   }
 
-  let last: string;
+  const tx_id = uri.slice('ar://'.length);
 
-  try {
-    last = decodeURIComponent(raw);
-  } catch {
-    last = raw;
-  }
-
-  return ARWEAVE_LIKE_TX_ID.test(last);
+  return ARWEAVE_LIKE_TX_ID.test(tx_id);
 }
 
-export function is_content_uri(uri: string): boolean {
-  try {
-    const u = new URL(uri.trim());
+export function tx_id_from_content_uri(uri: `ar://${string}`): string {
+  return uri.slice('ar://'.length);
+}
 
-    if (u.protocol !== 'http:' && u.protocol !== 'https:') {
-      return false;
-    }
-
-    return is_arweave_tx_path(u);
-  } catch {
-    return false;
+export function content_uri_from_tx_id(tx_id: string): `ar://${string}` {
+  if (!ARWEAVE_LIKE_TX_ID.test(tx_id)) {
+    throw new Error(`Invalid Arweave tx id: ${tx_id}`);
   }
+
+  return `ar://${tx_id}`;
 }

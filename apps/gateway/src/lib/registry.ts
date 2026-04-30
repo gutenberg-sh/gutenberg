@@ -2,11 +2,13 @@ import { sha256 as noble_sha256 } from '@noble/hashes/sha2';
 
 import { base58_decode, base58_encode } from './base58';
 import { is_on_curve } from './ed25519';
-import { bytes_equal, bytes_to_hex } from './hash';
+import { bytes_to_hex } from './hash';
 import {
   release_event_type,
   sha256_prefix,
+  type ContentUri,
   type GutenbergReleaseEvent,
+  type Sha256Hash,
 } from './types';
 
 const PDA_MARKER = new TextEncoder().encode('ProgramDerivedAddress');
@@ -15,11 +17,6 @@ const ACCOUNT_DISCRIMINATOR_RELEASE = sync_sha256(
   new TextEncoder().encode('account:Release'),
 ).subarray(0, 8);
 
-/**
- * Solana JSON-RPC encodes account `data` as a `[content, encoding]` tuple
- * (e.g. `["5TFglKe8…", "base64"]`), not as separate fields. We always request
- * `encoding: 'base64'`, so the second element is just a sanity check.
- */
 type RpcAccount = {
   data: [string, string];
   executable?: boolean;
@@ -37,20 +34,17 @@ type RpcResponse<T> = {
 let request_id = 0;
 
 export function find_release_pda(input: {
-  publisher: string;
   name: string;
   version: string;
   program_id: string;
 }): string {
   const program_bytes = base58_decode(input.program_id);
-  const publisher_bytes = base58_decode(input.publisher);
   const name_seed = sync_sha256(new TextEncoder().encode(input.name));
   const version_seed = sync_sha256(new TextEncoder().encode(input.version));
 
   for (let bump = 255; bump >= 0; bump--) {
     const buffer = concat_bytes(
       RELEASE_SEED,
-      publisher_bytes,
       name_seed,
       version_seed,
       Uint8Array.of(bump),
@@ -67,34 +61,20 @@ export function find_release_pda(input: {
   throw new Error('Unable to derive release PDA');
 }
 
-/**
- * Scan all release accounts under `program_id` via `getProgramAccounts`.
- * The RPC must allow `getProgramAccounts` for this program; some public
- * providers disable it for arbitrary programs.
- */
-async function list_releases(input: {
+async function rpc_call<T>(input: {
   rpc_url: string;
-  program_id: string;
-}): Promise<GutenbergReleaseEvent[]> {
+  method: string;
+  params: unknown[];
+}): Promise<T> {
   const id = ++request_id;
-  const filter_bytes_base58 = base58_encode(ACCOUNT_DISCRIMINATOR_RELEASE);
   const response = await fetch(input.rpc_url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       jsonrpc: '2.0',
       id,
-      method: 'getProgramAccounts',
-      params: [
-        input.program_id,
-        {
-          encoding: 'base64',
-          commitment: 'confirmed',
-          filters: [
-            { memcmp: { offset: 0, bytes: filter_bytes_base58 } },
-          ],
-        },
-      ],
+      method: input.method,
+      params: input.params,
     }),
   });
 
@@ -104,55 +84,89 @@ async function list_releases(input: {
     );
   }
 
-  const body = (await response.json()) as RpcResponse<
-    Array<{ pubkey: string; account: RpcAccount }>
-  >;
+  const body = (await response.json()) as RpcResponse<T>;
 
   if (body.error) {
     throw new Error(`Solana RPC error: ${body.error.message}`);
   }
 
+  return body.result;
+}
+
+export async function fetch_release_by_name_at_version(input: {
+  rpc_url: string;
+  program_id: string;
+  name: string;
+  version: string;
+}): Promise<{
+  release: GutenbergReleaseEvent;
+  release_pda: string;
+} | undefined> {
+  const release_pda = find_release_pda({
+    name: input.name,
+    version: input.version,
+    program_id: input.program_id,
+  });
+
+  const result = await rpc_call<{
+    value: { data: [string, string] } | null;
+  }>({
+    rpc_url: input.rpc_url,
+    method: 'getAccountInfo',
+    params: [
+      release_pda,
+      {
+        encoding: 'base64',
+        commitment: 'confirmed',
+      },
+    ],
+  });
+
+  if (!result.value) {
+    return undefined;
+  }
+
+  const data = decode_account_data(result.value.data);
+  const release = decode_release_account(data);
+
+  return { release, release_pda };
+}
+
+export async function list_releases(input: {
+  rpc_url: string;
+  program_id: string;
+}): Promise<GutenbergReleaseEvent[]> {
+  const filter_bytes_base58 = base58_encode(ACCOUNT_DISCRIMINATOR_RELEASE);
+  const result = await rpc_call<
+    Array<{ pubkey: string; account: RpcAccount }>
+  >({
+    rpc_url: input.rpc_url,
+    method: 'getProgramAccounts',
+    params: [
+      input.program_id,
+      {
+        encoding: 'base64',
+        commitment: 'confirmed',
+        filters: [{ memcmp: { offset: 0, bytes: filter_bytes_base58 } }],
+      },
+    ],
+  });
+
   const events: GutenbergReleaseEvent[] = [];
 
-  for (const entry of body.result) {
+  for (const entry of result) {
     try {
       events.push(
         decode_release_account(decode_account_data(entry.account.data)),
       );
     } catch {
-      // skip accounts we can't decode (different account type, malformed, etc.)
+      /* noop */
     }
   }
 
-  return events.sort(
-    (a, b) => Date.parse(a.created_at) - Date.parse(b.created_at),
-  );
+  return events.sort((a, b) => a.created_at_slot - b.created_at_slot);
 }
 
-/** Find the registry release for the given `name@version`, if it exists. */
-export async function find_release_by_name_at_version(input: {
-  rpc_url: string;
-  program_id: string;
-  name: string;
-  version: string;
-}): Promise<GutenbergReleaseEvent | undefined> {
-  const releases = await list_releases({
-    rpc_url: input.rpc_url,
-    program_id: input.program_id,
-  });
-
-  return releases
-    .filter(
-      (event) => event.name === input.name && event.version === input.version,
-    )
-    .at(-1);
-}
-
-/**
- * Find the most recently created registry release for `name`.
- * `list_releases` returns events sorted ascending by `created_at`,
- * so the last filtered match is the latest version.
- */
 export async function find_latest_release_by_name(input: {
   rpc_url: string;
   program_id: string;
@@ -166,7 +180,6 @@ export async function find_latest_release_by_name(input: {
   return releases.filter((event) => event.name === input.name).at(-1);
 }
 
-/** Decode the `[content, encoding]` tuple Solana returns under `account.data`. */
 function decode_account_data(data: RpcAccount['data']): Uint8Array {
   const [content, encoding] = data;
 
@@ -189,27 +202,39 @@ function decode_release_account(data: Uint8Array): GutenbergReleaseEvent {
   }
 
   const reader = new AccountReader(data, 8);
+  const schema_version = reader.read_u8();
   const publisher_bytes = reader.read_bytes(32);
   const name = reader.read_string();
   const version = reader.read_string();
   const manifest = reader.read_string();
   const manifest_hash_raw = reader.read_bytes(32);
-  const created_at_unix = reader.read_i64_le();
+  const content_hash_raw = reader.read_bytes(32);
+  const content_size_bytes = Number(reader.read_u64_le());
+  const created_at_unix = Number(reader.read_i64_le());
+  const created_at_slot = Number(reader.read_u64_le());
 
   return {
     type: release_event_type,
+    schema_version,
+    publisher: base58_encode(publisher_bytes),
     name,
     version,
-    manifest,
-    manifest_hash: `${sha256_prefix}${bytes_to_hex(manifest_hash_raw)}`,
-    publisher: base58_encode(publisher_bytes),
-    created_at: new Date(Number(created_at_unix) * 1000).toISOString(),
+    manifest: manifest as ContentUri,
+    manifest_hash: prefixed_sha256(manifest_hash_raw),
+    content_hash: prefixed_sha256(content_hash_raw),
+    content_size_bytes,
+    created_at: new Date(created_at_unix * 1000).toISOString(),
+    created_at_slot,
   };
 }
 
+function prefixed_sha256(bytes: Uint8Array): Sha256Hash {
+  return `${sha256_prefix}${bytes_to_hex(bytes)}`;
+}
+
 class AccountReader {
-  readonly data: Uint8Array;
   private offset: number;
+  private readonly data: Uint8Array;
 
   constructor(data: Uint8Array, start: number) {
     this.data = data;
@@ -229,6 +254,10 @@ class AccountReader {
     return value;
   }
 
+  read_u8(): number {
+    return this.read_bytes(1)[0]!;
+  }
+
   read_string(): string {
     const length_bytes = this.read_bytes(4);
     const length = new DataView(
@@ -245,6 +274,26 @@ class AccountReader {
 
     return new DataView(bytes.buffer, bytes.byteOffset, 8).getBigInt64(0, true);
   }
+
+  read_u64_le(): bigint {
+    const bytes = this.read_bytes(8);
+
+    return new DataView(bytes.buffer, bytes.byteOffset, 8).getBigUint64(0, true);
+  }
+}
+
+function bytes_equal(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.byteLength !== b.byteLength) {
+    return false;
+  }
+
+  for (let i = 0; i < a.byteLength; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function concat_bytes(...parts: Uint8Array[]): Uint8Array {
@@ -265,7 +314,6 @@ function concat_bytes(...parts: Uint8Array[]): Uint8Array {
   return out;
 }
 
-/** Synchronous sha256 (via @noble/hashes) — needed for PDA derivation in a tight loop. */
 function sync_sha256(data: Uint8Array): Uint8Array {
   return noble_sha256(data);
 }

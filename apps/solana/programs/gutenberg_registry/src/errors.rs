@@ -12,10 +12,4 @@ pub enum GutenbergError {
     InvalidSeedHash,
     #[msg("This release name is already claimed by another publisher")]
     NameAlreadyClaimed,
-    #[msg("Release counter overflow")]
-    ReleaseCountOverflow,
-    #[msg("Release counter underflow")]
-    ReleaseCountUnderflow,
-    #[msg("Only the publisher may unpublish this release")]
-    UnauthorizedUnpublish,
 }

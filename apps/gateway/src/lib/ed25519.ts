@@ -44,7 +44,6 @@ export function verify_ed25519(
   }
 }
 
-/** Whether `bytes` (32) decodes as a point on the Ed25519 curve (Solana's PDA off-curve check). */
 export function is_on_curve(bytes: Uint8Array): boolean {
   if (bytes.byteLength !== SOLANA_PUBLIC_KEY_LENGTH) {
     return false;

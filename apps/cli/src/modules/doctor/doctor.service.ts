@@ -1,10 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import {
-  ARWEAVE_GATEWAY_URL,
+  ARWEAVE_GATEWAY_URLS,
+  ARWEAVE_TRUST_MIRRORS,
   IRYS_NETWORK,
   SOLANA_RPC_URL,
 } from '../../common/config/config.tokens';
+import {
+  irys_settlement_mirror,
+  parse_gateway_list,
+  type IrysNetwork,
+} from '../../common/helpers/gateway-list';
 import { SolanaRegistryRepository } from '../registry/solana-registry.repository';
 import {
   type LoadedWallet,
@@ -21,19 +27,20 @@ export class DoctorService {
     private readonly storage_service: StorageService,
     private readonly registry_repository: SolanaRegistryRepository,
     private readonly wallet_repository: SolanaWalletRepository,
-    @Inject(ARWEAVE_GATEWAY_URL) private readonly arweave_gateway_url: string,
+    @Inject(ARWEAVE_GATEWAY_URLS)
+    private readonly arweave_gateways: readonly string[],
+    @Inject(ARWEAVE_TRUST_MIRRORS)
+    private readonly trust_mirrors: readonly string[],
     @Inject(IRYS_NETWORK)
-    private readonly irys_network: 'mainnet' | 'devnet',
+    private readonly irys_network: IrysNetwork,
     @Inject(SOLANA_RPC_URL) private readonly solana_rpc_url: string,
   ) {}
 
   async check(): Promise<DoctorResult> {
     const wallet = await this.try_load_wallet();
     const checks: DoctorCheck[] = [
-      ok_check(
-        'irys_config',
-        `network ${this.irys_network}, read gateway ${this.arweave_gateway_url}`,
-      ),
+      this.check_gateway_config(),
+      this.check_browser_gateway_alignment(),
       this.check_solana_publisher_key(wallet),
       await this.check_solana_rpc(),
       this.check_registry_program_id(),
@@ -61,6 +68,62 @@ export class DoctorService {
         cause: error,
       });
     }
+  }
+
+  private check_gateway_config(): DoctorCheck {
+    const trust_hosts = this.trust_mirrors.map(safe_host).join(', ');
+    const settlement = irys_settlement_mirror(this.irys_network);
+    const settlement_already_listed = this.trust_mirrors.some(
+      (m) => m.replace(/\/$/, '') === settlement,
+    );
+    const settlement_note = settlement_already_listed
+      ? ' (also present in trust mirrors)'
+      : '';
+
+    return ok_check(
+      'gateway_config',
+      `Irys network ${this.irys_network}; trust mirrors (${this.trust_mirrors.length}): ${trust_hosts}; settlement mirror: ${safe_host(settlement)}${settlement_note}`,
+    );
+  }
+
+  private check_browser_gateway_alignment(): DoctorCheck {
+    const raw = process.env.VITE_GUTENBERG_ARWEAVE_GATEWAYS;
+
+    if (!raw) {
+      return warn_check(
+        'browser_gateway_alignment',
+        'VITE_GUTENBERG_ARWEAVE_GATEWAYS is not set; the browser gateway will refuse to start. Configure it to mirror the CLI list (and include the Irys network gateway when publishing via Irys).',
+      );
+    }
+
+    let browser_list: string[];
+
+    try {
+      browser_list = parse_gateway_list(raw);
+    } catch (error) {
+      return error_check('browser_gateway_alignment', error);
+    }
+
+    const settlement = irys_settlement_mirror(this.irys_network);
+    const includes_settlement = browser_list.some(
+      (m) => m.replace(/\/$/, '') === settlement,
+    );
+
+    if (!includes_settlement) {
+      const action =
+        this.irys_network === 'devnet'
+          ? `add ${settlement} to VITE_GUTENBERG_ARWEAVE_GATEWAYS — Irys devnet uploads never settle to Arweave mainnet, so the browser cannot resolve them through any other gateway.`
+          : `add ${settlement} to VITE_GUTENBERG_ARWEAVE_GATEWAYS — Irys mainnet uploads need the Irys gateway to resolve until they propagate to Arweave proper (hours-to-days).`;
+
+      return this.irys_network === 'devnet'
+        ? error_check_message('browser_gateway_alignment', action)
+        : warn_check('browser_gateway_alignment', action);
+    }
+
+    return ok_check(
+      'browser_gateway_alignment',
+      `Browser gateway list reaches ${safe_host(settlement)} for Irys ${this.irys_network} uploads`,
+    );
   }
 
   private check_solana_publisher_key(
@@ -190,6 +253,18 @@ function error_check(name: string, error: unknown): DoctorCheck {
     status: 'error',
     message: error instanceof Error ? error.message : String(error),
   };
+}
+
+function error_check_message(name: string, message: string): DoctorCheck {
+  return { name, status: 'error', message };
+}
+
+function safe_host(url: string): string {
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
 }
 
 function is_local_solana_rpc(rpc_url: string): boolean {

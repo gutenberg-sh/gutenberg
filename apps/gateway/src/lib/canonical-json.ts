@@ -1,9 +1,3 @@
-/**
- * Canonical JSON: stable key-sorted, no insignificant whitespace.
- * Must match the CLI's manifest-service implementation byte-for-byte; this is
- * the input the publisher signs and that we re-hash to verify the registry
- * release event.
- */
 export function canonical_json(value: unknown): string {
   return JSON.stringify(to_canonical_value(value));
 }

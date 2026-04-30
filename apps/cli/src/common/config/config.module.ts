@@ -8,9 +8,15 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { env } from '../../env';
+import {
+  compose_effective_gateways,
+  parse_gateway_list,
+  type IrysNetwork,
+} from '../helpers/gateway-list';
 
 import {
-  ARWEAVE_GATEWAY_URL,
+  ARWEAVE_GATEWAY_URLS,
+  ARWEAVE_TRUST_MIRRORS,
   GATEWAY_URL,
   IRYS_NETWORK,
   SOLANA_PRIVATE_KEY,
@@ -42,16 +48,32 @@ load_dotenv({ path: env_file_path, quiet: true });
   ],
   providers: [
     {
-      provide: ARWEAVE_GATEWAY_URL,
+      provide: ARWEAVE_TRUST_MIRRORS,
       inject: [ConfigService],
-      useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('GUTENBERG_ARWEAVE_GATEWAY'),
+      useFactory: (config: ConfigService): readonly string[] => {
+        const raw = config.getOrThrow<string>('GUTENBERG_ARWEAVE_GATEWAYS');
+
+        return Object.freeze(parse_gateway_list(raw));
+      },
+    },
+    {
+      provide: ARWEAVE_GATEWAY_URLS,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): readonly string[] => {
+        const raw = config.getOrThrow<string>('GUTENBERG_ARWEAVE_GATEWAYS');
+        const network = config.getOrThrow<IrysNetwork>(
+          'GUTENBERG_IRYS_NETWORK',
+        );
+        const trust_mirrors = parse_gateway_list(raw);
+
+        return Object.freeze(compose_effective_gateways(trust_mirrors, network));
+      },
     },
     {
       provide: IRYS_NETWORK,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.getOrThrow<'mainnet' | 'devnet'>('GUTENBERG_IRYS_NETWORK'),
+        config.getOrThrow<IrysNetwork>('GUTENBERG_IRYS_NETWORK'),
     },
     {
       provide: SOLANA_RPC_URL,
@@ -74,7 +96,8 @@ load_dotenv({ path: env_file_path, quiet: true });
   ],
   exports: [
     NestConfigModule,
-    ARWEAVE_GATEWAY_URL,
+    ARWEAVE_GATEWAY_URLS,
+    ARWEAVE_TRUST_MIRRORS,
     GATEWAY_URL,
     IRYS_NETWORK,
     SOLANA_PRIVATE_KEY,

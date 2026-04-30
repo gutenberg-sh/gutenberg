@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import {
-  ComputeBudgetProgram,
   Connection,
   LAMPORTS_PER_SOL,
   PublicKey,
@@ -9,6 +8,7 @@ import {
   Transaction,
   TransactionInstruction,
 } from '@solana/web3.js';
+import bs58 from 'bs58';
 import { createHash } from 'node:crypto';
 
 import {
@@ -22,12 +22,19 @@ import {
   type FindReleaseInput,
   type GutenbergReleaseEvent,
   type HasReleaseInput,
-  type UnpublishBatchInput,
-  type UnpublishInput,
 } from './registry.types';
 
 export const GUTENBERG_REGISTRY_PROGRAM_ID =
   'NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517';
+
+export type PublishReleaseInput = {
+  name: string;
+  version: string;
+  manifest_uri: string;
+  manifest_hash: GutenbergReleaseEvent['manifest_hash'];
+  content_hash: GutenbergReleaseEvent['content_hash'];
+  content_size_bytes: number;
+};
 
 @Injectable()
 export class SolanaRegistryRepository {
@@ -80,77 +87,11 @@ export class SolanaRegistryRepository {
     return version['solana-core'];
   }
 
-  async publish_release(event: GutenbergReleaseEvent): Promise<void> {
+  async publish_release(input: PublishReleaseInput): Promise<void> {
     const wallet = await this.wallet_repository.load_keypair();
     const transaction = new Transaction().add(
-      new TransactionInstruction({
-        programId: this.program_id(),
-        keys: [
-          { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
-          {
-            pubkey: this.name_authority_address(event.name),
-            isSigner: false,
-            isWritable: true,
-          },
-          {
-            pubkey: this.release_address({
-              publisher: event.publisher,
-              name: event.name,
-              version: event.version,
-            }),
-            isSigner: false,
-            isWritable: true,
-          },
-          {
-            pubkey: SystemProgram.programId,
-            isSigner: false,
-            isWritable: false,
-          },
-        ],
-        data: encode_publish_release_instruction(event),
-      }),
+      this.create_publish_instruction(wallet.publicKey, input),
     );
-
-    await sendAndConfirmTransaction(this.connection, transaction, [wallet], {
-      commitment: 'confirmed',
-    });
-  }
-
-  async unpublish_release(input: UnpublishInput): Promise<void> {
-    const wallet = await this.wallet_repository.load_keypair();
-    const transaction = new Transaction().add(
-      this.create_unpublish_instruction(wallet.publicKey, input),
-    );
-
-    await sendAndConfirmTransaction(this.connection, transaction, [wallet], {
-      commitment: 'confirmed',
-    });
-  }
-
-  async unpublish_releases_batch(input: UnpublishBatchInput): Promise<void> {
-    const unique_sorted = [...new Set(input.versions)].sort();
-
-    if (unique_sorted.length === 0) {
-      throw new Error('No versions to unpublish');
-    }
-
-    const wallet = await this.wallet_repository.load_keypair();
-    const transaction = new Transaction();
-
-    transaction.add(
-      ComputeBudgetProgram.setComputeUnitLimit({
-        units: Math.min(1_400_000, 40_000 + unique_sorted.length * 130_000),
-      }),
-    );
-
-    for (const version of unique_sorted) {
-      transaction.add(
-        this.create_unpublish_instruction(wallet.publicKey, {
-          name: input.name,
-          version,
-        }),
-      );
-    }
 
     await sendAndConfirmTransaction(this.connection, transaction, [wallet], {
       commitment: 'confirmed',
@@ -160,6 +101,16 @@ export class SolanaRegistryRepository {
   async list_releases(): Promise<GutenbergReleaseEvent[]> {
     const accounts = await this.connection.getProgramAccounts(
       this.program_id(),
+      {
+        filters: [
+          {
+            memcmp: {
+              offset: 0,
+              bytes: account_discriminator_b58('Release'),
+            },
+          },
+        ],
+      },
     );
 
     return accounts
@@ -170,13 +121,9 @@ export class SolanaRegistryRepository {
   async find_release(
     input: FindReleaseInput,
   ): Promise<GutenbergReleaseEvent | undefined> {
-    if (input.publisher && input.version) {
+    if (input.version) {
       const account = await this.connection.getAccountInfo(
-        this.release_address({
-          publisher: input.publisher,
-          name: input.name,
-          version: input.version,
-        }),
+        this.release_address({ name: input.name, version: input.version }),
       );
 
       if (!account) {
@@ -187,14 +134,8 @@ export class SolanaRegistryRepository {
     }
 
     const releases = await this.list_releases();
-    const matches = releases.filter(
-      (event) =>
-        event.name === input.name &&
-        (input.version === undefined || event.version === input.version) &&
-        (input.publisher === undefined || event.publisher === input.publisher),
-    );
 
-    return matches.at(-1);
+    return releases.filter((event) => event.name === input.name).at(-1);
   }
 
   async has_release(input: HasReleaseInput): Promise<boolean> {
@@ -203,9 +144,18 @@ export class SolanaRegistryRepository {
     return (await this.connection.getAccountInfo(release_address)) !== null;
   }
 
-  private create_unpublish_instruction(
+  release_address(input: { name: string; version: string }): PublicKey {
+    const [address] = PublicKey.findProgramAddressSync(
+      [Buffer.from('release'), seed_hash(input.name), seed_hash(input.version)],
+      this.program_id(),
+    );
+
+    return address;
+  }
+
+  private create_publish_instruction(
     publisher: PublicKey,
-    input: UnpublishInput,
+    input: PublishReleaseInput,
   ): TransactionInstruction {
     return new TransactionInstruction({
       programId: this.program_id(),
@@ -218,7 +168,6 @@ export class SolanaRegistryRepository {
         },
         {
           pubkey: this.release_address({
-            publisher: publisher.toBase58(),
             name: input.name,
             version: input.version,
           }),
@@ -231,7 +180,7 @@ export class SolanaRegistryRepository {
           isWritable: false,
         },
       ],
-      data: encode_unpublish_release_instruction(input),
+      data: encode_publish_release_instruction(input),
     });
   }
 
@@ -243,75 +192,42 @@ export class SolanaRegistryRepository {
 
     return address;
   }
-
-  release_address(input: {
-    publisher: string;
-    name: string;
-    version: string;
-  }): PublicKey {
-    const [address] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from('release'),
-        new PublicKey(input.publisher).toBuffer(),
-        seed_hash(input.name),
-        seed_hash(input.version),
-      ],
-      this.program_id(),
-    );
-
-    return address;
-  }
 }
 
-function encode_unpublish_release_instruction(input: UnpublishInput): Buffer {
+function encode_publish_release_instruction(input: PublishReleaseInput): Buffer {
   return Buffer.concat([
-    instruction_discriminator('unpublish_release'),
+    instruction_discriminator('publish_release'),
     encode_string(input.name),
     encode_string(input.version),
+    encode_string(input.manifest_uri),
+    sha256_string_to_raw(input.manifest_hash),
+    sha256_string_to_raw(input.content_hash),
+    encode_u64_le(input.content_size_bytes),
     seed_hash(input.name),
     seed_hash(input.version),
   ]);
 }
 
-function encode_publish_release_instruction(
-  event: GutenbergReleaseEvent,
-): Buffer {
-  const created_unix = Math.trunc(Date.parse(event.created_at) / 1000);
-
-  if (!Number.isFinite(created_unix)) {
-    throw new Error('Release event created_at must be a valid date');
-  }
-
-  return Buffer.concat([
-    instruction_discriminator('publish_release'),
-    encode_string(event.name),
-    encode_string(event.version),
-    encode_string(event.manifest),
-    manifest_hash_string_to_raw(event.manifest_hash),
-    encode_i64_le(created_unix),
-    seed_hash(event.name),
-    seed_hash(event.version),
-  ]);
-}
-
-function manifest_hash_string_to_raw(
-  hash: GutenbergReleaseEvent['manifest_hash'],
-): Buffer {
+function sha256_string_to_raw(hash: `sha256:${string}`): Buffer {
   const hex = hash.startsWith(sha256_prefix)
     ? hash.slice(sha256_prefix.length)
     : hash;
   const raw = Buffer.from(hex, 'hex');
 
   if (raw.byteLength !== 32) {
-    throw new Error('Release manifest_hash must be a 32-byte sha256 digest');
+    throw new Error('sha256 hash must serialize to 32 bytes');
   }
 
   return raw;
 }
 
-function encode_i64_le(seconds: number): Buffer {
+function encode_u64_le(value: number): Buffer {
+  if (!Number.isFinite(value) || value < 0 || !Number.isInteger(value)) {
+    throw new Error('u64 must be a non-negative integer');
+  }
+
   const out = Buffer.allocUnsafe(8);
-  out.writeBigInt64LE(BigInt(seconds), 0);
+  out.writeBigUInt64LE(BigInt(value), 0);
 
   return out;
 }
@@ -321,7 +237,9 @@ function decode_name_authority_account(data: Buffer): PublicKey | undefined {
     return undefined;
   }
 
-  if (!data.subarray(0, 8).equals(account_discriminator('NameAuthority'))) {
+  if (
+    !data.subarray(0, 8).equals(account_discriminator_bytes('NameAuthority'))
+  ) {
     return undefined;
   }
 
@@ -332,25 +250,33 @@ function decode_release_account(data: Buffer): GutenbergReleaseEvent {
   const reader = new AccountReader(data);
   const discriminator = reader.read_bytes(8);
 
-  if (!discriminator.equals(account_discriminator('Release'))) {
+  if (!discriminator.equals(account_discriminator_bytes('Release'))) {
     throw new Error('Invalid Solana release account discriminator');
   }
 
+  const schema_version = reader.read_u8();
   const publisher = new PublicKey(reader.read_bytes(32)).toBase58();
   const name = reader.read_string();
   const version = reader.read_string();
   const manifest = reader.read_string();
   const manifest_hash_raw = reader.read_bytes(32);
-  const created_at_unix = reader.read_i64_le();
+  const content_hash_raw = reader.read_bytes(32);
+  const content_size_bytes = Number(reader.read_u64_le());
+  const created_at_unix = Number(reader.read_i64_le());
+  const created_at_slot = Number(reader.read_u64_le());
 
   return {
     type: release_event_type,
+    schema_version,
+    publisher,
     name,
     version,
-    manifest,
+    manifest: manifest as `ar://${string}`,
     manifest_hash: `${sha256_prefix}${manifest_hash_raw.toString('hex')}`,
-    publisher,
+    content_hash: `${sha256_prefix}${content_hash_raw.toString('hex')}`,
+    content_size_bytes,
     created_at: new Date(created_at_unix * 1000).toISOString(),
+    created_at_slot,
   };
 }
 
@@ -366,8 +292,12 @@ function instruction_discriminator(name: string): Buffer {
   return createHash('sha256').update(`global:${name}`).digest().subarray(0, 8);
 }
 
-function account_discriminator(name: string): Buffer {
+function account_discriminator_bytes(name: string): Buffer {
   return createHash('sha256').update(`account:${name}`).digest().subarray(0, 8);
+}
+
+function account_discriminator_b58(name: string): string {
+  return bs58.encode(account_discriminator_bytes(name));
 }
 
 function encode_string(value: string): Buffer {
@@ -386,10 +316,10 @@ function compare_release_events(
   a: GutenbergReleaseEvent,
   b: GutenbergReleaseEvent,
 ): number {
-  const by_created_at = Date.parse(a.created_at) - Date.parse(b.created_at);
+  const by_slot = a.created_at_slot - b.created_at_slot;
 
-  if (by_created_at !== 0) {
-    return by_created_at;
+  if (by_slot !== 0) {
+    return by_slot;
   }
 
   return a.manifest < b.manifest ? -1 : a.manifest > b.manifest ? 1 : 0;
@@ -413,15 +343,21 @@ class AccountReader {
     return value;
   }
 
+  read_u8(): number {
+    return this.read_bytes(1).readUInt8(0);
+  }
+
   read_string(): string {
     const length = this.read_bytes(4).readUInt32LE(0);
 
     return this.read_bytes(length).toString('utf8');
   }
 
-  read_i64_le(): number {
-    const bytes = this.read_bytes(8);
+  read_i64_le(): bigint {
+    return this.read_bytes(8).readBigInt64LE(0);
+  }
 
-    return Number(bytes.readBigInt64LE(0));
+  read_u64_le(): bigint {
+    return this.read_bytes(8).readBigUInt64LE(0);
   }
 }

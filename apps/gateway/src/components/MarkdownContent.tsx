@@ -77,10 +77,8 @@ export function MarkdownContent({
   return (
     <article
       className={cn(
-        // Reading column held narrow (~70 chars) for editorial legibility.
         'prose prose-neutral dark:prose-invert',
         'prose-editorial max-w-[68ch]',
-        // Headings stay sans-serif, body is serif via util class.
         'prose-headings:tracking-[-0.02em] prose-headings:text-foreground',
         'prose-h1:text-[2.05rem] prose-h1:font-semibold prose-h1:leading-[1.05]',
         'prose-h2:mt-14 prose-h2:text-[1.55rem] prose-h2:font-semibold',

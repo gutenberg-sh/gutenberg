@@ -31,20 +31,10 @@ export class SolanaWalletRepository {
     private readonly env_private_key: string | undefined,
   ) {}
 
-  /**
-   * Resolve the publisher's keypair, prompting the user on first use if no
-   * key has been configured. Cached for the lifetime of the process so write
-   * commands only ever prompt once per invocation.
-   */
   async load_keypair(): Promise<Keypair> {
     return (await this.load()).keypair;
   }
 
-  /**
-   * Resolve the keypair without prompting. Returns `undefined` when no key
-   * is available from environment or disk. Used by `doctor` so it can report
-   * configuration without forcing an interactive flow.
-   */
   async try_load_keypair(): Promise<LoadedWallet | undefined> {
     if (this.cached) {
       return this.cached;

@@ -36,7 +36,7 @@ export function Glyph({ className, ...rest }: React.SVGProps<SVGSVGElement>) {
       className={cn('size-[1.15em]', className)}
       {...rest}
     >
-      {/* Vertical bar — a printer's measure. */}
+      {}
       <path
         d="M5 4 L5 20"
         stroke="currentColor"
@@ -44,7 +44,7 @@ export function Glyph({ className, ...rest }: React.SVGProps<SVGSVGElement>) {
         strokeLinecap="round"
         opacity="0.55"
       />
-      {/* Geometric G. */}
+      {}
       <path
         d="M19.2 8.5C18.45 6.65 16.5 5.4 14 5.4 10.4 5.4 8 8.4 8 12s2.4 6.6 6 6.6c2.05 0 3.6-.85 4.55-1.9V12.7H14"
         fill="none"
@@ -53,7 +53,7 @@ export function Glyph({ className, ...rest }: React.SVGProps<SVGSVGElement>) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Accent registration mark. */}
+      {}
       <circle cx="20.5" cy="6" r="1.4" fill="var(--accent)" />
     </svg>
   );

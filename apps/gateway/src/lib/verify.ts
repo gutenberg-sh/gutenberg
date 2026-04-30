@@ -5,81 +5,78 @@ import {
   strip_utf8_bom,
   verify_manifest_signature,
 } from './manifest';
-import { find_release_pda, find_release_by_name_at_version } from './registry';
+import { fetch_release_by_name_at_version } from './registry';
 import { fetch_blob } from './storage';
-import { extract_tar_bundle } from './tar';
 import type {
+  ContentUri,
   GutenbergManifest,
   GutenbergReleaseEvent,
+  VerifiedFile,
   VerifiedRelease,
 } from './types';
 
 export type VerifyContext = {
   rpc_url: string;
-  arweave_gateway: string;
+  arweave_gateways: readonly string[];
   program_id: string;
 };
 
-/** Resolve a release by name@version to its on-chain registry event + PDA. */
 export async function resolve_release(
   input: { name: string; version: string },
   ctx: VerifyContext,
 ): Promise<{ release: GutenbergReleaseEvent; release_pda: string }> {
-  const event = await find_release_by_name_at_version({
+  const found = await fetch_release_by_name_at_version({
     rpc_url: ctx.rpc_url,
     program_id: ctx.program_id,
     name: input.name,
     version: input.version,
   });
 
-  if (!event) {
+  if (!found) {
     throw new Error(`No release found for ${input.name}@${input.version}`);
   }
 
-  const release_pda = find_release_pda({
-    publisher: event.publisher,
-    name: event.name,
-    version: event.version,
-    program_id: ctx.program_id,
-  });
-
-  return { release: event, release_pda };
+  return found;
 }
 
-/** Fetch + verify the manifest referenced by a registry event. */
 export async function verify_manifest_uri(input: {
-  manifest_uri: string;
   expected_release: GutenbergReleaseEvent;
   ctx: VerifyContext;
 }): Promise<{ manifest: GutenbergManifest }> {
   const manifest_bytes = await fetch_blob(
-    input.manifest_uri,
-    input.ctx.arweave_gateway,
+    input.expected_release.manifest,
+    input.ctx.arweave_gateways,
+    async (bytes) => {
+      const text = strip_utf8_bom(new TextDecoder('utf-8').decode(bytes));
+      let candidate: unknown;
+
+      try {
+        candidate = JSON.parse(text);
+      } catch {
+        return 'not valid JSON';
+      }
+
+      let canonical: string;
+
+      try {
+        canonical = canonical_json(candidate);
+      } catch {
+        return 'manifest is not canonicalizable';
+      }
+
+      const hash = await sha256_hash(canonical);
+
+      if (hash !== input.expected_release.manifest_hash) {
+        return 'manifest hash does not match the registered release';
+      }
+
+      return true;
+    },
   );
-  const manifest_text = strip_utf8_bom(
-    new TextDecoder('utf-8').decode(manifest_bytes),
+
+  const parsed: unknown = JSON.parse(
+    strip_utf8_bom(new TextDecoder('utf-8').decode(manifest_bytes)),
   );
-  let parsed: unknown;
-
-  try {
-    parsed = JSON.parse(manifest_text);
-  } catch {
-    throw new Error('Manifest is not valid JSON');
-  }
-
-  let canonical: string;
-
-  try {
-    canonical = canonical_json(parsed);
-  } catch {
-    throw new Error('Manifest hash does not match the registered release');
-  }
-
-  const hash = await sha256_hash(canonical);
-
-  if (hash !== input.expected_release.manifest_hash) {
-    throw new Error('Manifest hash does not match the registered release');
-  }
 
   assert_valid_manifest(parsed);
 
@@ -95,42 +92,83 @@ export async function verify_manifest_uri(input: {
     throw new Error('Manifest does not match the registered release');
   }
 
+  if (parsed.chain.program_id !== input.ctx.program_id) {
+    throw new Error(
+      'Manifest chain.program_id does not match the gateway-configured program',
+    );
+  }
+
+  const files_canonical = canonical_json(parsed.files);
+  const expected_content_hash = await sha256_hash(files_canonical);
+
+  if (expected_content_hash !== parsed.content_hash) {
+    throw new Error('Manifest content_hash does not match files digest');
+  }
+
+  if (parsed.content_hash !== input.expected_release.content_hash) {
+    throw new Error(
+      'Manifest content_hash does not match the on-chain content_hash',
+    );
+  }
+
+  if (parsed.content_size_bytes !== input.expected_release.content_size_bytes) {
+    throw new Error(
+      'Manifest content_size_bytes does not match the on-chain content_size_bytes',
+    );
+  }
+
   return { manifest: parsed };
 }
 
-/** Fetch + verify the bundle referenced by a verified manifest. */
-export async function verify_bundle(input: {
-  manifest: GutenbergManifest;
+export function build_file_index(
+  manifest: GutenbergManifest,
+): ReadonlyMap<`/${string}`, VerifiedFile> {
+  const map = new Map<`/${string}`, VerifiedFile>();
+
+  for (const [path, file] of Object.entries(manifest.files)) {
+    const entry: VerifiedFile = {
+      hash: file.hash,
+      size_bytes: file.size_bytes,
+      uri: file.uri,
+      ...(file.mime ? { mime: file.mime } : {}),
+    };
+    map.set(path as `/${string}`, entry);
+  }
+
+  return map;
+}
+
+export async function load_file_bytes(input: {
+  uri: ContentUri;
+  expected_hash: VerifiedFile['hash'];
+  expected_size_bytes: number;
   ctx: VerifyContext;
-}): Promise<VerifiedRelease['files']> {
-  const bundle_bytes = await fetch_blob(
-    input.manifest.bundle_uri,
-    input.ctx.arweave_gateway,
-  );
-  const bundle_hash = await sha256_hash(bundle_bytes);
-
-  if (bundle_hash !== input.manifest.bundle_hash) {
-    throw new Error('Site bundle hash does not match manifest bundle_hash');
-  }
-
-  const extracted = extract_tar_bundle(bundle_bytes);
-  const files: VerifiedRelease['files'] = new Map();
-
-  for (const [path, file] of Object.entries(input.manifest.files)) {
-    const bytes = extracted.get(path as `/${string}`);
-
-    if (!bytes) {
-      throw new Error(`Missing path ${path} in site bundle`);
+}): Promise<Uint8Array> {
+  return fetch_blob(input.uri, input.ctx.arweave_gateways, async (bytes) => {
+    if (bytes.byteLength !== input.expected_size_bytes) {
+      return `size mismatch (expected ${input.expected_size_bytes}, got ${bytes.byteLength})`;
     }
 
-    const file_hash = await sha256_hash(bytes);
+    const actual_hash = await sha256_hash(bytes);
 
-    if (file_hash !== file.hash) {
-      throw new Error(`File hash verification failed for ${path}`);
+    if (actual_hash !== input.expected_hash) {
+      return 'file hash does not match manifest';
     }
 
-    files.set(path as `/${string}`, bytes);
-  }
+    return true;
+  });
+}
 
-  return files;
+export function assemble_verified_release(input: {
+  release: GutenbergReleaseEvent;
+  release_pda: string;
+  manifest: GutenbergManifest;
+}): VerifiedRelease {
+  return {
+    manifest: input.manifest,
+    manifest_uri: input.release.manifest,
+    release: input.release,
+    release_pda: input.release_pda,
+    files: build_file_index(input.manifest),
+  };
 }

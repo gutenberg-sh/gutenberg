@@ -2,24 +2,50 @@ export const signature_prefix = 'ed25519:' as const;
 export const sha256_prefix = 'sha256:' as const;
 export const release_event_type = 'gutenberg.release.v1' as const;
 
-export type ContentUri = string;
+export const MANIFEST_SCHEMA_VERSION = 1 as const;
+export const STORAGE_LAYOUT_PER_FILE = 'per_file' as const;
+
 export type SolanaPublicKey = string;
 export type Ed25519Signature = `${typeof signature_prefix}${string}`;
 export type Sha256Hash = `${typeof sha256_prefix}${string}`;
 
+export type ContentUri = `ar://${string}`;
+
+export type ChainId = `solana:${string}`;
+
 export type GutenbergManifestFile = {
   hash: Sha256Hash;
+  size_bytes: number;
+  uri: ContentUri;
+  mime?: string;
+};
+
+export type GutenbergChainBinding = {
+  chain_id: ChainId;
+  program_id: SolanaPublicKey;
 };
 
 export type GutenbergUnsignedManifest = {
-  bundle_uri: ContentUri;
-  bundle_hash: Sha256Hash;
+  schema_version: typeof MANIFEST_SCHEMA_VERSION;
+  storage_layout: typeof STORAGE_LAYOUT_PER_FILE;
+
   name: string;
   version: string;
-  entry: `/${string}`;
-  files: Record<`/${string}`, GutenbergManifestFile>;
   publisher: SolanaPublicKey;
   created_at: string;
+
+  entry: `/${string}`;
+  files: Record<`/${string}`, GutenbergManifestFile>;
+
+  content_hash: Sha256Hash;
+  content_size_bytes: number;
+
+  chain: GutenbergChainBinding;
+
+  prev_version?: string;
+  license?: string;
+  language?: string;
+  tags?: string[];
 };
 
 export type GutenbergManifest = GutenbergUnsignedManifest & {
@@ -28,17 +54,29 @@ export type GutenbergManifest = GutenbergUnsignedManifest & {
 
 export type GutenbergReleaseEvent = {
   type: typeof release_event_type;
+  schema_version: number;
+  publisher: SolanaPublicKey;
   name: string;
   version: string;
   manifest: ContentUri;
   manifest_hash: Sha256Hash;
-  publisher: SolanaPublicKey;
+  content_hash: Sha256Hash;
+  content_size_bytes: number;
   created_at: string;
+  created_at_slot: number;
+};
+
+export type VerifiedFile = {
+  hash: Sha256Hash;
+  size_bytes: number;
+  uri: ContentUri;
+  mime?: string;
 };
 
 export type VerifiedRelease = {
   manifest: GutenbergManifest;
   manifest_uri: ContentUri;
-  release_pda?: string;
-  files: Map<`/${string}`, Uint8Array>;
+  release: GutenbergReleaseEvent;
+  release_pda: string;
+  files: ReadonlyMap<`/${string}`, VerifiedFile>;
 };

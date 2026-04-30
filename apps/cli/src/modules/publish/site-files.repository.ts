@@ -7,10 +7,6 @@ import type { SiteBundleFile } from '../../common/helpers/site-bundle';
 
 @Injectable()
 export class SiteFilesRepository {
-  /**
-   * Resolves `gutenberg publish <folder>` when the process cwd is not the repo root
-   * (e.g. `pnpm --filter @gutenberg/cli` runs with cwd `apps/cli`).
-   */
   resolve_folder(folder: string): string {
     if (isAbsolute(folder)) {
       return folder;

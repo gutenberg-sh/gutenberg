@@ -11,21 +11,21 @@ const PROOF_STEPS: ReadonlyArray<{
 }> = [
   {
     index: '01',
-    label: 'Manifest signature',
+    label: 'On-chain content hash',
     detail:
-      'The publisher signs a canonical JSON manifest with their Solana key (Ed25519). We re-check that signature against the on-chain key.',
+      'The Solana release record carries a SHA-256 over the canonical file index. The manifest you fetch must match it byte-for-byte.',
   },
   {
     index: '02',
-    label: 'Bundle hash',
+    label: 'Manifest signature',
     detail:
-      'The whole release archive — a tar — is hashed with SHA-256 and matched against the digest the publisher signed.',
+      'The publisher signs the canonical JSON manifest with their Solana key (Ed25519). We re-check the signature against the on-chain publisher.',
   },
   {
     index: '03',
     label: 'Per-file hashes',
     detail:
-      'Every file in the bundle is hashed individually before it is rendered. If a single byte was tampered with, nothing mounts.',
+      'Each file is fetched on demand from its own content address and verified against the hash the publisher signed. If a single byte changes, that file does not render.',
   },
 ];
 
@@ -43,9 +43,10 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     q: 'What can I publish?',
     a: (
       <>
-        Anything that fits in a tar — markdown, images, PDFs, raw text,
-        archives. The gateway renders markdown directly and lets readers
-        download other file types verbatim.
+        Anything that fits in files — markdown, images, PDFs, raw text,
+        archives. Each file gets its own content-addressed Arweave upload.
+        The gateway renders markdown directly and lets readers download
+        other file types verbatim.
       </>
     ),
   },
@@ -53,9 +54,9 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     q: 'Where is the content stored?',
     a: (
       <>
-        On Arweave, addressed by content hash. The Solana program only stores a
-        small record (publisher, version, manifest URI). The bundle itself is
-        durable and host-independent.
+        On Arweave, addressed by content hash — each file individually. The
+        Solana program stores publisher, version, manifest pointer, and a
+        digest of the file index. Files survive any one host going away.
       </>
     ),
   },
@@ -63,9 +64,9 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     q: 'Can a publisher revoke a release?',
     a: (
       <>
-        They can remove the on-chain record so the gateway stops surfacing it,
-        but the bundle and signed manifest live on. Anyone who has the manifest
-        URI can still verify and read it offline.
+        No. The registry is append-only by design: there is no
+        unpublish instruction. Once a release is recorded, the on-chain
+        pointer (publisher, manifest URI, content hash) is permanent.
       </>
     ),
   },
@@ -84,8 +85,8 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
 export function LandingRoute() {
   return (
     <div className="flex flex-col">
-      {/* ─── Hero ───────────────────────────────────────────────────────── */}
-      <Container className="grid items-start gap-14 pb-24 pt-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-20 lg:pb-32 lg:pt-24">
+      {}
+      <Container className="grid items-start gap-14 pb-24 pt-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center lg:gap-20 lg:pb-32 lg:pt-24">
         <div className="grid gap-7">
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
             Gutenberg gateway
@@ -111,7 +112,7 @@ export function LandingRoute() {
           </p>
         </div>
 
-        <div className="lg:sticky lg:top-24">
+        <div>
           <LookupForm />
           <div className="mt-5 px-1">
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
@@ -228,17 +229,17 @@ export function LandingRoute() {
             {
               k: 'manifest.json',
               t: 'Canonical metadata',
-              v: 'Name, version, entry path, file → SHA-256 map, bundle URI, publisher pubkey, Ed25519 signature.',
+              v: 'Name, version, entry path, file → {hash, size, ar:// uri}, content_hash, chain binding, publisher pubkey, Ed25519 signature.',
             },
             {
-              k: 'bundle.tar',
+              k: 'ar://<txid> per file',
               t: 'Content archive',
-              v: 'POSIX tar of the actual files: markdown, images, attachments. SHA-256 referenced in the manifest.',
+              v: 'Each file uploaded individually to Arweave under its content address. Readers fetch only what they actually open.',
             },
             {
               k: 'release PDA',
               t: 'On-chain record',
-              v: 'A small account on Solana keyed by (publisher, name, version) pointing at the manifest URI.',
+              v: 'An append-only Solana account at (name, version) carrying publisher, content_hash, content_size, and the manifest pointer.',
             },
           ].map((row) => (
             <div
@@ -262,10 +263,11 @@ export function LandingRoute() {
       <Section eyebrow="04 / Stack" title="The whole verifier ships in the page.">
         <p className="max-w-[64ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
           The gateway uses <Code>WebCrypto</Code> for SHA-256, the small{' '}
-          <Code>@noble/curves</Code> library for Ed25519, a minimal POSIX{' '}
-          <Code>tar</Code> reader, and direct Solana <Code>JSON-RPC</Code>{' '}
-          calls. There is no Solana SDK and no Node runtime in the bundle. If
-          verification fails for a release, the renderer never mounts.
+          <Code>@noble/curves</Code> library for Ed25519, and direct Solana{' '}
+          <Code>JSON-RPC</Code> calls. There is no Solana SDK and no Node
+          runtime in the bundle. Files are fetched lazily — only the page you
+          read crosses the wire — and each is hashed against the manifest
+          before it renders.
         </p>
       </Section>
 
@@ -290,10 +292,6 @@ export function LandingRoute() {
   );
 }
 
-/* ─── Section primitive ──────────────────────────────────────────────────── *
- * Each section sits on the same `bg-background`. Hierarchy is carried by
- * type size and a single hairline rule along the top edge of the container.
- */
 function Section({
   eyebrow,
   title,
@@ -332,8 +330,6 @@ function Code({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* ─── Release schematic ──────────────────────────────────────────────────── */
-
 function ReleaseDiagram() {
   return (
     <div className="ring-hairline relative overflow-hidden rounded-2xl bg-card p-5 sm:p-7">
@@ -350,16 +346,16 @@ function ReleaseDiagram() {
         <div className="grid content-between gap-3 rounded-xl border border-border p-4">
           <div className="flex items-center justify-between">
             <span className="font-mono text-[11.5px] tabular text-foreground">
-              bundle.tar
+              files (per-file ar://)
             </span>
             <span className="font-mono text-[10.5px] tabular text-muted-foreground">
               SHA-256
             </span>
           </div>
           <ul className="grid gap-1 font-mono text-[11.5px] tabular text-foreground-soft">
-            <li>/index.md</li>
-            <li>/about.md</li>
-            <li>/assets/cover.png</li>
+            <li>/index.md ↦ ar://abc…</li>
+            <li>/about.md ↦ ar://def…</li>
+            <li>/assets/cover.png ↦ ar://ghi…</li>
             <li className="text-muted-foreground">…</li>
           </ul>
         </div>
@@ -389,9 +385,14 @@ function ReleaseDiagram() {
               <span className="text-muted-foreground">entry</span>: /index.md
               <br />
               <span className="text-muted-foreground">files</span>:{' '}
-              <span className="text-muted-foreground/80">{'{'}…hashes{'}'}</span>
+              <span className="text-muted-foreground/80">
+                {'{'}path: {'{'}hash, size, uri{'}'}…{'}'}
+              </span>
               <br />
-              <span className="text-muted-foreground">bundle</span>: ar://…
+              <span className="text-muted-foreground">content_hash</span>:
+              sha256:…
+              <br />
+              <span className="text-muted-foreground">chain</span>: solana:…
               <br />
               <span className="text-foreground">sig</span>: ed25519:…
             </p>
@@ -401,8 +402,8 @@ function ReleaseDiagram() {
               Solana PDA
             </span>
             <span className="truncate font-mono text-[11.5px] tabular text-foreground">
-              [&apos;release&apos;, publisher, &apos;gutenberg&apos;,
-              &apos;1.0.0&apos;]
+              [&apos;release&apos;, sha256(&apos;gutenberg&apos;),
+              sha256(&apos;1.0.0&apos;)]
             </span>
           </div>
         </div>

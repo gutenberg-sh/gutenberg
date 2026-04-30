@@ -34,7 +34,7 @@ export function VerifyStatus({ steps }: { steps: readonly VerifyStep[] }) {
             {total}
           </p>
         </div>
-        {/* Segmented bar — one cell per step. */}
+        {}
         <div
           role="progressbar"
           aria-valuenow={done}

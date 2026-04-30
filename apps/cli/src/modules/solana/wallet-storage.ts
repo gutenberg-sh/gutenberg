@@ -9,11 +9,6 @@ const KEYPAIR_FILE = join(CONFIG_DIR, 'wallet.json');
 
 export const wallet_storage_path = KEYPAIR_FILE;
 
-/**
- * Decode a base58-encoded Solana secret key into a {@link Keypair}.
- *
- * Throws a descriptive error on bad input — callers surface this to the user.
- */
 export function decode_base58_secret_key(value: string): Keypair {
   const trimmed = value.trim();
 
@@ -44,13 +39,6 @@ export function decode_base58_secret_key(value: string): Keypair {
   }
 }
 
-/**
- * Read a stored keypair from `~/.config/gutenberg/wallet.json` if present.
- *
- * The file format is the Solana CLI keypair format: a JSON array of 64
- * unsigned bytes. Returns `undefined` when the file does not exist; throws
- * with a descriptive message on read or parse errors.
- */
 export async function read_stored_keypair(): Promise<Keypair | undefined> {
   let raw: string;
 
@@ -95,11 +83,6 @@ export async function read_stored_keypair(): Promise<Keypair | undefined> {
   return Keypair.fromSecretKey(Uint8Array.from(parsed as number[]));
 }
 
-/**
- * Persist a keypair to `~/.config/gutenberg/wallet.json` in Solana CLI
- * format. Creates the config directory with restrictive permissions if
- * missing.
- */
 export async function write_stored_keypair(keypair: Keypair): Promise<string> {
   await mkdir(CONFIG_DIR, { recursive: true, mode: 0o700 });
 

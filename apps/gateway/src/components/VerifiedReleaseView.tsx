@@ -3,11 +3,15 @@ import { useMemo } from 'react';
 import { AssetView } from '@/components/AssetView';
 import { ErrorView } from '@/components/ErrorView';
 import { FileNav } from '@/components/FileNav';
+import { GatewayLinks } from '@/components/GatewayLinks';
 import { Container } from '@/components/Layout';
 import { MarkdownContent } from '@/components/MarkdownContent';
 import { ReleaseHeader } from '@/components/ReleaseHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VerifyStatus } from '@/components/VerifyStatus';
+import { env } from '@/env';
+import { useReferencedAssets } from '@/hooks/useReferencedAssets';
+import { useVerifiedFile } from '@/hooks/useVerifiedFile';
 import {
   useVerifiedRelease,
   type ReleaseSource,
@@ -54,6 +58,15 @@ export function VerifiedReleaseView({
           <ErrorView
             title="Verification failed"
             message={state.error ?? 'Unknown error'}
+            extras={
+              state.partial_manifest_uri ? (
+                <GatewayLinks
+                  uri={state.partial_manifest_uri}
+                  gateways={env.VITE_GUTENBERG_ARWEAVE_GATEWAYS}
+                  label="Try the manifest via"
+                />
+              ) : undefined
+            }
           />
         </div>
       </Container>
@@ -106,7 +119,7 @@ function VerifiedReleaseRendered({
     current_path && release.files.has(current_path)
       ? current_path
       : manifest.entry;
-  const target_bytes = release.files.get(target_path);
+  const target_file = release.files.get(target_path);
 
   const all_paths = useMemo(
     () =>
@@ -116,7 +129,7 @@ function VerifiedReleaseRendered({
     [manifest.files],
   );
 
-  if (!target_bytes) {
+  if (!target_file) {
     return (
       <Container className="py-20 lg:py-28">
         <ErrorView
@@ -128,15 +141,9 @@ function VerifiedReleaseRendered({
     );
   }
 
-  const ext = extension_of(target_path);
-
   return (
     <Container className="grid gap-12 pb-20 pt-12 lg:gap-16 lg:pb-28 lg:pt-16">
-      <ReleaseHeader
-        manifest={manifest}
-        manifest_uri={release.manifest_uri}
-        release_pda={release.release_pda}
-      />
+      <ReleaseHeader release={release} />
 
       <div className="grid gap-10 border-t border-border pt-12 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-14 lg:pt-16">
         <FileNav
@@ -146,25 +153,134 @@ function VerifiedReleaseRendered({
         />
 
         <div className="min-w-0">
-          {ext === '.md' ? (
-            <MarkdownContent
-              source={new TextDecoder('utf-8').decode(target_bytes)}
-              resolve_url={(raw) =>
-                resolve_relative_url({
-                  raw,
-                  current_path: target_path,
-                  manifest,
-                  base_path,
-                  release,
-                })
-              }
-            />
-          ) : (
-            <AssetView path={target_path} bytes={target_bytes} />
-          )}
+          <ActiveFile
+            release={release}
+            target_path={target_path}
+            base_path={base_path}
+          />
         </div>
       </div>
     </Container>
+  );
+}
+
+function ActiveFile({
+  release,
+  target_path,
+  base_path,
+}: {
+  release: VerifiedRelease;
+  target_path: `/${string}`;
+  base_path: string;
+}) {
+  const target_file = release.files.get(target_path)!;
+  const file_state = useVerifiedFile(target_path, target_file);
+  const ext = extension_of(target_path);
+
+  if (file_state.status === 'idle' || file_state.status === 'loading') {
+    return <FileLoadingSkeleton path={target_path} />;
+  }
+
+  if (file_state.status === 'error') {
+    return (
+      <ErrorView
+        title="File verification failed"
+        message={file_state.error}
+        back_to={base_path}
+        extras={
+          <GatewayLinks
+            uri={target_file.uri}
+            gateways={env.VITE_GUTENBERG_ARWEAVE_GATEWAYS}
+            label="Try this file via"
+          />
+        }
+      />
+    );
+  }
+
+  if (ext === '.md') {
+    return (
+      <ActiveMarkdown
+        release={release}
+        target_path={target_path}
+        bytes={file_state.bytes}
+        base_path={base_path}
+      />
+    );
+  }
+
+  return <AssetView path={target_path} bytes={file_state.bytes} />;
+}
+
+function ActiveMarkdown({
+  release,
+  target_path,
+  bytes,
+  base_path,
+}: {
+  release: VerifiedRelease;
+  target_path: `/${string}`;
+  bytes: Uint8Array;
+  base_path: string;
+}) {
+  const source = useMemo(
+    () => new TextDecoder('utf-8').decode(bytes),
+    [bytes],
+  );
+
+  const asset_state = useReferencedAssets({
+    source,
+    current_path: target_path,
+    files: release.files,
+  });
+
+  if (
+    asset_state.status === 'idle' ||
+    asset_state.status === 'loading'
+  ) {
+    return <FileLoadingSkeleton path={target_path} />;
+  }
+
+  if (asset_state.status === 'error') {
+    return (
+      <ErrorView
+        title="Linked asset failed verification"
+        message={asset_state.error}
+        back_to={base_path}
+      />
+    );
+  }
+
+  return (
+    <MarkdownContent
+      source={source}
+      resolve_url={(raw) =>
+        resolve_relative_url({
+          raw,
+          current_path: target_path,
+          manifest: release.manifest,
+          base_path,
+          assets: asset_state.assets,
+          files: release.files,
+        })
+      }
+    />
+  );
+}
+
+function FileLoadingSkeleton({ path }: { path: string }) {
+  return (
+    <div className="grid gap-3" aria-busy aria-live="polite">
+      <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+        Verifying {path}
+      </p>
+      <div className="grid gap-3">
+        <Skeleton className="h-6 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-11/12" />
+        <Skeleton className="h-4 w-10/12" />
+      </div>
+    </div>
   );
 }
 
@@ -179,16 +295,19 @@ function resolve_relative_url(input: {
   current_path: `/${string}`;
   manifest: GutenbergManifest;
   base_path: string;
-  release: VerifiedRelease;
+  assets: ReadonlyMap<`/${string}`, string>;
+  files: VerifiedRelease['files'];
 }): string | undefined {
-  const { raw, current_path, base_path, release } = input;
+  const { raw, current_path, base_path, files, assets } = input;
 
   if (
     raw.startsWith('http://') ||
     raw.startsWith('https://') ||
     raw.startsWith('mailto:') ||
     raw.startsWith('tel:') ||
-    raw.startsWith('#')
+    raw.startsWith('#') ||
+    raw.startsWith('data:') ||
+    raw.startsWith('blob:')
   ) {
     return raw;
   }
@@ -199,7 +318,7 @@ function resolve_relative_url(input: {
     return undefined;
   }
 
-  if (!release.files.has(resolved_site_path)) {
+  if (!files.has(resolved_site_path)) {
     return undefined;
   }
 
@@ -209,23 +328,7 @@ function resolve_relative_url(input: {
     return `${base_path}${encode_site_path(resolved_site_path)}`;
   }
 
-  const bytes = release.files.get(resolved_site_path);
-
-  if (!bytes) {
-    return undefined;
-  }
-
-  return URL.createObjectURL(
-    new Blob(
-      [
-        bytes.buffer.slice(
-          bytes.byteOffset,
-          bytes.byteOffset + bytes.byteLength,
-        ) as ArrayBuffer,
-      ],
-      { type: mime_for_ext(ext) },
-    ),
-  );
+  return assets.get(resolved_site_path);
 }
 
 function resolve_within_site(
@@ -276,33 +379,4 @@ function encode_site_path(path: `/${string}`): string {
     .split('/')
     .map((segment) => (segment ? encodeURIComponent(segment) : ''))
     .join('/');
-}
-
-function mime_for_ext(ext: string): string {
-  switch (ext) {
-    case '.png':
-      return 'image/png';
-    case '.jpg':
-    case '.jpeg':
-      return 'image/jpeg';
-    case '.gif':
-      return 'image/gif';
-    case '.webp':
-      return 'image/webp';
-    case '.svg':
-      return 'image/svg+xml';
-    case '.ico':
-      return 'image/x-icon';
-    case '.json':
-      return 'application/json';
-    case '.css':
-      return 'text/css';
-    case '.html':
-      return 'text/html';
-    case '.txt':
-    case '.md':
-      return 'text/plain';
-    default:
-      return 'application/octet-stream';
-  }
 }

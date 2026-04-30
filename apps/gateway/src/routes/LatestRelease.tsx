@@ -21,8 +21,6 @@ export function LatestReleaseRoute() {
 
   const valid_name = name && NAME_RE.test(name) ? name : undefined;
 
-  // Reset state synchronously when valid_name changes (canonical "derive
-  // state from props" pattern) so we never flash the previous result.
   const [last_valid_name, set_last_valid_name] = useState(valid_name);
   if (last_valid_name !== valid_name) {
     set_last_valid_name(valid_name);

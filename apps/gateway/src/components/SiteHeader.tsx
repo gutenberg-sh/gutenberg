@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import { Wordmark } from '@/components/Wordmark';
 
 export function SiteHeader() {
-  // Resolved at mount; this is a CSR app so navigator is always defined.
   const [is_mac] = useState(
     () =>
       typeof navigator !== 'undefined' &&

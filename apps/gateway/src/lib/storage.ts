@@ -1,78 +1,127 @@
-const ARWEAVE_TX_ID_PATTERN = /^[A-Za-z0-9+/=_-]{32,128}$/;
+import { is_content_uri, tx_id_from_content_uri } from './content-uri';
+
+const GATEWAY_FETCH_TIMEOUT_MS = 8_000;
+
+export function resolve_content_url(uri: string, gateway: string): string {
+  if (is_content_uri(uri)) {
+    const tx_id = tx_id_from_content_uri(uri);
+    const base = gateway.replace(/\/$/, '');
+
+    return `${base}/${encodeURIComponent(tx_id)}`;
+  }
+
+  return uri;
+}
+
+export function resolve_content_urls(
+  uri: string,
+  gateways: readonly string[],
+): readonly { gateway: string; url: string }[] {
+  if (!is_content_uri(uri) || gateways.length === 0) {
+    return [];
+  }
+
+  return gateways.map((gateway) => ({
+    gateway,
+    url: resolve_content_url(uri, gateway),
+  }));
+}
+
+export type GatewayValidation = true | string;
+
+export type GatewayValidator = (
+  bytes: Uint8Array,
+) => Promise<GatewayValidation> | GatewayValidation;
 
 export async function fetch_blob(
   uri: string,
-  arweave_gateway: string,
+  arweave_gateways: readonly string[],
+  validate?: GatewayValidator,
 ): Promise<Uint8Array> {
-  const resolved = resolve_arweave_fetch_url(uri, arweave_gateway);
-  const response = await fetch(resolved, {
-    redirect: 'follow',
-    headers: {
-      Accept: 'application/octet-stream,application/json;q=0.9,*/*;q=0.8',
-    },
-  });
-
-  if (response.status === 404) {
-    throw new Error(`Content not found: ${resolved}`);
+  if (!is_content_uri(uri)) {
+    return fetch_one(uri);
   }
 
-  if (!response.ok) {
-    throw new Error(
-      `GET failed (${response.status}) for ${resolved}: ${response.statusText}`,
-    );
+  if (arweave_gateways.length === 0) {
+    throw new Error('No Arweave gateways configured');
   }
 
-  return new Uint8Array(await response.arrayBuffer());
+  const errors: string[] = [];
+
+  for (const gateway of arweave_gateways) {
+    const url = resolve_content_url(uri, gateway);
+
+    try {
+      const bytes = await fetch_one(url);
+
+      if (validate) {
+        const verdict = await validate(bytes);
+
+        if (verdict !== true) {
+          errors.push(`${safe_host(gateway)}: ${verdict}`);
+          continue;
+        }
+      }
+
+      return bytes;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      errors.push(`${safe_host(gateway)}: ${message}`);
+    }
+  }
+
+  throw new Error(
+    `Failed to fetch ${uri} from all ${arweave_gateways.length} gateways:\n  - ${errors.join('\n  - ')}`,
+  );
 }
 
-/**
- * If the manifest references an arweave.net URL but the user prefers a
- * specific gateway (e.g. `gateway.irys.xyz`), rewrite to that gateway. This
- * mirrors the CLI's behavior for consistent caching and CORS behavior.
- */
-export function resolve_arweave_fetch_url(
-  url: string,
-  gateway: string,
-): string {
-  let parsed: URL;
+async function fetch_one(url: string): Promise<Uint8Array> {
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    GATEWAY_FETCH_TIMEOUT_MS,
+  );
 
   try {
-    parsed = new URL(url.trim());
+    const response = await fetch(url, {
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/octet-stream,application/json;q=0.9,*/*;q=0.8',
+      },
+    });
+
+    if (response.status === 404) {
+      throw new Error(`404 not found at ${url}`);
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        `GET failed (${response.status} ${response.statusText}) at ${url}`,
+      );
+    }
+
+    return new Uint8Array(await response.arrayBuffer());
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.name === 'AbortError' || error.message.includes('aborted'))
+    ) {
+      throw new Error(`timeout after ${GATEWAY_FETCH_TIMEOUT_MS}ms`, {
+        cause: error,
+      });
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function safe_host(url: string): string {
+  try {
+    return new URL(url).host;
   } catch {
     return url;
   }
-
-  const host = parsed.hostname.toLowerCase();
-
-  if (host !== 'arweave.net' && host !== 'www.arweave.net') {
-    return url;
-  }
-
-  const segments = parsed.pathname.replace(/^\/+|\/+$/g, '').split('/');
-
-  if (segments.length === 0) {
-    return url;
-  }
-
-  const raw_segment = segments[segments.length - 1];
-
-  if (raw_segment === undefined || raw_segment.length === 0) {
-    return url;
-  }
-
-  let last: string;
-
-  try {
-    last = decodeURIComponent(raw_segment);
-  } catch {
-    last = raw_segment;
-  }
-
-  if (!ARWEAVE_TX_ID_PATTERN.test(last)) {
-    return url;
-  }
-
-  const base = gateway.replace(/\/$/, '');
-
-  return `${base}/${encodeURIComponent(last)}`;
 }

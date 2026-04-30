@@ -1,14 +1,17 @@
 import { ArrowLeft } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 export function ErrorView({
   title,
   message,
   back_to = '/',
+  extras,
 }: {
   title: string;
   message: string;
   back_to?: string;
+  extras?: ReactNode;
 }) {
   return (
     <section role="alert" aria-live="polite" className="grid gap-5">
@@ -18,9 +21,10 @@ export function ErrorView({
       <h2 className="text-[26px] font-semibold leading-[1.1] tracking-tight text-foreground sm:text-[32px] lg:text-[38px]">
         {title}
       </h2>
-      <p className="max-w-[60ch] wrap-break-word text-[15px] leading-[1.6] text-foreground-soft sm:text-[16px]">
+      <pre className="max-w-[60ch] whitespace-pre-wrap wrap-break-word font-sans text-[15px] leading-[1.6] text-foreground-soft sm:text-[16px]">
         {message}
-      </p>
+      </pre>
+      {extras ? <div className="grid gap-3">{extras}</div> : null}
       <div className="mt-2">
         <Link
           to={back_to}
