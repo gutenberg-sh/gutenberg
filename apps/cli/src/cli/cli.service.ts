@@ -75,17 +75,16 @@ export class CliService {
       desc: 'Remove release(s) from the Solana registry and reclaim account rent',
       options: {
         pkg: positional('pkg')
-          .desc('name@version for one release, or site name alone to unpublish every version')
+          .desc(
+            'name@version for one release, or site name alone to unpublish every version',
+          )
           .required(),
       },
       handler: async (options) => {
         const trimmed = options.pkg.trim();
 
         if (trimmed.includes('@')) {
-          const { name, version } = parse_name_at_version(
-            trimmed,
-            'unpublish',
-          );
+          const { name, version } = parse_name_at_version(trimmed, 'unpublish');
 
           await this.unpublishService.unpublish_site({ name, version });
 
@@ -109,9 +108,7 @@ export class CliService {
       desc: 'Open and verify a registered site name or manifest https URL',
       options: {
         source: positional('source')
-          .desc(
-            'Site name, name@version, or manifest https URL',
-          )
+          .desc('Site name, name@version, or manifest https URL')
           .required(),
         print: boolean().desc(
           'Print the verified entry instead of opening an editor',

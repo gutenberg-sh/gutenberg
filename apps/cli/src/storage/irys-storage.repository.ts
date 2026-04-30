@@ -138,7 +138,9 @@ export class IrysStorageRepository {
    */
   async add_bytes(body: Buffer, filename: string): Promise<string> {
     const irys = await this.get_client();
-    const tags = [{ name: 'Content-Type', value: content_type_for_filename(filename) }];
+    const tags = [
+      { name: 'Content-Type', value: content_type_for_filename(filename) },
+    ];
     const result = await irys.upload(body, { tags });
 
     return this.gateway_object_url(extract_irys_tx_id(result));

@@ -9,7 +9,12 @@ function is_ipfs_path_gateway(u: URL): boolean {
   const parts = u.pathname.replace(/^\/+|\/+$/g, '').split('/');
   const cid = parts[1];
 
-  return parts.length >= 2 && parts[0] === 'ipfs' && cid !== undefined && cid.length > 0;
+  return (
+    parts.length >= 2 &&
+    parts[0] === 'ipfs' &&
+    cid !== undefined &&
+    cid.length > 0
+  );
 }
 
 /** True when the last path segment looks like an Arweave / bundler transaction id. */

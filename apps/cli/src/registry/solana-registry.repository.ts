@@ -393,9 +393,7 @@ function decode_release_account(data: Buffer): GutenbergReleaseEvent {
     name,
     version,
     manifest,
-    manifest_hash: `${sha256_prefix}${manifest_hash_raw.toString(
-      'hex',
-    )}` as GutenbergReleaseEvent['manifest_hash'],
+    manifest_hash: `${sha256_prefix}${manifest_hash_raw.toString('hex')}`,
     publisher,
     created_at: new Date(created_at_unix * 1000).toISOString(),
   };

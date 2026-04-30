@@ -10,7 +10,10 @@ export class UnpublishService {
     private readonly registryService: RegistryService,
   ) {}
 
-  async unpublish_site(input: { name: string; version: string }): Promise<void> {
+  async unpublish_site(input: {
+    name: string;
+    version: string;
+  }): Promise<void> {
     await this.registryService.assert_can_publish();
     await this.registryService.unpublish_release(input);
   }
