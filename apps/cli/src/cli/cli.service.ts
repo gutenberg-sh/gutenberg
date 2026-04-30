@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { boolean, command, positional, run } from '@drizzle-team/brocli';
-import { mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { boolean, command, number, positional, run } from '@drizzle-team/brocli';
 import { spawn } from 'node:child_process';
 
 import { DoctorService } from '../doctor/doctor.service';
+import {
+  LocalSiteGatewayService,
+  wait_for_shutdown_signal,
+} from '../gateway/local-site-gateway.service';
 import { OpenService } from '../open/open.service';
 import { PublishService } from '../publish/publish.service';
 import { UnpublishService } from '../publish/unpublish.service';
@@ -14,6 +15,7 @@ import { UnpublishService } from '../publish/unpublish.service';
 export class CliService {
   constructor(
     private readonly doctorService: DoctorService,
+    private readonly localSiteGatewayService: LocalSiteGatewayService,
     private readonly openService: OpenService,
     private readonly publishService: PublishService,
     private readonly unpublishService: UnpublishService,
@@ -66,13 +68,13 @@ export class CliService {
         console.log(`Uploaded ${this.format_bytes(result.total_bytes)}`);
         console.log(`Files: ${result.file_count}`);
         console.log(`Manifest: ${result.manifest_uri}`);
-        console.log(`Open with: gutenberg open ${name}@${version}`);
+        console.log(`Read with: gutenberg open ${name}@${version}`);
       },
     });
 
     const unpublish = command({
       name: 'unpublish',
-      desc: 'Remove release(s) from the Solana registry and reclaim account rent',
+      desc: 'Remove release(s) you published from the Solana registry and reclaim account rent',
       options: {
         pkg: positional('pkg')
           .desc(
@@ -105,14 +107,22 @@ export class CliService {
 
     const open = command({
       name: 'open',
-      desc: 'Open and verify a registered site name or manifest https URL',
+      desc: 'Verify a site and serve sanitized Markdown as HTML locally (default)',
       options: {
         source: positional('source')
           .desc('Site name, name@version, or manifest https URL')
           .required(),
-        print: boolean().desc(
-          'Print the verified entry instead of opening an editor',
+        print: boolean('print').desc(
+          'Print the verified entry Markdown to stdout and exit (no local server)',
         ),
+        port: number('port')
+          .desc('HTTP port for the local gateway (default 8787)')
+          .default(8787)
+          .min(1)
+          .max(65535),
+        no_browser: boolean('no-browser')
+          .desc('Do not open the system browser')
+          .alias('-n'),
       },
       handler: async (options) => {
         const parsed = parse_open_source(options.source);
@@ -135,9 +145,26 @@ export class CliService {
           return;
         }
 
-        const path = await this.write_entry_file(result);
-        await this.open_editor(path);
-        console.log(`Opened: ${path}`);
+        const port = options.port ?? 8787;
+        const { url, close } = await this.localSiteGatewayService.listen({
+          host: '127.0.0.1',
+          port,
+          name: result.name,
+          version: result.version,
+          manifest: result.manifest,
+          files: result.files,
+        });
+
+        console.log('');
+        console.log(`Local gateway: ${url}`);
+        console.log('Press Ctrl+C to stop');
+
+        if (!options.no_browser) {
+          this.open_url_in_browser(url);
+        }
+
+        await wait_for_shutdown_signal();
+        await close();
       },
     });
 
@@ -160,64 +187,20 @@ export class CliService {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  private async write_entry_file(result: {
-    name: string;
-    version: string;
-    entry: string;
-    content: string;
-  }): Promise<string> {
-    const dir = await mkdtemp(join(tmpdir(), 'gutenberg-open-'));
-    const basename =
-      result.entry.split('/').filter(Boolean).at(-1) ?? 'index.md';
-    const path = join(dir, `${result.name}-${result.version}-${basename}`);
-
-    await writeFile(path, result.content);
-
-    return path;
-  }
-
-  private async open_editor(path: string): Promise<void> {
-    const editor = process.env.VISUAL ?? process.env.EDITOR;
-
-    if (editor) {
-      await this.spawn_editor(editor, [path], true);
-      return;
-    }
+  private open_url_in_browser(url: string): void {
+    const opts = { detached: true, stdio: 'ignore' as const };
 
     if (process.platform === 'darwin') {
-      await this.spawn_editor('open', ['-t', path], false);
+      spawn('open', [url], opts).unref();
       return;
     }
 
     if (process.platform === 'win32') {
-      await this.spawn_editor('notepad', [path], false);
+      spawn('cmd', ['/c', 'start', '', url], { ...opts, shell: false }).unref();
       return;
     }
 
-    await this.spawn_editor('xdg-open', [path], false);
-  }
-
-  private async spawn_editor(
-    command: string,
-    args: string[],
-    shell: boolean,
-  ): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-      const child = spawn(command, args, {
-        shell,
-        stdio: 'inherit',
-      });
-
-      child.on('error', reject);
-      child.on('exit', (code) => {
-        if (code === 0) {
-          resolve();
-          return;
-        }
-
-        reject(new Error(`Editor exited with status ${code}`));
-      });
-    });
+    spawn('xdg-open', [url], opts).unref();
   }
 }
 

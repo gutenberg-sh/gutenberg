@@ -107,6 +107,7 @@ export class OpenService {
     const extracted = await extract_site_tarball(bundle_bytes);
 
     let entry_content: string | undefined;
+    const files: Record<`/${string}`, Buffer> = {};
 
     for (const [path, file] of Object.entries(manifest.files)) {
       const bytes = extracted.get(path);
@@ -118,6 +119,8 @@ export class OpenService {
       if (!this.manifestService.verify_file_hash(file, bytes)) {
         throw new Error(`File hash verification failed for ${path}`);
       }
+
+      files[path as `/${string}`] = bytes;
 
       if (path === manifest.entry) {
         entry_content = bytes.toString('utf8');
@@ -136,6 +139,7 @@ export class OpenService {
       entry: manifest.entry,
       content: entry_content,
       file_count: Object.keys(manifest.files).length,
+      files,
     };
   }
 

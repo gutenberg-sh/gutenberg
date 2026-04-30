@@ -17,6 +17,9 @@ export type OpenResult = {
   name: string;
   version: string;
   entry: `/${string}`;
+  /** Verified entry file as UTF-8 (same as `files[entry]` decoded). */
   content: string;
   file_count: number;
+  /** All paths from the manifest with verified bytes from the bundle. */
+  files: Record<`/${string}`, Buffer>;
 };

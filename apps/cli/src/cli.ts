@@ -7,7 +7,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { CliService } from './cli/cli.service';
 
-void main();
+void main().catch((error: unknown) => {
+  console.error(error);
+  process.exit(1);
+});
 
 async function main(): Promise<void> {
   const app = await NestFactory.createApplicationContext(AppModule, {

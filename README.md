@@ -77,14 +77,14 @@ Publish the demo folder:
 pnpm cli:dev publish gutenberg-demo@1.0.0 examples/gutenberg-demo
 ```
 
-Open and verify the registered release:
+Verify the release and read it in the browser (local HTTP gateway; use `--print` for entry Markdown on stdout, `--no-browser` to skip opening a tab, `--port` to change 8787):
 
 ```bash
 pnpm cli:dev open gutenberg-demo@1.0.0
 pnpm cli:dev open gutenberg-demo
 ```
 
-Remove Solana registry rows and reclaim rent:
+Remove Solana registry release:
 
 ```bash
 pnpm cli:dev unpublish gutenberg-demo@1.0.0

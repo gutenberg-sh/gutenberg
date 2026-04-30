@@ -15,6 +15,19 @@ export class UnpublishService {
     version: string;
   }): Promise<void> {
     await this.registryService.assert_can_publish();
+    const { publisher } = this.keysService.load_publisher_key();
+    const release = await this.registryService.find_release({
+      name: input.name,
+      version: input.version,
+      publisher,
+    });
+
+    if (!release) {
+      throw new Error(
+        `No release ${input.name}@${input.version} for this wallet; only the publisher that created it may unpublish`,
+      );
+    }
+
     await this.registryService.unpublish_release(input);
   }
 
