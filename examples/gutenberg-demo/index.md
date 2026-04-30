@@ -1,12 +1,17 @@
-# Gutenberg Demo
+# Letters on Permanence
 
-This is a local demo document for publishing through Gutenberg.
+A short collection of dispatches on books that refused to disappear.
 
-Each file should be uploaded individually to Arweave (via Irys), referenced by a signed manifest,
-and registered on the local Solana registry.
+The printing press did not so much accelerate writing as remove the editor
+between author and reader. Five centuries later we are repeating the experiment
+in a different medium, with different stakes.
 
-## Notes
+![A printer's flower](assets/press.svg)
 
-- The file is plain Markdown.
-- The publish step should make the content immutable by hash.
-- The open step should verify the manifest signature and file hash.
+## Read
+
+1. [Mainz, ca. 1450](letters/01-mainz.md)
+2. [Venice, ca. 1500](letters/02-venice.md)
+3. [On Permanence](letters/03-permanence.md)
+
+For sources, license, and version notes, see the [colophon](colophon.md).
