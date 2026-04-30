@@ -12,6 +12,7 @@ import { createHash } from 'node:crypto';
 
 import { SolanaWalletRepository } from '../solana/solana-wallet.repository';
 
+import { sha256_prefix } from '../manifest/manifest.types';
 import type { SolanaPublicKey } from '../manifest/manifest.types';
 import type {
   FindReleaseInput,
@@ -212,16 +213,44 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
 function encode_publish_release_instruction(
   event: GutenbergReleaseEvent,
 ): Buffer {
+  const created_unix = Math.trunc(Date.parse(event.created_at) / 1000);
+
+  if (!Number.isFinite(created_unix)) {
+    throw new Error('Release event created_at must be a valid date');
+  }
+
   return Buffer.concat([
     instruction_discriminator('publish_release'),
     encode_string(event.name),
     encode_string(event.version),
     encode_string(event.manifest),
-    encode_string(event.manifest_hash),
-    encode_string(event.created_at),
+    manifest_hash_string_to_raw(event.manifest_hash),
+    encode_i64_le(created_unix),
     seed_hash(event.name),
     seed_hash(event.version),
   ]);
+}
+
+function manifest_hash_string_to_raw(
+  hash: GutenbergReleaseEvent['manifest_hash'],
+): Buffer {
+  const hex = hash.startsWith(sha256_prefix)
+    ? hash.slice(sha256_prefix.length)
+    : hash;
+  const raw = Buffer.from(hex, 'hex');
+
+  if (raw.byteLength !== 32) {
+    throw new Error('Release manifest_hash must be a 32-byte sha256 digest');
+  }
+
+  return raw;
+}
+
+function encode_i64_le(seconds: number): Buffer {
+  const out = Buffer.allocUnsafe(8);
+  out.writeBigInt64LE(BigInt(seconds), 0);
+
+  return out;
 }
 
 function decode_name_authority_account(data: Buffer): PublicKey | undefined {
@@ -250,17 +279,19 @@ function decode_release_account(data: Buffer): GutenbergReleaseEvent {
   const name = reader.read_string();
   const version = reader.read_string();
   const manifest = reader.read_string();
-  const manifest_hash = reader.read_string();
-  const created_at = reader.read_string();
+  const manifest_hash_raw = reader.read_bytes(32);
+  const created_at_unix = reader.read_i64_le();
 
   return {
     type: release_event_type,
     name,
     version,
     manifest,
-    manifest_hash: manifest_hash as GutenbergReleaseEvent['manifest_hash'],
+    manifest_hash: `${sha256_prefix}${manifest_hash_raw.toString(
+      'hex',
+    )}` as GutenbergReleaseEvent['manifest_hash'],
     publisher,
-    created_at,
+    created_at: new Date(created_at_unix * 1000).toISOString(),
   };
 }
 
@@ -327,5 +358,11 @@ class AccountReader {
     const length = this.read_bytes(4).readUInt32LE(0);
 
     return this.read_bytes(length).toString('utf8');
+  }
+
+  read_i64_le(): number {
+    const bytes = this.read_bytes(8);
+
+    return Number(bytes.readBigInt64LE(0));
   }
 }

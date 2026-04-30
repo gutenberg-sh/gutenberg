@@ -9,17 +9,20 @@ pub mod gutenberg_registry {
 
     pub fn publish_release(
         ctx: Context<PublishRelease>,
-        name: String,
-        version: String,
+        site_name: String,
+        site_version: String,
         manifest_uri: String,
-        manifest_hash: String,
-        created_at: String,
-        name_hash: [u8; 32],
-        version_hash: [u8; 32],
+        manifest_hash: [u8; 32],
+        created_at_unix: i64,
+        name_seed: [u8; 32],
+        version_seed: [u8; 32],
     ) -> Result<()> {
-        require!(name.len() <= Release::MAX_NAME_LEN, GutenbergError::NameTooLong);
         require!(
-            version.len() <= Release::MAX_VERSION_LEN,
+            site_name.len() <= Release::MAX_NAME_LEN,
+            GutenbergError::NameTooLong
+        );
+        require!(
+            site_version.len() <= Release::MAX_VERSION_LEN,
             GutenbergError::VersionTooLong
         );
         require!(
@@ -27,19 +30,11 @@ pub mod gutenberg_registry {
             GutenbergError::ManifestUriTooLong
         );
         require!(
-            manifest_hash.len() <= Release::MAX_HASH_LEN,
-            GutenbergError::ManifestHashTooLong
-        );
-        require!(
-            created_at.len() <= Release::MAX_CREATED_AT_LEN,
-            GutenbergError::CreatedAtTooLong
-        );
-        require!(
-            hashv(&[name.as_bytes()]).to_bytes() == name_hash,
+            hashv(&[site_name.as_bytes()]).to_bytes() == name_seed,
             GutenbergError::InvalidSeedHash
         );
         require!(
-            hashv(&[version.as_bytes()]).to_bytes() == version_hash,
+            hashv(&[site_version.as_bytes()]).to_bytes() == version_seed,
             GutenbergError::InvalidSeedHash
         );
 
@@ -56,11 +51,11 @@ pub mod gutenberg_registry {
 
         let release = &mut ctx.accounts.release;
         release.publisher = ctx.accounts.publisher.key();
-        release.name = name;
-        release.version = version;
+        release.name = site_name;
+        release.version = site_version;
         release.manifest_uri = manifest_uri;
         release.manifest_hash = manifest_hash;
-        release.created_at = created_at;
+        release.created_at_unix = created_at_unix;
 
         Ok(())
     }
@@ -68,13 +63,13 @@ pub mod gutenberg_registry {
 
 #[derive(Accounts)]
 #[instruction(
-    name: String,
-    version: String,
+    site_name: String,
+    site_version: String,
     manifest_uri: String,
-    manifest_hash: String,
-    created_at: String,
-    name_hash: [u8; 32],
-    version_hash: [u8; 32],
+    manifest_hash: [u8; 32],
+    created_at_unix: i64,
+    name_seed: [u8; 32],
+    version_seed: [u8; 32],
 )]
 pub struct PublishRelease<'info> {
     #[account(mut)]
@@ -84,7 +79,7 @@ pub struct PublishRelease<'info> {
         init_if_needed,
         payer = publisher,
         space = NameAuthority::SPACE,
-        seeds = [b"name", name_hash.as_ref()],
+        seeds = [b"name", name_seed.as_ref()],
         bump,
     )]
     pub name_authority: Account<'info, NameAuthority>,
@@ -96,8 +91,8 @@ pub struct PublishRelease<'info> {
         seeds = [
             b"release",
             publisher.key().as_ref(),
-            name_hash.as_ref(),
-            version_hash.as_ref(),
+            name_seed.as_ref(),
+            version_seed.as_ref(),
         ],
         bump,
     )]
@@ -121,16 +116,14 @@ pub struct Release {
     pub name: String,
     pub version: String,
     pub manifest_uri: String,
-    pub manifest_hash: String,
-    pub created_at: String,
+    pub manifest_hash: [u8; 32],
+    pub created_at_unix: i64,
 }
 
 impl Release {
     pub const MAX_NAME_LEN: usize = 64;
     pub const MAX_VERSION_LEN: usize = 32;
     pub const MAX_URI_LEN: usize = 512;
-    pub const MAX_HASH_LEN: usize = 71;
-    pub const MAX_CREATED_AT_LEN: usize = 32;
     pub const SPACE: usize = 8
         + 32
         + 4
@@ -139,10 +132,8 @@ impl Release {
         + Self::MAX_VERSION_LEN
         + 4
         + Self::MAX_URI_LEN
-        + 4
-        + Self::MAX_HASH_LEN
-        + 4
-        + Self::MAX_CREATED_AT_LEN;
+        + 32
+        + 8;
 }
 
 #[error_code]
@@ -153,10 +144,6 @@ pub enum GutenbergError {
     VersionTooLong,
     #[msg("Manifest URI is too long")]
     ManifestUriTooLong,
-    #[msg("Manifest hash is too long")]
-    ManifestHashTooLong,
-    #[msg("Created-at timestamp is too long")]
-    CreatedAtTooLong,
     #[msg("Seed hash does not match instruction data")]
     InvalidSeedHash,
     #[msg("This release name is already claimed by another publisher")]
