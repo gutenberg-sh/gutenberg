@@ -48,10 +48,17 @@ cp .env.example .env
 ```
 
 ```txt
+# CLI
 GUTENBERG_ARWEAVE_GATEWAY=https://gateway.irys.xyz
 GUTENBERG_IRYS_NETWORK=devnet
 GUTENBERG_SOLANA_RPC_URL=http://127.0.0.1:8899
 GUTENBERG_SOLANA_PRIVATE_KEY=<base58-encoded-solana-secret-key>
+GUTENBERG_GATEWAY_URL=http://localhost:5173
+
+# Gateway
+VITE_GUTENBERG_REGISTRY_PROGRAM_ID=NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517
+VITE_GUTENBERG_SOLANA_RPC_URL=http://127.0.0.1:8899
+VITE_GUTENBERG_ARWEAVE_GATEWAY=https://gateway.irys.xyz
 ```
 
 ## Local Solana registry
@@ -85,11 +92,16 @@ Publish the demo folder:
 pnpm cli:dev -- publish gutenberg-demo@1.0.0 examples/gutenberg-demo
 ```
 
-Open a release in the browser (local HTTP gateway; use `--print` for entry Markdown on stdout, `--no-browser` to skip opening a tab, `--port` to change from `8787`):
+Open a release in the gateway. The CLI builds the gateway URL from
+`GUTENBERG_GATEWAY_URL` and opens your browser; verification (manifest
+signature, bundle hash, file hashes) happens entirely in the browser. Use
+`--no-browser` to print the URL only, `--gateway` to override the base URL,
+and `--publisher` to skip the `getProgramAccounts` scan on public RPCs:
 
 ```bash
 pnpm cli:dev -- open gutenberg-demo@1.0.0
-pnpm cli:dev -- open gutenberg-demo
+pnpm cli:dev -- open gutenberg-demo --publisher 46gAcDFFDPMmvrXVurDgDtRZUqMvioW4xK7xTsc4RLNS
+pnpm cli:dev -- open https://gateway.irys.xyz/<manifest-tx-id> --no-browser
 ```
 
 Remove a registry release:
@@ -99,11 +111,25 @@ pnpm cli:dev -- unpublish gutenberg-demo@1.0.0
 pnpm cli:dev -- unpublish gutenberg-demo
 ```
 
+## Gateway
+
+The gateway performs all verification in the browser using WebCrypto (SHA-256),
+`@noble/curves` (Ed25519), a minimal POSIX tar reader, and direct Solana
+JSON-RPC calls — no Solana SDK or Node dependencies in the bundle.
+
+```bash
+pnpm gateway:dev
+pnpm gateway:build
+pnpm gateway:start
+```
+
 ## Build and lint
 
 ```bash
 pnpm cli:build
 pnpm cli:lint
+pnpm gateway:build
+pnpm gateway:lint
 ```
 
 ## Contributing

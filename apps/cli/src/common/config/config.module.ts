@@ -11,6 +11,7 @@ import { env } from '../../env';
 
 import {
   ARWEAVE_GATEWAY_URL,
+  GATEWAY_URL,
   IRYS_NETWORK,
   SOLANA_PRIVATE_KEY,
   SOLANA_RPC_URL,
@@ -64,10 +65,17 @@ load_dotenv({ path: env_file_path, quiet: true });
       useFactory: (config: ConfigService) =>
         config.getOrThrow<string>('GUTENBERG_SOLANA_PRIVATE_KEY'),
     },
+    {
+      provide: GATEWAY_URL,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) =>
+        config.getOrThrow<string>('GUTENBERG_GATEWAY_URL'),
+    },
   ],
   exports: [
     NestConfigModule,
     ARWEAVE_GATEWAY_URL,
+    GATEWAY_URL,
     IRYS_NETWORK,
     SOLANA_PRIVATE_KEY,
     SOLANA_RPC_URL,

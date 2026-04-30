@@ -1,87 +1,76 @@
-import { boolean, command, number, positional } from '@drizzle-team/brocli';
-import { Injectable } from '@nestjs/common';
+import { boolean, command, positional, string } from '@drizzle-team/brocli';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { GATEWAY_URL } from '../../common/config/config.tokens';
 import { open_url_in_browser } from '../../common/helpers/open-browser';
 import { parse_open_source } from '../../common/helpers/parse-spec';
-import { wait_for_shutdown_signal } from '../../common/helpers/wait-for-shutdown';
-import { LocalSiteGatewayService } from '../gateway/local-site-gateway.service';
-
-import { OpenService } from './open.service';
-
-const DEFAULT_PORT = 8787;
 
 @Injectable()
 export class OpenCommand {
-  constructor(
-    private readonly open_service: OpenService,
-    private readonly local_site_gateway_service: LocalSiteGatewayService,
-  ) {}
+  constructor(@Inject(GATEWAY_URL) private readonly gateway_url: string) {}
 
   build() {
     return command({
       name: 'open',
-      desc: 'Verify a site and serve sanitized Markdown as HTML locally (default)',
+      desc: 'Open a release in the Gutenberg gateway (browser-side verification)',
       options: {
         source: positional('source')
           .desc('Site name, name@version, or manifest https URL')
           .required(),
-        print: boolean('print').desc(
-          'Print the verified entry Markdown to stdout and exit (no local server)',
-        ),
-        port: number('port')
-          .desc(`HTTP port for the local gateway (default ${DEFAULT_PORT})`)
-          .default(DEFAULT_PORT)
-          .min(1)
-          .max(65535),
+        gateway: string('gateway')
+          .desc(
+            'Override the gateway URL (defaults to GUTENBERG_GATEWAY_URL env)',
+          ),
+        publisher: string('publisher')
+          .desc(
+            "Publisher's Solana public key (recommended on public RPCs that disable getProgramAccounts)",
+          )
+          .alias('-p'),
         no_browser: boolean('no-browser')
-          .desc('Do not open the system browser')
+          .desc('Print the gateway URL only, do not open the browser')
           .alias('-n'),
       },
-      handler: async (options) => {
-        const parsed = parse_open_source(options.source);
-
-        const result = await this.open_service.open_site({
-          source: parsed.source,
-          version: parsed.version,
+      handler: (options) => {
+        const gateway_base = (options.gateway ?? this.gateway_url).replace(
+          /\/$/,
+          '',
+        );
+        const url = build_gateway_url({
+          gateway: gateway_base,
+          source: options.source,
+          publisher: options.publisher,
         });
 
-        console.log('Verified');
-        console.log(`Name: ${result.name}`);
-        console.log(`Version: ${result.version}`);
-        console.log(`Entry: ${result.entry}`);
-        console.log(`Files: ${result.file_count}`);
-        console.log(`Manifest: ${result.manifest_uri}`);
-
-        if (result.release_pda) {
-          console.log(`Release PDA: ${result.release_pda}`);
-        }
-
-        if (options.print) {
-          console.log('');
-          console.log(result.content);
-          return;
-        }
-
-        const { url, close } = await this.local_site_gateway_service.listen({
-          host: '127.0.0.1',
-          port: options.port ?? DEFAULT_PORT,
-          name: result.name,
-          version: result.version,
-          manifest: result.manifest,
-          files: result.files,
-        });
-
-        console.log('');
-        console.log(`Local gateway: ${url}`);
-        console.log('Press Ctrl+C to stop');
+        console.log(url);
 
         if (!options.no_browser) {
           open_url_in_browser(url);
         }
-
-        await wait_for_shutdown_signal();
-        await close();
       },
     });
   }
+}
+
+function build_gateway_url(input: {
+  gateway: string;
+  source: string;
+  publisher?: string;
+}): string {
+  const trimmed = input.source.trim();
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    const params = new URLSearchParams({ uri: trimmed });
+
+    return `${input.gateway}/m?${params.toString()}`;
+  }
+
+  const parsed = parse_open_source(trimmed);
+  const path = parsed.version
+    ? `/r/${encodeURIComponent(parsed.source)}/${encodeURIComponent(parsed.version)}`
+    : `/r/${encodeURIComponent(parsed.source)}`;
+  const query = input.publisher
+    ? `?${new URLSearchParams({ p: input.publisher }).toString()}`
+    : '';
+
+  return `${input.gateway}${path}${query}`;
 }

@@ -10,7 +10,8 @@
     "pnpm": ">=10.28.2 <11.0.0"
   },
   "dependencies": {
-    "@gutenberg/cli": "workspace:*"
+    "@gutenberg/cli": "workspace:*",
+    "@gutenberg/gateway": "workspace:*"
   },
   "scripts": {
     "solana:validator": "solana-test-validator",
@@ -21,7 +22,12 @@
     "cli:build": "pnpm --filter @gutenberg/cli run build",
     "cli:start": "pnpm exec gutenberg",
     "cli:format": "pnpm --filter @gutenberg/cli run format",
-    "cli:lint": "pnpm --filter @gutenberg/cli run lint"
+    "cli:lint": "pnpm --filter @gutenberg/cli run lint",
+    "gateway:dev": "pnpm --filter @gutenberg/gateway run dev",
+    "gateway:build": "pnpm --filter @gutenberg/gateway run build",
+    "gateway:preview": "pnpm --filter @gutenberg/gateway run preview",
+    "gateway:format": "pnpm --filter @gutenberg/gateway run format",
+    "gateway:lint": "pnpm --filter @gutenberg/gateway run lint"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
