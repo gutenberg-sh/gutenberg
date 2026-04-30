@@ -19,6 +19,38 @@ To install all workspace dependencies, run:
 pnpm install
 ```
 
+That links the `gutenberg` CLI into `node_modules/.bin`.
+
+Build the CLI (`pnpm cli:build`), then run commands with `pnpm exec gutenberg …`, or put `node_modules/.bin` on your `PATH` and run `gutenberg …` directly.
+
+While you change CLI code, use the Nest CLI watch mode (same as in a typical Nest app):
+
+```bash
+pnpm cli:dev
+```
+
+That runs `nest start --watch` (via `apps/cli/scripts/nest-dev.cjs`, which invokes the Nest CLI with `node` so it resolves reliably under pnpm). It rebuilds with `tsc` and restarts when sources change.
+
+To watch and repeatedly run a specific Gutenberg subcommand, pass it after `cli:dev`:
+
+```bash
+pnpm cli:dev open gutenberg-demo
+pnpm cli:dev doctor
+```
+
+For a one-off run without watch, use the compiled CLI:
+
+```bash
+pnpm exec gutenberg open gutenberg-demo
+```
+
+To install the built CLI globally (optional):
+
+```bash
+pnpm cli:build
+pnpm --filter @gutenberg/cli link --global
+```
+
 ## Environment Setup
 
 Copy the example environment file and fill in the required values:
@@ -43,52 +75,47 @@ GUTENBERG_SOLANA_PRIVATE_KEY=<base58-encoded-solana-secret-key>
 Run a local validator in a separate terminal:
 
 ```bash
-pnpm run solana:validator
+pnpm solana:validator
 ```
 
 Build and deploy the Gutenberg registry program:
 
 ```bash
-pnpm run solana:build
-pnpm run solana:deploy
+pnpm solana:build
+pnpm solana:deploy
 ```
 
 Gutenberg uses the same hardcoded registry program id across localnet, devnet, and mainnet.
 
-Airdrop localnet SOL to the configured publisher wallet:
+Airdrop localnet SOL to the publisher wallet in `.env` (defaults to 2 SOL if you omit the amount):
 
 ```bash
-pnpm run solana:airdrop --amount 5
+pnpm solana:airdrop -- 5
 ```
 
 ## Running the Project
 
 ### CLI
 
-The CLI publishes Markdown folders, registers immutable releases, and opens verified releases.
+The CLI publishes folders of writing, registers immutable releases, and opens verified releases.
 
 Check local publisher configuration:
 
 ```bash
-pnpm run cli:start doctor
+pnpm cli:dev doctor
 ```
 
-Publish the demo Markdown folder (npm-style **`name@version`** first, then folder):
+Publish the demo folder:
 
 ```bash
-pnpm run cli:start publish gutenberg-demo@1.0.0 examples/gutenberg-demo
+pnpm cli:dev publish gutenberg-demo@1.0.0 examples/gutenberg-demo
 ```
 
-Open and verify the registered release:
+Open and verify the registered release (pin a version with `@` or omit it to use the latest release for that name):
 
 ```bash
-pnpm run cli:start open gutenberg-demo@1.0.0
-```
-
-For a plain site name without a version, pass `--release-version` or omit it to pick the latest matching release:
-
-```bash
-pnpm run cli:start open gutenberg-demo --release-version 1.0.0
+pnpm cli:dev open gutenberg-demo@1.0.0
+pnpm cli:dev open gutenberg-demo
 ```
 
 ### Build And Lint
@@ -96,22 +123,11 @@ pnpm run cli:start open gutenberg-demo --release-version 1.0.0
 To build the CLI:
 
 ```bash
-pnpm run cli:build
+pnpm cli:build
 ```
 
 To lint the CLI:
 
 ```bash
-pnpm run cli:lint
+pnpm cli:lint
 ```
-
-## How Publishing Works
-
-Publishing a Markdown folder:
-
-- Builds a deterministic POSIX tar of all site files and uploads it via **Irys** (paid in **SOL**), producing a permanent **`bundle_uri`** (`{gateway}/{tx id}`)
-- Creates a signed manifest listing each file’s SHA-256 and that **`bundle_uri`**
-- Uploads the signed manifest JSON the same way; **`manifest_uri`** on-chain is `{gateway}/{tx id}`
-- Registers the release (`gutenberg.release.v1`) on Solana for `publisher + name + version`
-
-The Solana registry stores the publisher, site name, version, manifest URI, manifest hash, and timestamp. Readers fetch the manifest and bundle over **HTTPS** (no storage API token required). They verify the bundle hash, per-file hashes, and the publisher signature.

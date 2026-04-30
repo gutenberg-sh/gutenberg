@@ -1,11 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  boolean,
-  command,
-  positional,
-  run,
-  string,
-} from '@drizzle-team/brocli';
+import { boolean, command, positional, run } from '@drizzle-team/brocli';
 import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -14,15 +8,12 @@ import { spawn } from 'node:child_process';
 import { DoctorService } from '../doctor/doctor.service';
 import { OpenService } from '../open/open.service';
 import { PublishService } from '../publish/publish.service';
-import { SolanaRegistryRepository } from '../registry/solana-registry.repository';
-
 @Injectable()
 export class CliService {
   constructor(
     private readonly doctorService: DoctorService,
     private readonly openService: OpenService,
     private readonly publishService: PublishService,
-    private readonly solanaRegistryRepository: SolanaRegistryRepository,
   ) {}
 
   async run(): Promise<void> {
@@ -51,13 +42,13 @@ export class CliService {
 
     const publish = command({
       name: 'publish',
-      desc: 'Publish a Markdown folder (tar + manifest) via Irys and register on Solana',
+      desc: 'Publish a folder of writing (tar + manifest) via Irys and register on Solana',
       options: {
         pkg: positional('pkg')
           .desc('Site name and version, npm-style: name@version')
           .required(),
         folder: positional('folder')
-          .desc('Markdown folder to publish')
+          .desc('Folder of writing to publish')
           .required(),
       },
       handler: async (options) => {
@@ -85,32 +76,16 @@ export class CliService {
             'Site name, name@version, or manifest https URL',
           )
           .required(),
-        release_version: string('release-version').desc(
-          'Site version (only when source is a plain name without @)',
-        ),
         print: boolean().desc(
-          'Print the verified Markdown entry instead of opening an editor',
+          'Print the verified entry instead of opening an editor',
         ),
       },
       handler: async (options) => {
         const parsed = parse_open_source(options.source);
-        const version_from_flag = options.release_version;
-
-        if (
-          parsed.version !== undefined &&
-          version_from_flag !== undefined &&
-          parsed.version !== version_from_flag
-        ) {
-          throw new Error(
-            'Version mismatch: source uses name@version but --release-version differs; use only one',
-          );
-        }
-
-        const version = version_from_flag ?? parsed.version;
 
         const result = await this.openService.open_site({
           source: parsed.source,
-          version,
+          version: parsed.version,
         });
 
         console.log('Verified');
@@ -132,28 +107,7 @@ export class CliService {
       },
     });
 
-    const airdrop = command({
-      name: 'airdrop',
-      desc: 'Airdrop localnet SOL to the publisher wallet',
-      options: {
-        amount: string('amount').desc('SOL amount to airdrop'),
-      },
-      handler: async (options) => {
-        const amount = Number(options.amount ?? '2');
-
-        if (!Number.isFinite(amount) || amount <= 0) {
-          throw new Error('Airdrop amount must be a positive number');
-        }
-
-        const result = await this.solanaRegistryRepository.airdrop_sol(amount);
-
-        console.log(
-          `Airdropped ${result.sol} SOL to ${result.public_key.toBase58()}`,
-        );
-      },
-    });
-
-    await run([doctor, publish, open, airdrop], {
+    await run([doctor, publish, open], {
       name: 'gutenberg',
       description: 'Verifiable publishing for the Solana ecosystem',
       version: '0.0.0',

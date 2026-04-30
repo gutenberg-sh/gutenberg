@@ -7,10 +7,12 @@
     "gutenberg": "./dist/src/cli.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "node ./node_modules/@nestjs/cli/bin/nest.js build",
+    "start": "node ./node_modules/@nestjs/cli/bin/nest.js start",
+    "start:dev": "node ./scripts/nest-dev.cjs",
     "format": "eslint . --fix --ignore-pattern 'dist/**' --ignore-pattern '*.json' && prettier --write .",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
-    "gutenberg": "pnpm run build && node dist/src/cli.js"
+    "gutenberg": "node dist/src/cli.js"
   },
   "dependencies": {
     "@drizzle-team/brocli": "0.12.0",
@@ -26,5 +28,9 @@
     "rxjs": "^7.8.2",
     "tar": "^7.5.13",
     "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.21",
+    "@nestjs/schematics": "^11.1.0"
   }
 }

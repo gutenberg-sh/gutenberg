@@ -8,13 +8,17 @@
     "node": ">=22.12.0",
     "pnpm": ">=10.28.2 <11.0.0"
   },
+  "dependencies": {
+    "@gutenberg/cli": "workspace:*"
+  },
   "scripts": {
     "solana:validator": "solana-test-validator",
-    "solana:airdrop": "pnpm run cli:start airdrop",
+    "solana:airdrop": "pnpm --filter @gutenberg/solana run airdrop",
     "solana:build": "pnpm --filter @gutenberg/solana run anchor:build",
     "solana:deploy": "pnpm --filter @gutenberg/solana run anchor:deploy",
+    "cli:dev": "pnpm --filter @gutenberg/cli run start:dev",
     "cli:build": "pnpm --filter @gutenberg/cli run build",
-    "cli:start": "pnpm --filter @gutenberg/cli run gutenberg",
+    "cli:start": "pnpm exec gutenberg",
     "cli:format": "pnpm --filter @gutenberg/cli run format",
     "cli:lint": "pnpm --filter @gutenberg/cli run lint"
   },

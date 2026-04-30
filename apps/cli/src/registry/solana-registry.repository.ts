@@ -86,23 +86,6 @@ export class SolanaRegistryRepository implements ReleaseRegistryRepository {
     };
   }
 
-  async airdrop_sol(
-    sol: number,
-  ): Promise<{ public_key: PublicKey; sol: number }> {
-    const wallet = this.solanaWalletRepository.load_keypair();
-    const signature = await this.connection.requestAirdrop(
-      wallet.publicKey,
-      sol * LAMPORTS_PER_SOL,
-    );
-
-    await this.connection.confirmTransaction(signature, 'confirmed');
-
-    return {
-      public_key: wallet.publicKey,
-      sol,
-    };
-  }
-
   async list_releases(): Promise<GutenbergReleaseEvent[]> {
     const program_id = this.require_program_id();
     const accounts = await this.connection.getProgramAccounts(program_id);

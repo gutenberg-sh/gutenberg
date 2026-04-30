@@ -6,6 +6,7 @@ export default tseslint.config(
   {
     ignores: [
       '**/dist/**',
+      'apps/cli/scripts/**',
       'eslint.config.js',
       '**/node_modules/**',
       'pnpm-lock.yaml',
