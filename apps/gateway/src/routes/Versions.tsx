@@ -37,14 +37,11 @@ function VersionsView({ name }: { name: string }) {
     <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
       <header className="grid gap-3">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          Versions
+          Version history
         </p>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h1 className="text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
-            <span>{name}</span>
-            <span className="ml-3 align-baseline font-mono text-[1rem] font-normal tabular text-muted-foreground sm:text-[1.125rem]">
-              version history
-            </span>
+            {name}
           </h1>
           <Link
             to={`/r/${encodeURIComponent(name)}`}

@@ -12,7 +12,7 @@ export function ReleaseRow({ release }: { release: ReleaseDto }) {
   return (
     <Link
       to={target}
-      className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-2 py-5 transition-colors hover:bg-surface/40 sm:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto] sm:py-4"
+      className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-2 py-4 transition-colors hover:bg-surface/40"
     >
       <div className="grid min-w-0 gap-1.5 px-1 sm:px-2">
         <div className="flex min-w-0 items-baseline gap-2">
@@ -33,14 +33,10 @@ export function ReleaseRow({ release }: { release: ReleaseDto }) {
             {shorten(publisher, 6, 6)}
           </Link>
           <Dot />
-          <span>{format_bytes(release.content_size_bytes)}</span>
+          <span className="font-mono tabular">
+            {format_bytes(release.content_size_bytes)}
+          </span>
         </div>
-      </div>
-
-      <div className="hidden min-w-0 sm:block sm:px-2">
-        <p className="truncate font-mono text-[11.5px] tabular text-muted-foreground">
-          {shorten(release.address, 8, 8)}
-        </p>
       </div>
 
       <div className="flex shrink-0 items-center gap-3 px-1 sm:px-2">
@@ -70,9 +66,8 @@ function Dot() {
 
 export function ReleaseListHeader() {
   return (
-    <div className="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto] gap-x-6 border-b border-border pb-2 text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground sm:grid">
+    <div className="hidden grid-cols-[minmax(0,1fr)_auto] gap-x-6 border-b border-border pb-2 text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground sm:grid">
       <div className="px-2">Release</div>
-      <div className="px-2">Address</div>
       <div className="px-2 text-right">Published</div>
     </div>
   );
@@ -84,13 +79,12 @@ export function ReleaseListSkeleton({ rows = 6 }: { rows?: number }) {
       {Array.from({ length: rows }).map((_, idx) => (
         <div
           key={idx}
-          className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto] items-center gap-x-6 py-5"
+          className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 py-4"
         >
           <div className="grid gap-2 px-2">
             <div className="h-4 w-2/3 max-w-[16rem] animate-pulse rounded-md bg-muted" />
-            <div className="h-3 w-1/3 max-w-[10rem] animate-pulse rounded-md bg-muted/70" />
+            <div className="h-3 w-1/3 max-w-40 animate-pulse rounded-md bg-muted/70" />
           </div>
-          <div className="hidden h-3 w-3/4 max-w-[14rem] animate-pulse rounded-md bg-muted/70 sm:block sm:px-2" />
           <div className="h-3 w-20 animate-pulse rounded-md bg-muted/70 px-2" />
         </div>
       ))}

@@ -1,4 +1,4 @@
-import { ArrowUpRight, Search as SearchIcon } from 'lucide-react';
+import { ArrowUpRight, Search as SearchIcon, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -60,16 +60,18 @@ export function SearchRoute() {
           Search
         </p>
         <h1 className="text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
-          Find a publisher.
+          Find a release.
         </h1>
         <p className="max-w-[60ch] text-[14.5px] leading-[1.6] text-foreground-soft">
-          Fuzzy name search across the registry index. Lookup is trigram-
-          matched on the publisher-claimed name; the result links straight
-          to the latest verified release.
+          Forgiving name search across the registry. Trigram-matched on the
+          publisher-claimed name — partial words and typos still surface
+          results.
         </p>
       </header>
 
-      <SearchInput value={query} on_change={set_query} />
+      <div className="max-w-3xl">
+        <SearchInput value={query} on_change={set_query} />
+      </div>
 
       <section className="grid gap-3">
         {!trimmed ? (
@@ -110,30 +112,37 @@ function SearchInput({
   on_change: (next: string) => void;
 }) {
   return (
-    <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[12px] font-medium text-foreground">
-          Query
-        </span>
-        <span className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
-          trigram match
-        </span>
-      </div>
-      <div className="flex items-stretch rounded-xl border border-border bg-background focus-within:border-foreground/25">
-        <span className="pointer-events-none flex select-none items-center pl-3 pr-1 text-muted-foreground">
-          <SearchIcon className="size-3.5" strokeWidth={1.85} aria-hidden />
-        </span>
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => on_change(e.target.value)}
-          placeholder="gutenberg-demo"
-          autoFocus
-          spellCheck={false}
-          autoComplete="off"
-          className="min-w-0 flex-1 bg-transparent py-2.5 pr-3 font-mono text-[13.5px] tabular text-foreground placeholder:text-muted-foreground/55 focus:outline-none"
-        />
-      </div>
+    <div
+      role="search"
+      aria-label="Search the registry"
+      className="flex items-stretch overflow-hidden rounded-2xl border border-border-strong/70 bg-card shadow-[0_1px_0_0_rgb(0_0_0/0.02)] transition-colors focus-within:border-foreground/35"
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none flex select-none items-center pl-5 pr-2.5 text-muted-foreground"
+      >
+        <SearchIcon className="size-4" strokeWidth={1.85} />
+      </span>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => on_change(e.target.value)}
+        placeholder="gutenberg-demo"
+        autoFocus
+        spellCheck={false}
+        autoComplete="off"
+        className="h-14 min-w-0 flex-1 bg-transparent pr-2 font-mono tabular text-[15px] text-foreground placeholder:text-muted-foreground/55 focus:outline-none"
+      />
+      {value ? (
+        <button
+          type="button"
+          aria-label="Clear search"
+          onClick={() => on_change('')}
+          className="mr-2 my-2 inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-surface hover:text-foreground active:translate-y-px"
+        >
+          <X className="size-3.5" strokeWidth={1.85} aria-hidden />
+        </button>
+      ) : null}
     </div>
   );
 }

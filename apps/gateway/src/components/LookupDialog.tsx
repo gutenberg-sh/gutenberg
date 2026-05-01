@@ -44,17 +44,21 @@ export function LookupDialog({
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className="relative w-full max-w-xl"
+        className="relative w-full max-w-2xl"
       >
         <button
           type="button"
           aria-label="Close"
           onClick={() => on_open_change(false)}
-          className="absolute -right-2 -top-2 inline-flex size-7 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-colors hover:border-border-strong hover:text-foreground"
+          className="absolute -right-2 -top-2 z-10 inline-flex size-7 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-colors hover:border-border-strong hover:text-foreground"
         >
           <X className="size-3.5" strokeWidth={1.85} aria-hidden />
         </button>
-        <LookupForm auto_focus on_navigate={() => on_open_change(false)} />
+        <LookupForm
+          auto_focus
+          size="lg"
+          on_navigate={() => on_open_change(false)}
+        />
       </div>
     </div>,
     document.body,

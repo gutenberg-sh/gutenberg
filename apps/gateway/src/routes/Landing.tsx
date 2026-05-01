@@ -1,6 +1,11 @@
+import { Link } from 'react-router-dom';
+
 import { Container } from '@/components/Layout';
 import { LookupForm } from '@/components/LookupForm';
 import { RecentReleases } from '@/components/RecentReleases';
+import { format_count } from '@/lib/format';
+import { useIndexerStats } from '@/lib/queries';
+import { cn } from '@/lib/utils';
 
 const PROOF_STEPS: ReadonlyArray<{
   index: string;
@@ -75,36 +80,39 @@ export function LandingRoute() {
   return (
     <div className="flex flex-col">
       {}
-      <Container className="grid items-start gap-14 pb-24 pt-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center lg:gap-20 lg:pb-32 lg:pt-24">
-        <div className="grid gap-7">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-            Gutenberg gateway
-          </p>
-
-          <h1 className="text-[2.5rem] font-semibold leading-none tracking-[-0.035em] text-foreground sm:text-[3.25rem] lg:text-[4.25rem]">
-            Read what was actually published.
-          </h1>
-
-          <p className="max-w-[58ch] text-[16.5px] leading-[1.55] text-foreground-soft sm:text-[18px]">
-            Open any release recorded on the Gutenberg registry. Your browser
-            fetches the manifest and the bundle, recomputes every hash, and
-            checks the publisher&apos;s signature before rendering a single
-            byte.
-          </p>
-
-          <p className="text-[12.5px] text-muted-foreground">
-            No SDKs in the bundle
-            <Sep />
-            No proxy or analytics
-            <Sep />
-            Just WebCrypto + RPC
+      <Container className="pb-20 pt-14 lg:pb-28 lg:pt-20">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-10">
+          <div className="grid gap-5">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+              Gutenberg · verifiable publishing on Solana
+            </p>
+            <h1 className="text-[2.25rem] font-semibold leading-[1.02] tracking-[-0.035em] text-foreground sm:text-[2.875rem] lg:text-[3.5rem]">
+              Read what was actually published.
+            </h1>
+            <p className="max-w-[60ch] text-[15.5px] leading-[1.55] text-foreground-soft sm:text-[16.5px]">
+              A public registry of signed releases. The gateway verifies every
+              file in your browser before rendering a single byte — no proxy,
+              no SDK, no edits.
+            </p>
+          </div>
+          <p className="hidden text-[12px] text-muted-foreground lg:block">
+            <span className="font-mono tabular text-foreground-soft">
+              ⌘K
+            </span>{' '}
+            anywhere to search
           </p>
         </div>
 
-        <div className="grid gap-7">
-          <LookupForm />
-          <RecentReleases limit={5} />
+        {}
+        <div className="mt-9 max-w-3xl">
+          <LookupForm size="lg" placeholder="find a release or publisher" />
         </div>
+
+        <StatsStrip />
+      </Container>
+
+      <Container as="section" className="border-t border-border py-14 lg:py-20">
+        <RecentReleases limit={8} />
       </Container>
 
       <Section eyebrow="01 / Why" title="Publishing should outlive its publisher.">
@@ -277,8 +285,56 @@ function Section({
   );
 }
 
-function Sep() {
-  return <span className="mx-2 text-muted-foreground/50">·</span>;
+function StatsStrip() {
+  const stats = useIndexerStats();
+
+  const items: ReadonlyArray<{
+    key: 'releases' | 'names' | 'publishers';
+    label: string;
+    href: string;
+  }> = [
+    { key: 'releases', label: 'releases', href: '/browse' },
+    { key: 'names', label: 'names', href: '/search' },
+    { key: 'publishers', label: 'publishers', href: '/search' },
+  ];
+
+  const ready = stats.isSuccess && !!stats.data;
+
+  return (
+    <dl
+      aria-label="Registry totals"
+      className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-3 text-[13px]"
+    >
+      {items.map((it, idx) => {
+        const value = ready ? stats.data?.[it.key] ?? 0 : null;
+        return (
+          <Link
+            key={it.key}
+            to={it.href}
+            className="group inline-flex items-baseline gap-2"
+          >
+            <dt className="sr-only">{it.label}</dt>
+            <dd
+              className={cn(
+                'font-mono text-[20px] tabular leading-none text-foreground transition-colors group-hover:text-foreground sm:text-[22px]',
+                ready ? '' : 'text-muted-foreground/40',
+              )}
+            >
+              {ready ? format_count(value) : '···'}
+            </dd>
+            <span className="text-[12px] text-muted-foreground transition-colors group-hover:text-foreground-soft">
+              {it.label}
+            </span>
+            {idx < items.length - 1 ? (
+              <span aria-hidden className="ml-6 text-muted-foreground/30">
+                ·
+              </span>
+            ) : null}
+          </Link>
+        );
+      })}
+    </dl>
+  );
 }
 
 function Code({ children }: { children: React.ReactNode }) {

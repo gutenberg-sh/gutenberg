@@ -11,6 +11,7 @@ import { ManifestsModule } from './modules/manifests/manifests.module';
 import { NamesModule } from './modules/names/names.module';
 import { PublishersModule } from './modules/publishers/publishers.module';
 import { ReleasesModule } from './modules/releases/releases.module';
+import { StatsModule } from './modules/stats/stats.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ReleasesModule } from './modules/releases/releases.module';
     NamesModule,
     ReleasesModule,
     ManifestsModule,
+    StatsModule,
     IngestionModule,
   ],
   providers: [

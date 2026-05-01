@@ -16,14 +16,22 @@ import { useNameSearch, type NameDto } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
 const NAME_RE = /^[a-z0-9][a-z0-9._-]*$/;
-const SUGGESTION_LIMIT = 6;
+const SUGGESTION_LIMIT = 8;
+
+type Size = 'sm' | 'lg';
 
 export function LookupForm({
   auto_focus = false,
+  size = 'lg',
+  placeholder = 'find a release or publisher',
   on_navigate,
+  className,
 }: {
   auto_focus?: boolean;
+  size?: Size;
+  placeholder?: string;
   on_navigate?: () => void;
+  className?: string;
 } = {}) {
   const navigate = useNavigate();
   const input_ref = useRef<HTMLInputElement>(null);
@@ -149,49 +157,47 @@ export function LookupForm({
   }
 
   const has_error = Boolean(error);
-  const show_dropdown = focused && (debounced_query.length > 0);
+  const show_dropdown = focused && debounced_query.length > 0;
   const empty_results =
     show_dropdown &&
     !search.isLoading &&
     !search.isError &&
     suggestions.length === 0;
 
+  const lg = size === 'lg';
+
   return (
-    <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
+    <div className={cn('grid w-full gap-2', className)}>
       <form
         onSubmit={submit}
         noValidate
         role="search"
         aria-label="Search the registry"
+        className="relative grid gap-2"
       >
-        <div className="flex items-baseline justify-between gap-3">
-          <label
-            htmlFor={input_id}
-            className="text-[12px] font-medium tracking-[-0.005em] text-foreground"
-          >
-            Open a release
-          </label>
-          <span className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
-            name · name@version
-          </span>
-        </div>
-
         <div
           className={cn(
-            'mt-3 flex items-stretch rounded-xl border bg-background transition-colors',
+            'flex items-stretch overflow-hidden rounded-2xl border bg-card shadow-[0_1px_0_0_rgb(0_0_0/0.02)] transition-colors',
             has_error
               ? 'border-destructive/70'
               : focused
-                ? 'border-foreground/25'
-                : 'border-border',
+                ? 'border-foreground/35'
+                : 'border-border-strong/70',
           )}
         >
           <span
             aria-hidden
-            className="pointer-events-none flex select-none items-center pl-3 pr-1 text-muted-foreground"
+            className={cn(
+              'pointer-events-none flex select-none items-center text-muted-foreground',
+              lg ? 'pl-5 pr-2.5' : 'pl-3.5 pr-1.5',
+            )}
           >
-            <Search className="size-3.5" strokeWidth={1.85} />
+            <Search
+              className={lg ? 'size-4' : 'size-3.5'}
+              strokeWidth={1.85}
+            />
           </span>
+
           <input
             ref={input_ref}
             id={input_id}
@@ -209,7 +215,7 @@ export function LookupForm({
             }
             aria-invalid={has_error || undefined}
             aria-describedby={has_error ? error_id : undefined}
-            placeholder="search names or paste name@version"
+            placeholder={placeholder}
             value={release_spec}
             onFocus={() => set_focused(true)}
             onBlur={() => {
@@ -221,15 +227,28 @@ export function LookupForm({
             }}
             onKeyDown={on_key_down}
             required
-            className="min-w-0 flex-1 bg-transparent py-2.5 pr-3 font-mono text-[13.5px] tabular text-foreground placeholder:text-muted-foreground/55 focus:outline-none"
+            className={cn(
+              'min-w-0 flex-1 bg-transparent font-mono tabular text-foreground placeholder:text-muted-foreground/55 focus:outline-none',
+              lg
+                ? 'h-14 pr-2 text-[15px]'
+                : 'h-11 pr-2 text-[13.5px]',
+            )}
           />
+
           <button
             type="submit"
-            aria-label="Submit"
-            className="m-1 inline-flex items-center gap-1.5 rounded-lg bg-foreground px-3 text-[12.5px] font-medium text-background transition-colors hover:bg-foreground/92 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+            aria-label={has_at ? 'Verify release' : 'Search'}
+            className={cn(
+              'inline-flex shrink-0 items-center gap-1.5 bg-foreground font-medium text-background transition-colors hover:bg-foreground/92 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+              lg ? 'mx-1.5 my-1.5 rounded-xl px-4 text-[13.5px]' : 'mx-1 my-1 rounded-lg px-3 text-[12.5px]',
+            )}
           >
             <span>{has_at ? 'Verify' : 'Search'}</span>
-            <ArrowRight className="size-3.5" strokeWidth={2} aria-hidden />
+            <ArrowRight
+              className={lg ? 'size-3.5' : 'size-3'}
+              strokeWidth={2}
+              aria-hidden
+            />
           </button>
         </div>
 
@@ -237,86 +256,99 @@ export function LookupForm({
           id={has_error ? error_id : undefined}
           role={has_error ? 'alert' : undefined}
           className={cn(
-            'mt-2 text-[12px]',
+            'px-1 text-[12px]',
             has_error ? 'text-destructive' : 'text-muted-foreground',
           )}
         >
-          {has_error
-            ? error
-            : has_at
-              ? 'Verifies in your browser. Nothing is uploaded.'
-              : 'Live results from the registry index. Use ↑↓ to pick.'}
-        </p>
-      </form>
-
-      {show_dropdown ? (
-        <div className="-mx-1 -mb-1 grid">
-          {search.isLoading ? (
-            <SuggestionSkeleton />
-          ) : search.isError ? (
-            <p className="px-3 py-2 text-[12px] text-muted-foreground">
-              Search is offline right now. Try{' '}
-              <span className="font-mono tabular">name@version</span> to verify
-              directly.
-            </p>
-          ) : empty_results ? (
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-dashed border-border px-3 py-3 text-[12px] text-muted-foreground">
-              <span>
-                No releases match{' '}
-                <span className="font-mono tabular text-foreground">
-                  {debounced_query}
-                </span>
-                .
-              </span>
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => go_to_search(debounced_query)}
-                className="inline-flex items-center gap-1 text-foreground hover:underline"
-              >
-                Open search
-                <ArrowUpRight className="size-3" strokeWidth={1.85} />
-              </button>
-            </div>
+          {has_error ? (
+            error
           ) : (
-            <ul
-              id={list_id}
-              ref={list_ref}
-              role="listbox"
-              className="grid divide-y divide-border overflow-hidden rounded-lg border border-border bg-background"
-            >
-              {suggestions.map((item, idx) => (
-                <SuggestionItem
-                  key={item.id}
-                  id={`${list_id}-${item.id}`}
-                  item={item}
-                  active={highlight === idx}
-                  on_hover={() => set_highlight(idx)}
-                  on_select={() => go_to_name(item.name)}
-                />
-              ))}
-              <li>
+            <>
+              <span className="font-mono tabular text-foreground-soft">
+                ↑↓
+              </span>{' '}
+              to pick ·{' '}
+              <span className="font-mono tabular text-foreground-soft">
+                ↵
+              </span>{' '}
+              to open ·{' '}
+              <span className="font-mono tabular text-foreground-soft">
+                name@version
+              </span>{' '}
+              jumps straight to a verified release
+            </>
+          )}
+        </p>
+
+        {show_dropdown ? (
+          <div className="absolute inset-x-0 top-full z-30 mt-2">
+            {search.isLoading ? (
+              <SuggestionSkeleton />
+            ) : search.isError ? (
+              <div className="rounded-2xl border border-border bg-elevated px-4 py-3 text-[12px] text-muted-foreground shadow-lg">
+                Search is offline right now. Try{' '}
+                <span className="font-mono tabular text-foreground">
+                  name@version
+                </span>{' '}
+                to verify directly.
+              </div>
+            ) : empty_results ? (
+              <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-elevated px-4 py-3 text-[12.5px] text-muted-foreground shadow-lg">
+                <span>
+                  No releases match{' '}
+                  <span className="font-mono tabular text-foreground">
+                    {debounced_query}
+                  </span>
+                  .
+                </span>
                 <button
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => go_to_search(debounced_query)}
-                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-[12px] text-muted-foreground transition-colors hover:bg-surface/60 hover:text-foreground"
+                  className="inline-flex items-center gap-1 font-medium text-foreground hover:underline"
                 >
-                  <span>
-                    See all results for{' '}
-                    <span className="font-mono tabular text-foreground">
-                      {debounced_query}
-                    </span>
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <CornerDownLeft className="size-3" strokeWidth={1.85} />
-                  </span>
+                  Open search
+                  <ArrowUpRight className="size-3" strokeWidth={1.85} />
                 </button>
-              </li>
-            </ul>
-          )}
-        </div>
-      ) : null}
+              </div>
+            ) : (
+              <ul
+                id={list_id}
+                ref={list_ref}
+                role="listbox"
+                className="grid divide-y divide-border overflow-hidden rounded-2xl border border-border bg-elevated shadow-lg"
+              >
+                {suggestions.map((item, idx) => (
+                  <SuggestionItem
+                    key={item.id}
+                    id={`${list_id}-${item.id}`}
+                    item={item}
+                    active={highlight === idx}
+                    on_hover={() => set_highlight(idx)}
+                    on_select={() => go_to_name(item.name)}
+                  />
+                ))}
+                <li>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => go_to_search(debounced_query)}
+                    className="flex w-full items-center justify-between gap-2 bg-surface/40 px-4 py-2.5 text-[12px] text-muted-foreground transition-colors hover:bg-surface/80 hover:text-foreground"
+                  >
+                    <span>
+                      See all results for{' '}
+                      <span className="font-mono tabular text-foreground">
+                        {debounced_query}
+                      </span>
+                    </span>
+                    <CornerDownLeft className="size-3" strokeWidth={1.85} />
+                  </button>
+                </li>
+              </ul>
+            )}
+          </div>
+        ) : null}
+      </form>
     </div>
   );
 }
@@ -346,13 +378,13 @@ function SuggestionItem({
       onMouseEnter={on_hover}
       onClick={on_select}
       className={cn(
-        'grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-2.5 transition-colors',
+        'grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 transition-colors',
         active ? 'bg-surface/80' : 'bg-transparent',
       )}
     >
       <div className="grid min-w-0 gap-0.5">
         <div className="flex min-w-0 items-baseline gap-2">
-          <span className="truncate text-[13.5px] font-medium text-foreground">
+          <span className="truncate text-[14px] font-medium text-foreground">
             {item.name}
           </span>
           {latest ? (
@@ -391,10 +423,10 @@ function SuggestionSkeleton() {
   return (
     <ul
       aria-hidden
-      className="grid divide-y divide-border overflow-hidden rounded-lg border border-border bg-background"
+      className="grid divide-y divide-border overflow-hidden rounded-2xl border border-border bg-elevated shadow-lg"
     >
       {Array.from({ length: 3 }).map((_, idx) => (
-        <li key={idx} className="grid gap-1.5 px-3 py-2.5">
+        <li key={idx} className="grid gap-1.5 px-4 py-3">
           <div className="h-3.5 w-1/2 max-w-[12rem] animate-pulse rounded-md bg-muted" />
           <div className="h-3 w-1/3 max-w-[10rem] animate-pulse rounded-md bg-muted/70" />
         </li>

@@ -24,6 +24,7 @@ export function useRefreshIndexerFeeds() {
         qc.invalidateQueries({ queryKey: ['indexer', 'name'] }),
         qc.invalidateQueries({ queryKey: ['indexer', 'publisher'] }),
         qc.invalidateQueries({ queryKey: query_keys.health() }),
+        qc.invalidateQueries({ queryKey: query_keys.stats() }),
       ]);
     },
   });

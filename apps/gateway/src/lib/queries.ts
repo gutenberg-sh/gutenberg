@@ -65,6 +65,12 @@ export interface IndexerHealth {
   lag_slots: number | null;
 }
 
+export interface IndexerStats {
+  releases: number;
+  names: number;
+  publishers: number;
+}
+
 const STALE_FEED = 30_000;
 const STALE_LOOKUP = 60_000;
 const STALE_HEALTH = 15_000;
@@ -89,6 +95,7 @@ export const query_keys = {
     input: { limit: number; offset: number; includes?: string },
   ) => ['indexer', 'publisher', address, 'releases', input] as const,
   health: () => ['indexer', 'health'] as const,
+  stats: () => ['indexer', 'stats'] as const,
 };
 
 function build_params(record: Record<string, string | number | undefined>) {
@@ -235,6 +242,19 @@ export function useIndexerHealth() {
     },
     staleTime: STALE_HEALTH,
     refetchInterval: STALE_HEALTH,
+    retry: 0,
+  });
+}
+
+export function useIndexerStats() {
+  return useQuery<IndexerStats>({
+    queryKey: query_keys.stats(),
+    queryFn: async () => {
+      const { data } = await api.get<IndexerStats>('/stats');
+      return data;
+    },
+    staleTime: STALE_FEED,
+    refetchInterval: STALE_FEED,
     retry: 0,
   });
 }

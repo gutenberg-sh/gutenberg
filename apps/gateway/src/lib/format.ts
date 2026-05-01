@@ -44,3 +44,11 @@ export function shorten(value: string, head = 6, tail = 6): string {
   if (value.length <= head + tail + 1) return value;
   return `${value.slice(0, head)}…${value.slice(-tail)}`;
 }
+
+export function format_count(value: number | null | undefined): string {
+  if (value == null || !Number.isFinite(value)) return '—';
+  if (value < 1_000) return value.toLocaleString();
+  if (value < 10_000) return value.toLocaleString();
+  if (value < 1_000_000) return `${(value / 1_000).toFixed(value < 10_000 ? 2 : 1)}k`;
+  return `${(value / 1_000_000).toFixed(2)}M`;
+}

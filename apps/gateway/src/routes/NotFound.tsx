@@ -2,8 +2,11 @@ import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { Container } from '@/components/Layout';
+import { useIsApplePlatform } from '@/hooks/usePlatform';
 
 export function NotFoundRoute() {
+  const is_mac = useIsApplePlatform();
+
   return (
     <Container as="section" className="grid gap-7 py-24 lg:py-32">
       <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
@@ -17,7 +20,7 @@ export function NotFoundRoute() {
         <code className="rounded-md border border-border bg-card px-1.5 py-0.5 font-mono text-[13px] tabular text-foreground">
           /r/&lt;name&gt;/&lt;version&gt;
         </code>
-        . Double-check the name and version, then try again from the lookup
+        . Double-check the name and version, then try again from the search
         page.
       </p>
       <div className="mt-2 flex items-center gap-3">
@@ -26,11 +29,11 @@ export function NotFoundRoute() {
           className="inline-flex items-center gap-2 rounded-lg bg-foreground px-3.5 py-2 text-[13px] font-medium text-background transition-colors hover:bg-foreground/92 active:translate-y-px"
         >
           <ArrowLeft className="size-3.5" strokeWidth={2} aria-hidden />
-          Back to lookup
+          Back to search
         </Link>
         <span className="hidden items-center gap-1.5 text-[12px] text-muted-foreground sm:inline-flex">
           or press
-          <span className="kbd">⌘</span>
+          <span className="kbd">{is_mac ? '⌘' : 'Ctrl'}</span>
           <span className="kbd">K</span>
         </span>
       </div>

@@ -6,7 +6,7 @@ import { Wordmark } from '@/components/Wordmark';
 export function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-border/70 bg-background">
-      <div className="mx-auto grid w-full max-w-7xl gap-6 px-6 py-12 lg:px-10">
+      <div className="mx-auto grid w-full max-w-6xl gap-6 px-6 py-12 lg:px-10">
         <div className="grid gap-3">
           <Wordmark className="text-foreground" showSubmark={false} />
           <p className="max-w-[44ch] text-[13.5px] leading-relaxed text-foreground-soft">

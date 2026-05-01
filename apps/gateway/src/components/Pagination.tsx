@@ -17,6 +17,10 @@ export function Pagination({
   on_prev: () => void;
   on_next: () => void;
 }) {
+  if (!has_prev && !has_next && !loading) {
+    return null;
+  }
+
   return (
     <nav
       aria-label="Pagination"
@@ -24,7 +28,9 @@ export function Pagination({
     >
       <p className="font-mono tabular text-muted-foreground">
         Page <span className="text-foreground">{page}</span>
-        {loading ? <span className="ml-2 text-muted-foreground/70">·  loading…</span> : null}
+        {loading ? (
+          <span className="ml-2 text-muted-foreground/70">· loading…</span>
+        ) : null}
       </p>
 
       <div className="flex items-center gap-1">

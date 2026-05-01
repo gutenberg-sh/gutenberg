@@ -1,17 +1,14 @@
-import { Github } from 'lucide-react';
+import { Github, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
 import { LookupDialog } from '@/components/LookupDialog';
 import { Wordmark } from '@/components/Wordmark';
+import { useIsApplePlatform } from '@/hooks/usePlatform';
 import { cn } from '@/lib/utils';
 
 export function SiteHeader() {
-  const [is_mac] = useState(
-    () =>
-      typeof navigator !== 'undefined' &&
-      /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform),
-  );
+  const is_mac = useIsApplePlatform();
   const [lookup_open, set_lookup_open] = useState(false);
 
   useEffect(() => {
@@ -29,7 +26,7 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/65 backdrop-blur-xl supports-[backdrop-filter]:bg-background/55">
-        <div className="mx-auto flex w-full max-w-7xl items-center gap-6 px-6 py-3 lg:px-10">
+        <div className="mx-auto flex w-full max-w-6xl items-center gap-6 px-6 py-3 lg:px-10">
           <Link
             to="/"
             aria-label="Gutenberg gateway, home"
@@ -50,9 +47,11 @@ export function SiteHeader() {
             <button
               type="button"
               onClick={() => set_lookup_open(true)}
-              className="hidden items-center gap-2 rounded-lg border border-border px-2.5 py-1.5 text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground sm:inline-flex"
+              aria-label="Search the registry"
+              className="hidden items-center gap-2 rounded-lg border border-border bg-card px-2.5 py-1.5 text-foreground-soft transition-colors hover:border-border-strong hover:bg-elevated hover:text-foreground sm:inline-flex"
             >
-              <span className="text-[12.5px]">Open release</span>
+              <Search className="size-3.5" strokeWidth={1.85} aria-hidden />
+              <span className="text-[12.5px]">Search</span>
               <span className="flex items-center gap-0.5">
                 <span className="kbd">{is_mac ? '⌘' : 'Ctrl'}</span>
                 <span className="kbd">K</span>
@@ -89,14 +88,27 @@ function HeaderLink({
       to={to}
       className={({ isActive }) =>
         cn(
-          'rounded-md px-2.5 py-1.5 text-[12.5px] font-medium transition-colors',
+          'group relative rounded-md px-2.5 py-1.5 text-[12.5px] font-medium transition-colors',
           isActive
             ? 'text-foreground'
             : 'text-muted-foreground hover:text-foreground',
         )
       }
     >
-      {children}
+      {({ isActive }) => (
+        <>
+          {children}
+          <span
+            aria-hidden
+            className={cn(
+              'pointer-events-none absolute inset-x-2.5 bottom-[3px] h-[2px] origin-center rounded-full transition-all',
+              isActive
+                ? 'scale-x-100 bg-accent opacity-100'
+                : 'scale-x-50 bg-foreground/40 opacity-0 group-hover:scale-x-100 group-hover:opacity-30',
+            )}
+          />
+        </>
+      )}
     </NavLink>
   );
 }
