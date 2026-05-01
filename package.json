@@ -20,10 +20,13 @@
   "dependencies": {
     "@gutenberg/cli": "workspace:*",
     "@gutenberg/core": "workspace:*",
-    "@gutenberg/gateway": "workspace:*"
+    "@gutenberg/gateway": "workspace:*",
+    "@gutenberg/indexer": "workspace:*"
   },
   "scripts": {
-    "solana:validator": "solana-test-validator",
+    "env:setup": "docker compose up -d --wait && pnpm indexer:db:apply",
+    "env:teardown": "docker compose down",
+    "env:reset": "docker compose down -v",
     "solana:build": "pnpm --filter @gutenberg/solana run anchor:build",
     "solana:deploy": "pnpm --filter @gutenberg/solana run anchor:deploy",
     "solana:test": "pnpm --filter @gutenberg/solana run anchor:test",
@@ -38,7 +41,14 @@
     "gateway:build": "pnpm --filter @gutenberg/core run build && pnpm --filter @gutenberg/gateway run build",
     "gateway:preview": "pnpm --filter @gutenberg/gateway run preview",
     "gateway:format": "pnpm --filter @gutenberg/gateway run format",
-    "gateway:lint": "pnpm --filter @gutenberg/gateway run lint"
+    "gateway:lint": "pnpm --filter @gutenberg/gateway run lint",
+    "indexer:db:migrate": "pnpm --filter @gutenberg/indexer run db:migrate",
+    "indexer:db:apply": "pnpm --filter @gutenberg/indexer run db:apply",
+    "indexer:dev": "pnpm --filter @gutenberg/indexer run dev",
+    "indexer:build": "pnpm --filter @gutenberg/core run build && pnpm --filter @gutenberg/indexer run build",
+    "indexer:start": "pnpm --filter @gutenberg/indexer run start",
+    "indexer:format": "pnpm --filter @gutenberg/indexer run format",
+    "indexer:lint": "pnpm --filter @gutenberg/indexer run lint"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

@@ -31,7 +31,7 @@ export type GutenbergUnsignedManifest = {
   name: string;
   version: string;
   publisher: SolanaPublicKey;
-  created_at: string;
+  published_at: string;
 
   entry: `/${string}`;
   files: Record<`/${string}`, GutenbergManifestFile>;

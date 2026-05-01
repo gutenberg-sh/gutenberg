@@ -4,7 +4,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { GATEWAY_URL } from '../../common/config/config.tokens';
 import { open_url_in_browser } from '../../common/helpers/open-browser';
 import {
-  assert_valid_site_name,
+  assert_valid_name,
   parse_name_at_version,
 } from '../../common/helpers/parse-spec';
 import { RegistryService } from '../registry/registry.service';
@@ -23,7 +23,7 @@ export class OpenCommand {
       options: {
         pkg: positional('pkg')
           .desc(
-            'name@version for a specific release, or site name alone to open the latest version',
+            'name@version for a specific release, or name alone to open the latest version',
           )
           .required(),
         gateway: string('gateway').desc(
@@ -56,7 +56,7 @@ export class OpenCommand {
       return parse_name_at_version(trimmed, 'open');
     }
 
-    assert_valid_site_name(trimmed, 'open');
+    assert_valid_name(trimmed, 'open');
 
     const release = await this.registry_service.find_release({ name: trimmed });
 

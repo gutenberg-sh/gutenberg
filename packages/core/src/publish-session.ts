@@ -3,7 +3,7 @@ import type { ChainId, ContentUri, Sha256Hash } from './types.js';
 export const PUBLISH_SESSION_PROTOCOL_VERSION = 1 as const;
 
 export type PublishSessionFile = {
-  site_path: `/${string}`;
+  path: `/${string}`;
   size_bytes: number;
   mime?: string;
   content_base64: string;
@@ -33,8 +33,8 @@ export type PublishSessionResult = {
   manifest_hash: Sha256Hash;
   content_hash: Sha256Hash;
   content_size_bytes: number;
-  release_pda: string;
-  tx_signature: string;
+  release_address: string;
+  signature: string;
   publisher: string;
 };
 

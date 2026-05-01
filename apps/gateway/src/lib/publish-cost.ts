@@ -3,8 +3,8 @@ import {
   canonical_json,
   fetch_minimum_balance_for_rent_exemption,
   fetch_name_authority,
-  find_name_authority_pda,
-  NAME_AUTHORITY_ACCOUNT_SPACE,
+  find_name_address,
+  NAME_ACCOUNT_SPACE,
   PUBLISH_BASE_FEE_LAMPORTS,
   RELEASE_ACCOUNT_SPACE,
   type GutenbergManifestFile,
@@ -16,8 +16,8 @@ export const LAMPORTS_PER_SOL = 1_000_000_000;
 export type SolanaCostEstimate = {
   base_fee_lamports: number;
   release_rent_lamports: number;
-  name_authority_rent_lamports: number;
-  creates_name_authority: boolean;
+  name_rent_lamports: number;
+  creates_name: boolean;
   total_lamports: number;
 };
 
@@ -34,35 +34,34 @@ export async function estimate_solana_publish_cost(input: {
   name: string;
   program_id?: string;
 }): Promise<SolanaCostEstimate> {
-  const { address: pda } = find_name_authority_pda({
+  const { address } = find_name_address({
     name: input.name,
     ...(input.program_id ? { program_id: input.program_id } : {}),
   });
   const authority = await fetch_name_authority({
     rpc_url: input.rpc_url,
     name: input.name,
-    pda,
+    address,
   });
-  const creates_name_authority = authority === undefined;
+  const creates_name = authority === undefined;
 
   const release_rent = await fetch_minimum_balance_for_rent_exemption({
     rpc_url: input.rpc_url,
     data_length: RELEASE_ACCOUNT_SPACE,
   });
-  const name_authority_rent = creates_name_authority
+  const name_rent = creates_name
     ? await fetch_minimum_balance_for_rent_exemption({
         rpc_url: input.rpc_url,
-        data_length: NAME_AUTHORITY_ACCOUNT_SPACE,
+        data_length: NAME_ACCOUNT_SPACE,
       })
     : 0;
 
   return {
     base_fee_lamports: PUBLISH_BASE_FEE_LAMPORTS,
     release_rent_lamports: release_rent,
-    name_authority_rent_lamports: name_authority_rent,
-    creates_name_authority,
-    total_lamports:
-      release_rent + name_authority_rent + PUBLISH_BASE_FEE_LAMPORTS,
+    name_rent_lamports: name_rent,
+    creates_name,
+    total_lamports: release_rent + name_rent + PUBLISH_BASE_FEE_LAMPORTS,
   };
 }
 
@@ -72,7 +71,7 @@ export function estimate_manifest_size_for_session(
   const sample_files: Record<`/${string}`, GutenbergManifestFile> = {};
 
   for (const f of session.files) {
-    sample_files[f.site_path] = {
+    sample_files[f.path] = {
       hash: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
       size_bytes: f.size_bytes,
       uri: 'ar://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',

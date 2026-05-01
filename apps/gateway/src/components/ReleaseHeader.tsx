@@ -29,7 +29,7 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
     <section aria-label="Release" className="grid gap-5">
       <IdentityStrip
         publisher={manifest.publisher}
-        created_at={manifest.created_at}
+        published_at={manifest.published_at}
       />
 
       <h1 className="text-balance font-semibold tracking-[-0.02em] text-foreground">
@@ -72,17 +72,17 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
 
 function IdentityStrip({
   publisher,
-  created_at,
+  published_at,
 }: {
   publisher: string;
-  created_at: string;
+  published_at: string;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Chip
         icon={<Calendar className="size-3" strokeWidth={1.85} aria-hidden />}
       >
-        {format_date(created_at)}
+        {format_date(published_at)}
       </Chip>
 
       <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
@@ -208,11 +208,11 @@ function ProvenanceDisclosure({ release }: { release: VerifiedRelease }) {
           caption="Where this release is recorded on Solana"
         >
           <ProofRow
-            label="Release PDA"
-            display={shorten(release.release_pda, 6, 6)}
-            value={release.release_pda}
+            label="Release"
+            display={shorten(release.release_address, 6, 6)}
+            value={release.release_address}
             copyable
-            explorer_url={explorer_address_url(release.release_pda)}
+            explorer_url={explorer_address_url(release.release_address)}
           />
           <ProofRow
             label="Program"

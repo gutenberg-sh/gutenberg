@@ -18,7 +18,7 @@ export class PublishCommand {
       desc: 'Publish a folder of writing via the browser wallet (Phantom & friends)',
       options: {
         pkg: positional('pkg')
-          .desc('Site name and version, npm-style: name@version')
+          .desc('Release name and version, npm-style: name@version')
           .required(),
         folder: positional('folder')
           .desc('Folder of writing to publish')
@@ -57,7 +57,7 @@ export class PublishCommand {
         };
 
         try {
-          const result = await this.publish_service.publish_site(
+          const result = await this.publish_service.publish_release(
             publish_options,
             {
               on_progress: report_progress,
@@ -68,10 +68,10 @@ export class PublishCommand {
           console.log(
             `Uploaded ${format_bytes(result.total_bytes)} across ${result.file_count} file(s)`,
           );
-          console.log(`Publisher:    ${result.publisher}`);
-          console.log(`Manifest:     ${result.manifest_uri}`);
-          console.log(`Release PDA:  ${result.release_pda}`);
-          console.log(`Tx signature: ${result.tx_signature}`);
+          console.log(`Publisher: ${result.publisher}`);
+          console.log(`Manifest:  ${result.manifest_uri}`);
+          console.log(`Release:   ${result.release_address}`);
+          console.log(`Signature: ${result.signature}`);
         } catch (error) {
           if (error instanceof PublishCancelledError) {
             write_status(`Publish cancelled. ${error.message}`);

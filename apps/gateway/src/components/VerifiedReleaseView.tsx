@@ -342,26 +342,26 @@ function resolve_relative_url(input: {
     return raw;
   }
 
-  const resolved_site_path = resolve_within_site(current_path, raw);
+  const resolved_release_path = resolve_within_release(current_path, raw);
 
-  if (!resolved_site_path) {
+  if (!resolved_release_path) {
     return undefined;
   }
 
-  if (!files.has(resolved_site_path)) {
+  if (!files.has(resolved_release_path)) {
     return undefined;
   }
 
-  const ext = extension_of(resolved_site_path);
+  const ext = extension_of(resolved_release_path);
 
   if (ext === '.md') {
-    return `${base_path}${encode_site_path(resolved_site_path)}`;
+    return `${base_path}${encode_release_path(resolved_release_path)}`;
   }
 
-  return assets.get(resolved_site_path);
+  return assets.get(resolved_release_path);
 }
 
-function resolve_within_site(
+function resolve_within_release(
   current: `/${string}`,
   raw: string,
 ): `/${string}` | undefined {
@@ -372,16 +372,16 @@ function resolve_within_site(
   }
 
   if (cleaned.startsWith('/')) {
-    return normalize_site_path(cleaned);
+    return normalize_release_path(cleaned);
   }
 
   const last_slash = current.lastIndexOf('/');
   const dir = last_slash >= 0 ? current.slice(0, last_slash) : '';
 
-  return normalize_site_path(`${dir}/${cleaned}`);
+  return normalize_release_path(`${dir}/${cleaned}`);
 }
 
-function normalize_site_path(path: string): `/${string}` | undefined {
+function normalize_release_path(path: string): `/${string}` | undefined {
   const segments: string[] = [];
 
   for (const segment of path.split('/')) {
@@ -404,7 +404,7 @@ function normalize_site_path(path: string): `/${string}` | undefined {
   return `/${segments.join('/')}`;
 }
 
-function encode_site_path(path: `/${string}`): string {
+function encode_release_path(path: `/${string}`): string {
   return path
     .split('/')
     .map((segment) => (segment ? encodeURIComponent(segment) : ''))

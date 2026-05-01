@@ -112,7 +112,7 @@ export function useVerifiedRelease(source: ReleaseSource): State {
     void (async () => {
       try {
         begin_step('registry');
-        const { release, release_pda } = await resolve_release(
+        const { release, release_address } = await resolve_release(
           { name: source.name, version: source.version },
           ctx,
         );
@@ -131,7 +131,7 @@ export function useVerifiedRelease(source: ReleaseSource): State {
         begin_step('index');
         const verified = assemble_verified_release({
           release,
-          release_pda,
+          release_address,
           manifest,
         });
         if (cancelled) return;

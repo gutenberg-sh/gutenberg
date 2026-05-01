@@ -126,17 +126,10 @@ export class RegistryService {
     decode_publisher_public_key(value.publisher);
 
     if (
-      typeof value.created_at !== 'string' ||
-      Number.isNaN(Date.parse(value.created_at))
+      typeof value.published_at !== 'string' ||
+      Number.isNaN(Date.parse(value.published_at))
     ) {
-      throw new Error('Release event created_at must be an ISO timestamp');
-    }
-
-    if (
-      typeof value.created_at_slot !== 'number' ||
-      !Number.isInteger(value.created_at_slot)
-    ) {
-      throw new Error('Release event created_at_slot must be an integer');
+      throw new Error('Release event published_at must be an ISO timestamp');
     }
   }
 }

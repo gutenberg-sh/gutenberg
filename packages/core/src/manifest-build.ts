@@ -25,7 +25,7 @@ export type BuildManifestInput = {
   name: string;
   version: string;
   publisher: SolanaPublicKey;
-  created_at?: string;
+  published_at?: string;
   entry?: `/${string}`;
   files: Record<`/${string}`, GutenbergManifestFile>;
   chain: { chain_id: ChainId; program_id: SolanaPublicKey };
@@ -38,7 +38,7 @@ export type BuildManifestInput = {
 export function build_unsigned_manifest(
   input: BuildManifestInput,
 ): GutenbergUnsignedManifest {
-  const created_at = input.created_at ?? new Date().toISOString();
+  const published_at = input.published_at ?? new Date().toISOString();
   const entry = input.entry ?? '/index.md';
   const content_size_bytes = Object.values(input.files).reduce(
     (acc, file) => acc + file.size_bytes,
@@ -52,7 +52,7 @@ export function build_unsigned_manifest(
     name: input.name,
     version: input.version,
     publisher: input.publisher,
-    created_at,
+    published_at,
     entry,
     files: input.files,
     content_hash,

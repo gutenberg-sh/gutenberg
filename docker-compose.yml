@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gutenberg-indexer-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gutenberg
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - gutenberg-indexer-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d gutenberg']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  solana-validator:
+    image: ghcr.io/beeman/solana-test-validator:latest
+    container_name: gutenberg-solana-validator
+    restart: unless-stopped
+    security_opt:
+      - seccomp:unconfined
+    ports:
+      - '8899:8899'
+      - '8900:8900'
+    healthcheck:
+      test: ['CMD-SHELL', 'solana cluster-version -u http://127.0.0.1:8899 || exit 1']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+volumes:
+  gutenberg-indexer-postgres-data:

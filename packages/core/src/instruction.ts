@@ -6,11 +6,11 @@ import { sha256_prefix, type Sha256Hash } from './types.js';
 export const GUTENBERG_REGISTRY_PROGRAM_ID =
   'NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517';
 
-// Account sizes mirror `Release::SPACE` / `NameAuthority::SPACE` in
+// Account sizes mirror `Release::SPACE` / `Name::SPACE` in
 // apps/solana/programs/gutenberg_registry/src/state.rs.
 export const RELEASE_ACCOUNT_SPACE =
   8 + 1 + 32 + (4 + 64) + (4 + 32) + (4 + 512) + 32 + 32 + 8 + 8 + 8;
-export const NAME_AUTHORITY_ACCOUNT_SPACE = 8 + 32;
+export const NAME_ACCOUNT_SPACE = 8 + 32;
 
 // Solana charges 5000 lamports per signature; publish_release has exactly one.
 export const PUBLISH_BASE_FEE_LAMPORTS = 5000;
@@ -44,7 +44,7 @@ export function encode_publish_release_instruction(
   );
 }
 
-export function find_release_pda(input: {
+export function find_release_address(input: {
   name: string;
   version: string;
   program_id?: string;
@@ -57,7 +57,7 @@ export function find_release_pda(input: {
   );
 }
 
-export function find_name_authority_pda(input: {
+export function find_name_address(input: {
   name: string;
   program_id?: string;
 }): { address: string; bump: number } {
@@ -74,19 +74,19 @@ export function release_address(input: {
   version: string;
   program_id?: string;
 }): string {
-  return find_release_pda(input).address;
+  return find_release_address(input).address;
 }
 
-export function name_authority_address(input: {
+export function name_address(input: {
   name: string;
   program_id?: string;
 }): string {
-  return find_name_authority_pda(input).address;
+  return find_name_address(input).address;
 }
 
 export const ACCOUNT_DISCRIMINATOR = {
   Release: account_discriminator('Release'),
-  NameAuthority: account_discriminator('NameAuthority'),
+  Name: account_discriminator('Name'),
 } as const;
 
 function find_program_address(

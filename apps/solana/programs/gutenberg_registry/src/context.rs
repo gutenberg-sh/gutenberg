@@ -1,11 +1,11 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{NameAuthority, Release};
+use crate::state::{Name, Release};
 
 #[derive(Accounts)]
 #[instruction(
-    site_name: String,
-    site_version: String,
+    name: String,
+    version: String,
     manifest_uri: String,
     manifest_hash: [u8; 32],
     content_hash: [u8; 32],
@@ -20,11 +20,11 @@ pub struct PublishRelease<'info> {
     #[account(
         init_if_needed,
         payer = publisher,
-        space = NameAuthority::SPACE,
+        space = Name::SPACE,
         seeds = [b"name", name_seed.as_ref()],
         bump,
     )]
-    pub name_authority: Account<'info, NameAuthority>,
+    pub name: Account<'info, Name>,
 
     #[account(
         init,

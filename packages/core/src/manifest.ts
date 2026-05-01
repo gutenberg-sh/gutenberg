@@ -26,7 +26,7 @@ const manifest_required_keys: ReadonlySet<string> = new Set([
   'name',
   'version',
   'publisher',
-  'created_at',
+  'published_at',
   'entry',
   'files',
   'content_hash',
@@ -140,10 +140,10 @@ function assert_valid_unsigned_manifest_record(
   decode_publisher_public_key(manifest.publisher);
 
   if (
-    typeof manifest.created_at !== 'string' ||
-    Number.isNaN(Date.parse(manifest.created_at))
+    typeof manifest.published_at !== 'string' ||
+    Number.isNaN(Date.parse(manifest.published_at))
   ) {
-    throw new Error('Manifest created_at must be an ISO timestamp');
+    throw new Error('Manifest published_at must be an ISO timestamp');
   }
 
   assert_absolute_path(manifest.entry, 'Manifest entry');

@@ -4,8 +4,8 @@ import {
   canonical_json,
   encode_publish_release_instruction,
   encode_signature,
-  find_name_authority_pda,
-  find_release_pda,
+  find_name_address,
+  find_release_address,
   guess_mime_for_path,
   manifest_hash,
   sha256_hash,
@@ -45,8 +45,8 @@ export type PublishFlowResult = {
   manifest: GutenbergManifest;
   manifest_uri: `ar://${string}`;
   manifest_hash: Sha256Hash;
-  release_pda: string;
-  tx_signature: string;
+  release_address: string;
+  signature: string;
   publisher: string;
 };
 
@@ -91,10 +91,10 @@ export async function run_publish_flow(input: {
   );
 
   const decoded_files = session.files.map((file) => ({
-    site_path: file.site_path,
+    path: file.path,
     bytes: base64_decode(file.content_base64),
     size_bytes: file.size_bytes,
-    mime: file.mime ?? guess_mime_for_path(file.site_path),
+    mime: file.mime ?? guess_mime_for_path(file.path),
   }));
 
   if (session.irys_network === 'mainnet') {
@@ -164,7 +164,7 @@ export async function run_publish_flow(input: {
       uri: `ar://${prepared.tx_id}`,
       ...(prepared.file.mime ? { mime: prepared.file.mime } : {}),
     };
-    files_record[prepared.file.site_path] = entry;
+    files_record[prepared.file.path] = entry;
   }
 
   const unsigned_manifest = build_unsigned_manifest({
@@ -219,7 +219,7 @@ export async function run_publish_flow(input: {
 
   on_event({ kind: 'tx_sending' });
 
-  const tx_signature = await send_publish_release_tx({
+  const signature = await send_publish_release_tx({
     wallet,
     rpc_url: session.rpc_url,
     program_id: session.chain.program_id,
@@ -231,9 +231,9 @@ export async function run_publish_flow(input: {
     content_size_bytes: manifest.content_size_bytes,
   });
 
-  on_event({ kind: 'tx_confirmed', signature: tx_signature });
+  on_event({ kind: 'tx_confirmed', signature });
 
-  const release_pda = find_release_pda({
+  const release_addr = find_release_address({
     name: session.name,
     version: session.version,
     program_id: session.chain.program_id,
@@ -243,8 +243,8 @@ export async function run_publish_flow(input: {
     manifest,
     manifest_uri,
     manifest_hash: m_hash,
-    release_pda,
-    tx_signature,
+    release_address: release_addr,
+    signature,
     publisher,
   };
 }
@@ -306,15 +306,15 @@ async function send_publish_release_tx(input: {
   }
 
   const program_pubkey = new PublicKey(program_id);
-  const release_pda = new PublicKey(
-    find_release_pda({
+  const release_addr = new PublicKey(
+    find_release_address({
       name,
       version,
       program_id,
     }).address,
   );
-  const name_authority_pda = new PublicKey(
-    find_name_authority_pda({ name, program_id }).address,
+  const name_addr = new PublicKey(
+    find_name_address({ name, program_id }).address,
   );
 
   const data = encode_publish_release_instruction({
@@ -330,8 +330,8 @@ async function send_publish_release_tx(input: {
     programId: program_pubkey,
     keys: [
       { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
-      { pubkey: name_authority_pda, isSigner: false, isWritable: true },
-      { pubkey: release_pda, isSigner: false, isWritable: true },
+      { pubkey: name_addr, isSigner: false, isWritable: true },
+      { pubkey: release_addr, isSigner: false, isWritable: true },
       { pubkey: SYSTEM_PROGRAM_ID, isSigner: false, isWritable: false },
     ],
     data: Buffer.from(data),
@@ -379,14 +379,14 @@ function base64_decode(value: string): Uint8Array {
 function estimate_manifest_size(
   session: PublishSessionInput,
   files: ReadonlyArray<{
-    site_path: `/${string}`;
+    path: `/${string}`;
     size_bytes: number;
     mime?: string;
   }>,
 ): number {
   const sample_files: Record<`/${string}`, GutenbergManifestFile> = {};
   for (const f of files) {
-    sample_files[f.site_path] = {
+    sample_files[f.path] = {
       hash: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
       size_bytes: f.size_bytes,
       uri: 'ar://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',

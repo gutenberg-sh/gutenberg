@@ -25,7 +25,7 @@ export type VerifyContext = {
 export async function resolve_release(
   input: { name: string; version: string },
   ctx: VerifyContext,
-): Promise<{ release: GutenbergReleaseEvent; release_pda: string }> {
+): Promise<{ release: GutenbergReleaseEvent; release_address: string }> {
   const found = await fetch_release_by_name_at_version({
     rpc_url: ctx.rpc_url,
     program_id: ctx.program_id,
@@ -168,14 +168,14 @@ export async function load_file_bytes(input: {
 
 export function assemble_verified_release(input: {
   release: GutenbergReleaseEvent;
-  release_pda: string;
+  release_address: string;
   manifest: GutenbergManifest;
 }): VerifiedRelease {
   return {
     manifest: input.manifest,
     manifest_uri: input.release.manifest,
     release: input.release,
-    release_pda: input.release_pda,
+    release_address: input.release_address,
     files: build_file_index(input.manifest),
   };
 }

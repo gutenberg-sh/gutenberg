@@ -3,10 +3,10 @@ import { existsSync } from 'node:fs';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 
-import type { SiteBundleFile } from '../../common/helpers/site-bundle';
+import type { ReleaseBundleFile } from '../../common/helpers/release-bundle';
 
 @Injectable()
-export class SiteFilesRepository {
+export class ReleaseFilesRepository {
   resolve_folder(folder: string): string {
     if (isAbsolute(folder)) {
       return folder;
@@ -38,8 +38,8 @@ export class SiteFilesRepository {
     return root;
   }
 
-  async list_site_files(root: string): Promise<SiteBundleFile[]> {
-    const files: SiteBundleFile[] = [];
+  async list_release_files(root: string): Promise<ReleaseBundleFile[]> {
+    const files: ReleaseBundleFile[] = [];
 
     async function visit(dir: string): Promise<void> {
       const entries = await readdir(dir, { withFileTypes: true });
@@ -62,7 +62,7 @@ export class SiteFilesRepository {
 
         files.push({
           absolute_path: path,
-          site_path: `/${relative(root, path).split(sep).join('/')}`,
+          path: `/${relative(root, path).split(sep).join('/')}`,
         });
       }
     }
@@ -70,7 +70,7 @@ export class SiteFilesRepository {
     await visit(root);
 
     return files.sort((a, b) =>
-      a.site_path < b.site_path ? -1 : a.site_path > b.site_path ? 1 : 0,
+      a.path < b.path ? -1 : a.path > b.path ? 1 : 0,
     );
   }
 

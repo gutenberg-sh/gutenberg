@@ -30,7 +30,7 @@ export function FileNav({
         {files.map((path, idx) => {
           const active = path === current_path;
           const label = path === '/' ? 'index' : path.replace(/^\//, '');
-          const href = `${base_path}${encode_site_path(path)}`;
+          const href = `${base_path}${encode_release_path(path)}`;
           const number = (idx + 1).toString().padStart(2, '0');
 
           return (
@@ -80,7 +80,7 @@ export function FileNav({
   );
 }
 
-function encode_site_path(path: `/${string}`): string {
+function encode_release_path(path: `/${string}`): string {
   return path
     .split('/')
     .map((segment) => (segment ? encodeURIComponent(segment) : ''))

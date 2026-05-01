@@ -151,8 +151,8 @@ export function PublishRoute() {
         manifest_hash: result.manifest_hash,
         content_hash: result.manifest.content_hash,
         content_size_bytes: result.manifest.content_size_bytes,
-        release_pda: result.release_pda,
-        tx_signature: result.tx_signature,
+        release_address: result.release_address,
+        signature: result.signature,
         publisher: result.publisher,
       };
 
@@ -334,8 +334,8 @@ function CostPreview({ session }: { session: PublishSessionInput }) {
         <p className="text-[13px] text-foreground-soft">
           Paid by your connected wallet. Irys covers permanent storage; Solana
           covers rent for the new release account
-          {solana.kind === 'success' && solana.data.creates_name_authority
-            ? ' plus a one-time name-authority account'
+          {solana.kind === 'success' && solana.data.creates_name
+            ? ' plus a one-time name account'
             : ''}{' '}
           plus a 5,000-lamport base fee.
         </p>
@@ -365,10 +365,10 @@ function CostPreview({ session }: { session: PublishSessionInput }) {
               <span className="text-muted-foreground">
                 {' '}
                 · rent {format_lamports_as_sol(
-                  data.release_rent_lamports + data.name_authority_rent_lamports,
+                  data.release_rent_lamports + data.name_rent_lamports,
                 )}{' '}
                 + fee {format_lamports_as_sol(data.base_fee_lamports)}
-                {data.creates_name_authority ? ' · first release for name' : ''}
+                {data.creates_name ? ' · first release for name' : ''}
               </span>
             </>
           )}
@@ -522,7 +522,7 @@ function SuccessView({
 
   useEffect(() => {
     if (seconds_left <= 0) {
-      navigate(target);
+      void navigate(target);
       return;
     }
 
@@ -541,8 +541,8 @@ function SuccessView({
       </p>
       <Field label="Manifest" value={result.manifest_uri} mono truncate />
       <Field label="Manifest hash" value={result.manifest_hash} mono truncate />
-      <Field label="Release PDA" value={result.release_pda} mono truncate />
-      <Field label="Tx signature" value={result.tx_signature} mono truncate />
+      <Field label="Release" value={result.release_address} mono truncate />
+      <Field label="Signature" value={result.signature} mono truncate />
       <p className="text-foreground-soft">
         Opening your release in {seconds_left}s…{' '}
         <Link

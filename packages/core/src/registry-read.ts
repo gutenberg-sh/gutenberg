@@ -3,7 +3,7 @@ import { bytes_equal, bytes_to_hex } from './hash.js';
 import {
   ACCOUNT_DISCRIMINATOR,
   GUTENBERG_REGISTRY_PROGRAM_ID,
-  find_release_pda,
+  find_release_address,
 } from './instruction.js';
 import {
   release_event_type,
@@ -69,12 +69,12 @@ export async function fetch_release_by_name_at_version(input: {
 }): Promise<
   | {
       release: GutenbergReleaseEvent;
-      release_pda: string;
+      release_address: string;
     }
   | undefined
 > {
   const program_id = input.program_id ?? GUTENBERG_REGISTRY_PROGRAM_ID;
-  const { address: release_pda } = find_release_pda({
+  const { address: address } = find_release_address({
     name: input.name,
     version: input.version,
     program_id,
@@ -86,7 +86,7 @@ export async function fetch_release_by_name_at_version(input: {
     rpc_url: input.rpc_url,
     method: 'getAccountInfo',
     params: [
-      release_pda,
+      address,
       {
         encoding: 'base64',
         commitment: 'confirmed',
@@ -101,7 +101,7 @@ export async function fetch_release_by_name_at_version(input: {
   const data = decode_account_data(result.value.data);
   const release = decode_release_account(data);
 
-  return { release, release_pda };
+  return { release, release_address: address };
 }
 
 export async function list_releases(input: {
@@ -137,7 +137,9 @@ export async function list_releases(input: {
     }
   }
 
-  return events.sort((a, b) => a.created_at_slot - b.created_at_slot);
+  return events.sort((a, b) =>
+    a.published_at < b.published_at ? -1 : a.published_at > b.published_at ? 1 : 0,
+  );
 }
 
 export async function find_latest_release_by_name(input: {
@@ -157,7 +159,7 @@ export async function fetch_name_authority(input: {
   rpc_url: string;
   program_id?: string;
   name: string;
-  pda: string;
+  address: string;
 }): Promise<string | undefined> {
   const result = await rpc_call<{
     value: { data: [string, string]; lamports: number } | null;
@@ -165,7 +167,7 @@ export async function fetch_name_authority(input: {
     rpc_url: input.rpc_url,
     method: 'getAccountInfo',
     params: [
-      input.pda,
+      input.address,
       { encoding: 'base64', commitment: 'confirmed' },
     ],
   });
@@ -180,7 +182,7 @@ export async function fetch_name_authority(input: {
     return undefined;
   }
 
-  if (!bytes_equal(data.subarray(0, 8), ACCOUNT_DISCRIMINATOR.NameAuthority)) {
+  if (!bytes_equal(data.subarray(0, 8), ACCOUNT_DISCRIMINATOR.Name)) {
     return undefined;
   }
 
@@ -228,8 +230,8 @@ function decode_release_account(data: Uint8Array): GutenbergReleaseEvent {
   const manifest_hash_raw = reader.read_bytes(32);
   const content_hash_raw = reader.read_bytes(32);
   const content_size_bytes = Number(reader.read_u64_le());
-  const created_at_unix = Number(reader.read_i64_le());
-  const created_at_slot = Number(reader.read_u64_le());
+  const published_at_unix = Number(reader.read_i64_le());
+  reader.read_u64_le();
 
   return {
     type: release_event_type,
@@ -241,8 +243,7 @@ function decode_release_account(data: Uint8Array): GutenbergReleaseEvent {
     manifest_hash: prefixed_sha256(manifest_hash_raw),
     content_hash: prefixed_sha256(content_hash_raw),
     content_size_bytes,
-    created_at: new Date(created_at_unix * 1000).toISOString(),
-    created_at_slot,
+    published_at: new Date(published_at_unix * 1000).toISOString(),
   };
 }
 

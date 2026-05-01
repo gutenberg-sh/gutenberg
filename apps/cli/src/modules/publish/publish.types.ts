@@ -27,8 +27,8 @@ export type PublishResult = {
   manifest_uri: ContentUri;
   manifest_hash: Sha256Hash;
   release: GutenbergReleaseEvent | undefined;
-  release_pda: string;
-  tx_signature: string;
+  release_address: string;
+  signature: string;
   publisher: string;
   file_count: number;
   total_bytes: number;

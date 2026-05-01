@@ -18,7 +18,7 @@
 
 ---
 
-## Why we build this
+## Why Gutenberg?
 
 Whether you like it or not, governments and major outlets enforce a certain narrative. Work that contradicts it gets taken down, sued, or buried.
 
@@ -28,7 +28,8 @@ Gutenberg lets you publish freely, privately, and permanently: content is writte
 
 - **Node.js** `>=22.12.0`
 - **pnpm** `>=10.28.2` (and `<11`, per `package.json` engines)
-- **Solana CLI** — local validator and wallet utilities
+- **Docker** — runs the local Solana validator and indexer Postgres
+- **Solana CLI** — wallet utilities and program interaction
 - **Anchor CLI** — build and deploy the registry program
 
 ## Installing dependencies
@@ -47,6 +48,26 @@ Copy the example file and set values for your gateway, network, and RPC:
 cp .env.example .env
 ```
 
+## Local infrastructure
+
+A single command brings up everything Gutenberg expects locally:
+
+```bash
+pnpm env:setup
+```
+
+To stop the containers (state is preserved across restarts):
+
+```bash
+pnpm env:teardown
+```
+
+To wipe all local state (validator ledger and Postgres data):
+
+```bash
+pnpm env:reset
+```
+
 ```txt
 # CLI
 GUTENBERG_IRYS_NETWORK=devnet
@@ -61,15 +82,6 @@ VITE_GUTENBERG_ARWEAVE_MIRRORS=https://arweave.net,https://ar-io.dev,https://g8w
 VITE_GUTENBERG_EXPLORER_URL=https://explorer.solana.com/address/{address}?cluster=devnet
 ```
 
-## Local Solana registry
-
-The registry is an Anchor program on Solana that records signed release manifests on-chain. Publishing is permissionless and the first publisher of a name owns it through a name-authority PDA, so future versions of that name can only come from the same key.
-
-In a separate terminal, run a local validator:
-
-```bash
-pnpm solana:validator
-```
 
 To fund your publisher, you can airdrop some SOL via:
 
@@ -105,6 +117,15 @@ Open a release in the gateway:
 ```bash
 pnpm cli:start open gutenberg-demo@1.0.0
 pnpm cli:start open gutenberg-demo
+```
+
+## Indexer
+
+The indexer is a service that turns the on-chain registry into a fast, searchable read API. Every record it returns can still be re-verified against the chain by the gateway, so the indexer is a convenience, not an authority.
+
+```bash
+pnpm indexer:db:apply
+pnpm indexer:dev
 ```
 
 ## Gateway

@@ -13,6 +13,7 @@ export * from './multihash.js';
 export * from './parse-spec.js';
 export * from './publish-session.js';
 export * from './registry-read.js';
+export * from './release-event.js';
 export * from './storage.js';
 export * from './types.js';
 export * from './verify.js';

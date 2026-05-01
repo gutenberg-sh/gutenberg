@@ -35,7 +35,7 @@ export function useReferencedAssets(input: {
         continue;
       }
 
-      const resolved = resolve_within_site(input.current_path, raw);
+      const resolved = resolve_within_release(input.current_path, raw);
 
       if (!resolved) {
         continue;
@@ -190,7 +190,7 @@ function is_external_or_intra_doc(raw: string): boolean {
   );
 }
 
-function resolve_within_site(
+function resolve_within_release(
   current: `/${string}`,
   raw: string,
 ): `/${string}` | undefined {
@@ -201,16 +201,16 @@ function resolve_within_site(
   }
 
   if (cleaned.startsWith('/')) {
-    return normalize_site_path(cleaned);
+    return normalize_release_path(cleaned);
   }
 
   const last_slash = current.lastIndexOf('/');
   const dir = last_slash >= 0 ? current.slice(0, last_slash) : '';
 
-  return normalize_site_path(`${dir}/${cleaned}`);
+  return normalize_release_path(`${dir}/${cleaned}`);
 }
 
-function normalize_site_path(path: string): `/${string}` | undefined {
+function normalize_release_path(path: string): `/${string}` | undefined {
   const segments: string[] = [];
 
   for (const segment of path.split('/')) {

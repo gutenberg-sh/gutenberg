@@ -32,7 +32,7 @@ export type GutenbergUnsignedManifest = {
   name: string;
   version: string;
   publisher: SolanaPublicKey;
-  created_at: string;
+  published_at: string;
 
   entry: `/${string}`;
   files: Record<`/${string}`, GutenbergManifestFile>;
@@ -62,8 +62,7 @@ export type GutenbergReleaseEvent = {
   manifest_hash: Sha256Hash;
   content_hash: Sha256Hash;
   content_size_bytes: number;
-  created_at: string;
-  created_at_slot: number;
+  published_at: string;
 };
 
 export type VerifiedFile = {
@@ -77,6 +76,6 @@ export type VerifiedRelease = {
   manifest: GutenbergManifest;
   manifest_uri: ContentUri;
   release: GutenbergReleaseEvent;
-  release_pda: string;
+  release_address: string;
   files: ReadonlyMap<`/${string}`, VerifiedFile>;
 };

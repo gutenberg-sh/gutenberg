@@ -1,6 +1,6 @@
 use anchor_lang::solana_program::system_program;
 use anchor_lang::{AccountDeserialize, AnchorSerialize};
-use gutenberg_registry::{NameAuthority, Release};
+use gutenberg_registry::{Name, Release};
 use litesvm::LiteSVM;
 use solana_sdk::{
     instruction::{AccountMeta, Instruction, InstructionError},
@@ -63,12 +63,12 @@ fn name_seed(name: &str) -> [u8; 32] {
     solana_sha256_hasher::hashv(&[name.as_bytes()]).to_bytes()
 }
 
-fn name_authority_pda(name_seed: &[u8; 32]) -> Pubkey {
+fn name_address(name_seed: &[u8; 32]) -> Pubkey {
     let (pda, _) = Pubkey::find_program_address(&[b"name", name_seed.as_ref()], &PROGRAM_ID);
     pda
 }
 
-fn release_pda(name_seed: &[u8; 32], version_seed: &[u8; 32]) -> Pubkey {
+fn release_address(name_seed: &[u8; 32], version_seed: &[u8; 32]) -> Pubkey {
     let (pda, _) = Pubkey::find_program_address(
         &[b"release", name_seed.as_ref(), version_seed.as_ref()],
         &PROGRAM_ID,
@@ -86,8 +86,8 @@ fn anchor_discriminator(ix_name: &str) -> [u8; 8] {
 
 #[derive(AnchorSerialize)]
 struct PublishArgs {
-    site_name: String,
-    site_version: String,
+    name: String,
+    version: String,
     manifest_uri: String,
     manifest_hash: [u8; 32],
     content_hash: [u8; 32],
@@ -97,8 +97,8 @@ struct PublishArgs {
 }
 
 struct PublishOpts<'a> {
-    site_name: &'a str,
-    site_version: &'a str,
+    name: &'a str,
+    version: &'a str,
     manifest_uri: &'a str,
     manifest_hash: [u8; 32],
     content_hash: [u8; 32],
@@ -108,18 +108,18 @@ struct PublishOpts<'a> {
 }
 
 fn publish_ix(publisher: &Pubkey, opts: PublishOpts<'_>) -> Instruction {
-    let n_seed = opts.name_seed_override.unwrap_or_else(|| name_seed(opts.site_name));
+    let n_seed = opts.name_seed_override.unwrap_or_else(|| name_seed(opts.name));
     let v_seed = opts
         .version_seed_override
-        .unwrap_or_else(|| name_seed(opts.site_version));
+        .unwrap_or_else(|| name_seed(opts.version));
 
-    let na_pda = name_authority_pda(&n_seed);
-    let rel_pda = release_pda(&n_seed, &v_seed);
+    let name_addr = name_address(&n_seed);
+    let release_addr = release_address(&n_seed, &v_seed);
 
     let mut data = anchor_discriminator("publish_release").to_vec();
     PublishArgs {
-        site_name: opts.site_name.to_string(),
-        site_version: opts.site_version.to_string(),
+        name: opts.name.to_string(),
+        version: opts.version.to_string(),
         manifest_uri: opts.manifest_uri.to_string(),
         manifest_hash: opts.manifest_hash,
         content_hash: opts.content_hash,
@@ -134,8 +134,8 @@ fn publish_ix(publisher: &Pubkey, opts: PublishOpts<'_>) -> Instruction {
         program_id: PROGRAM_ID,
         accounts: vec![
             AccountMeta::new(*publisher, true),
-            AccountMeta::new(na_pda, false),
-            AccountMeta::new(rel_pda, false),
+            AccountMeta::new(name_addr, false),
+            AccountMeta::new(release_addr, false),
             AccountMeta::new_readonly(system_program::ID, false),
         ],
         data,
@@ -146,8 +146,8 @@ fn simple_publish(publisher: &Pubkey, name: &str, version: &str) -> Instruction 
     publish_ix(
         publisher,
         PublishOpts {
-            site_name: name,
-            site_version: version,
+            name,
+            version,
             manifest_uri: "ar://manifest",
             manifest_hash: [1u8; 32],
             content_hash: [2u8; 32],
@@ -194,12 +194,12 @@ fn read_release(svm: &LiteSVM, addr: &Pubkey) -> Release {
     Release::try_deserialize(&mut data).expect("decode Release")
 }
 
-fn read_name_authority(svm: &LiteSVM, addr: &Pubkey) -> NameAuthority {
+fn read_name(svm: &LiteSVM, addr: &Pubkey) -> Name {
     let acc = svm
         .get_account(addr)
-        .unwrap_or_else(|| panic!("name authority account {addr} missing"));
+        .unwrap_or_else(|| panic!("name account {addr} missing"));
     let mut data: &[u8] = &acc.data;
-    NameAuthority::try_deserialize(&mut data).expect("decode NameAuthority")
+    Name::try_deserialize(&mut data).expect("decode Name")
 }
 
 #[test]
@@ -207,27 +207,27 @@ fn publish_release_happy_path() {
     let mut svm = setup();
     let publisher = funded_keypair(&mut svm, 1_000_000_000);
 
-    let site = "my-site";
+    let name = "my-thing";
     let version = "1.0.0";
 
-    let logs = send(&mut svm, &publisher, simple_publish(&publisher.pubkey(), site, version))
+    let logs = send(&mut svm, &publisher, simple_publish(&publisher.pubkey(), name, version))
         .expect("publish should succeed");
 
-    let na = read_name_authority(&svm, &name_authority_pda(&name_seed(site)));
-    assert_eq!(na.authority, publisher.pubkey());
+    let name_acc = read_name(&svm, &name_address(&name_seed(name)));
+    assert_eq!(name_acc.authority, publisher.pubkey());
 
-    let rel_addr = release_pda(&name_seed(site), &name_seed(version));
+    let rel_addr = release_address(&name_seed(name), &name_seed(version));
     let rel = read_release(&svm, &rel_addr);
     assert_eq!(rel.schema_version, Release::CURRENT_SCHEMA_VERSION);
     assert_eq!(rel.publisher, publisher.pubkey());
-    assert_eq!(rel.name, site);
+    assert_eq!(rel.name, name);
     assert_eq!(rel.version, version);
     assert_eq!(rel.manifest_uri, "ar://manifest");
     assert_eq!(rel.manifest_hash, [1u8; 32]);
     assert_eq!(rel.content_hash, [2u8; 32]);
     assert_eq!(rel.content_size_bytes, 1234);
-    assert!(rel.created_at_unix > 0, "clock should populate created_at_unix");
-    assert!(rel.created_at_slot > 0);
+    assert!(rel.published_at_unix > 0, "clock should populate published_at_unix");
+    assert!(rel.published_at_slot > 0);
 
     assert!(
         logs.iter().any(|l| l.starts_with("Program data:")),
@@ -236,21 +236,21 @@ fn publish_release_happy_path() {
 }
 
 #[test]
-fn publish_release_two_versions_share_name_authority() {
+fn publish_release_two_versions_share_name() {
     let mut svm = setup();
     let publisher = funded_keypair(&mut svm, 2_000_000_000);
 
-    let site = "tour";
+    let name = "tour";
     for v in ["0.1.0", "0.2.0"] {
-        send(&mut svm, &publisher, simple_publish(&publisher.pubkey(), site, v))
+        send(&mut svm, &publisher, simple_publish(&publisher.pubkey(), name, v))
             .expect("publish should succeed");
     }
 
-    let na = read_name_authority(&svm, &name_authority_pda(&name_seed(site)));
-    assert_eq!(na.authority, publisher.pubkey());
+    let name_acc = read_name(&svm, &name_address(&name_seed(name)));
+    assert_eq!(name_acc.authority, publisher.pubkey());
 
     for v in ["0.1.0", "0.2.0"] {
-        let rel = read_release(&svm, &release_pda(&name_seed(site), &name_seed(v)));
+        let rel = read_release(&svm, &release_address(&name_seed(name), &name_seed(v)));
         assert_eq!(rel.version, v);
         assert_eq!(rel.publisher, publisher.pubkey());
     }
@@ -268,8 +268,8 @@ fn publish_release_rejects_invalid_name_seed() {
         publish_ix(
             &publisher.pubkey(),
             PublishOpts {
-                site_name: "site-a",
-                site_version: "1.0.0",
+                name: "thing-a",
+                version: "1.0.0",
                 manifest_uri: "ar://m",
                 manifest_hash: [0u8; 32],
                 content_hash: [0u8; 32],
@@ -296,8 +296,8 @@ fn publish_release_rejects_invalid_version_seed() {
         publish_ix(
             &publisher.pubkey(),
             PublishOpts {
-                site_name: "site-b",
-                site_version: "1.0.0",
+                name: "thing-b",
+                version: "1.0.0",
                 manifest_uri: "ar://m",
                 manifest_hash: [0u8; 32],
                 content_hash: [0u8; 32],
@@ -324,8 +324,8 @@ fn publish_release_rejects_name_too_long() {
         publish_ix(
             &publisher.pubkey(),
             PublishOpts {
-                site_name: &too_long,
-                site_version: "1.0.0",
+                name: &too_long,
+                version: "1.0.0",
                 manifest_uri: "ar://m",
                 manifest_hash: [0u8; 32],
                 content_hash: [0u8; 32],
@@ -364,12 +364,12 @@ fn cannot_republish_under_same_name_version() {
     let mut svm = setup();
     let publisher = funded_keypair(&mut svm, 3_000_000_000);
 
-    let site = "perm";
+    let name = "perm";
     let version = "1.0.0";
-    send(&mut svm, &publisher, simple_publish(&publisher.pubkey(), site, version))
+    send(&mut svm, &publisher, simple_publish(&publisher.pubkey(), name, version))
         .expect("publish");
 
-    let err = send(&mut svm, &publisher, simple_publish(&publisher.pubkey(), site, version))
+    let err = send(&mut svm, &publisher, simple_publish(&publisher.pubkey(), name, version))
         .expect_err("republish at same version must fail");
 
     match &err {

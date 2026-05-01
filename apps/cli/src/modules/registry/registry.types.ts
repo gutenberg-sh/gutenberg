@@ -16,8 +16,7 @@ export type GutenbergReleaseEvent = {
   manifest_hash: Sha256Hash;
   content_hash: Sha256Hash;
   content_size_bytes: number;
-  created_at: string;
-  created_at_slot: number;
+  published_at: string;
 };
 
 export type FindReleaseInput = {

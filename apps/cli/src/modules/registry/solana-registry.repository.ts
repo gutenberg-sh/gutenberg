@@ -3,8 +3,8 @@ import {
   GUTENBERG_REGISTRY_PROGRAM_ID as CORE_PROGRAM_ID,
   fetch_name_authority,
   fetch_release_by_name_at_version,
-  find_name_authority_pda,
-  find_release_pda,
+  find_name_address,
+  find_release_address,
   list_releases,
 } from '@gutenberg/core';
 
@@ -30,11 +30,11 @@ export class SolanaRegistryRepository {
     name: string;
     publisher: string;
   }): Promise<void> {
-    const { address: pda } = find_name_authority_pda({ name: input.name });
+    const { address } = find_name_address({ name: input.name });
     const authority = await fetch_name_authority({
       rpc_url: this.rpc_url,
       name: input.name,
-      pda,
+      address,
     });
 
     if (!authority) {
@@ -111,6 +111,6 @@ export class SolanaRegistryRepository {
   }
 
   release_address(input: { name: string; version: string }): string {
-    return find_release_pda(input).address;
+    return find_release_address(input).address;
   }
 }

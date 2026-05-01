@@ -1,11 +1,11 @@
 use anchor_lang::prelude::*;
 
 #[account]
-pub struct NameAuthority {
+pub struct Name {
     pub authority: Pubkey,
 }
 
-impl NameAuthority {
+impl Name {
     pub const SPACE: usize = 8 + 32;
 }
 
@@ -23,8 +23,8 @@ pub struct Release {
     pub content_hash: [u8; 32],
     pub content_size_bytes: u64,
 
-    pub created_at_unix: i64,
-    pub created_at_slot: u64,
+    pub published_at_unix: i64,
+    pub published_at_slot: u64,
 }
 
 impl Release {

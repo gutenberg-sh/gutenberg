@@ -19,7 +19,7 @@ import { RegistryService } from '../registry/registry.service';
 import { GUTENBERG_REGISTRY_PROGRAM_ID } from '../registry/solana-registry.repository';
 
 import { start_publish_session_server } from './publish-session-server';
-import { SiteFilesRepository } from './site-files.repository';
+import { ReleaseFilesRepository } from './release-files.repository';
 import type {
   PublishHooks,
   PublishOptions,
@@ -39,18 +39,18 @@ export class PublishCancelledError extends Error {
 export class PublishService {
   constructor(
     private readonly registry_service: RegistryService,
-    private readonly site_files_repository: SiteFilesRepository,
+    private readonly release_files_repository: ReleaseFilesRepository,
     @Inject(SOLANA_RPC_URL) private readonly rpc_url: string,
     @Inject(GATEWAY_URL) private readonly gateway_url: string,
     @Inject(IRYS_NETWORK) private readonly irys_network: IrysNetwork,
   ) {}
 
-  async publish_site(
+  async publish_release(
     options: PublishOptions,
     hooks: PublishHooks = {},
   ): Promise<PublishResult> {
-    const root = await this.site_files_repository.assert_directory(
-      this.site_files_repository.resolve_folder(options.folder),
+    const root = await this.release_files_repository.assert_directory(
+      this.release_files_repository.resolve_folder(options.folder),
     );
 
     if (
@@ -64,7 +64,7 @@ export class PublishService {
       );
     }
 
-    const files = await this.site_files_repository.list_site_files(root);
+    const files = await this.release_files_repository.list_release_files(root);
 
     if (files.length === 0) {
       throw new Error('Publish folder does not contain any files');
@@ -74,15 +74,15 @@ export class PublishService {
     let files_total_bytes = 0;
 
     for (const file of files) {
-      const bytes = await this.site_files_repository.read_file(
+      const bytes = await this.release_files_repository.read_file(
         file.absolute_path,
       );
 
       files_total_bytes += bytes.byteLength;
-      const mime = guess_mime_for_path(file.site_path);
+      const mime = guess_mime_for_path(file.path);
 
       session_files.push({
-        site_path: file.site_path,
+        path: file.path,
         size_bytes: bytes.byteLength,
         ...(mime ? { mime } : {}),
         content_base64: bytes.toString('base64'),
@@ -153,8 +153,8 @@ export class PublishService {
         manifest_uri: outcome.result.manifest_uri,
         manifest_hash: outcome.result.manifest_hash,
         release,
-        release_pda: outcome.result.release_pda,
-        tx_signature: outcome.result.tx_signature,
+        release_address: outcome.result.release_address,
+        signature: outcome.result.signature,
         publisher: outcome.result.publisher,
         file_count: files.length,
         total_bytes: files_total_bytes,
