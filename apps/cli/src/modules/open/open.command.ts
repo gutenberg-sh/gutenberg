@@ -27,7 +27,7 @@ export class OpenCommand {
           )
           .required(),
         gateway: string('gateway').desc(
-          'Override the gateway URL (defaults to GUTENBERG_GATEWAY_URL env)',
+          'Override the gateway URL (defaults to GUTENBERG_CLI_GATEWAY_URL env)',
         ),
       },
       handler: async (options) => {

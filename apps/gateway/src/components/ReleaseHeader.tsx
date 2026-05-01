@@ -5,9 +5,11 @@ import {
   Copy,
   ExternalLink,
   Fingerprint,
+  GitBranch,
   ShieldCheck,
 } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 
 import { GatewayLinks } from '@/components/GatewayLinks';
 import { env } from '@/env';
@@ -33,12 +35,24 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
       />
 
       <h1 className="text-balance font-semibold tracking-[-0.02em] text-foreground">
-        <span className="text-[1.75rem] leading-[1.1] sm:text-[2.125rem] lg:text-[2.5rem]">
+        <Link
+          to={`/r/${encodeURIComponent(manifest.name)}`}
+          className="text-[1.75rem] leading-[1.1] hover:underline sm:text-[2.125rem] lg:text-[2.5rem]"
+          title="Open the latest version"
+        >
           {manifest.name}
-        </span>
+        </Link>
         <span className="ml-3 align-baseline font-mono text-[1rem] font-normal tabular text-foreground-soft sm:text-[1.125rem] lg:text-[1.25rem]">
           {manifest.version}
         </span>
+        <Link
+          to={`/r/${encodeURIComponent(manifest.name)}/versions`}
+          className="ml-3 inline-flex items-center gap-1 align-middle text-[11.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
+          title="View all versions"
+        >
+          <GitBranch className="size-3" strokeWidth={1.85} aria-hidden />
+          versions
+        </Link>
       </h1>
 
       {sub_meta.length > 0 ? (
@@ -95,23 +109,24 @@ function IdentityStrip({
         </Chip>
 
         <span className="inline-flex items-center gap-1">
-          <Chip
-            mono
-            title={`View ${publisher} on the Solana explorer`}
-            href={explorer_address_url(publisher)}
-            icon={
-              <Fingerprint className="size-3" strokeWidth={1.85} aria-hidden />
-            }
-            trailing={
-              <ExternalLink
-                className="size-2.5 opacity-70"
-                strokeWidth={1.85}
-                aria-hidden
-              />
-            }
+          <Link
+            to={`/p/${encodeURIComponent(publisher)}`}
+            title="Open publisher profile"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/50 px-2.5 py-1 font-mono text-[11.5px] font-medium tabular tracking-tight text-foreground transition-colors hover:border-border-strong hover:bg-surface hover:text-foreground"
           >
+            <Fingerprint className="size-3" strokeWidth={1.85} aria-hidden />
             {shorten(publisher, 6, 6)}
-          </Chip>
+          </Link>
+          <a
+            href={explorer_address_url(publisher)}
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label="View publisher on the Solana explorer"
+            title="Solana explorer"
+            className="inline-flex size-5 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-surface hover:text-foreground"
+          >
+            <ExternalLink className="size-2.5" strokeWidth={1.85} aria-hidden />
+          </a>
           <CopyButton value={publisher} label="Publisher" inline />
         </span>
       </div>

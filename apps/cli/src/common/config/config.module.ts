@@ -46,14 +46,14 @@ load_dotenv({ path: env_file_path, quiet: true });
       provide: IRYS_GATEWAY_URL,
       inject: [ConfigService],
       useFactory: (config: ConfigService): string => {
-        const explicit = config.get<string>('GUTENBERG_IRYS_GATEWAY');
+        const explicit = config.get<string>('GUTENBERG_CLI_IRYS_GATEWAY');
 
         if (explicit && explicit.length > 0) {
           return explicit.replace(/\/$/, '');
         }
 
         const network = config.getOrThrow<IrysNetwork>(
-          'GUTENBERG_IRYS_NETWORK',
+          'GUTENBERG_CLI_IRYS_NETWORK',
         );
 
         return IRYS_GATEWAY_BY_NETWORK[network];
@@ -63,19 +63,19 @@ load_dotenv({ path: env_file_path, quiet: true });
       provide: IRYS_NETWORK,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.getOrThrow<IrysNetwork>('GUTENBERG_IRYS_NETWORK'),
+        config.getOrThrow<IrysNetwork>('GUTENBERG_CLI_IRYS_NETWORK'),
     },
     {
       provide: SOLANA_RPC_URL,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('GUTENBERG_SOLANA_RPC_URL'),
+        config.getOrThrow<string>('GUTENBERG_CLI_SOLANA_RPC_URL'),
     },
     {
       provide: GATEWAY_URL,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('GUTENBERG_GATEWAY_URL'),
+        config.getOrThrow<string>('GUTENBERG_CLI_GATEWAY_URL'),
     },
   ],
   exports: [

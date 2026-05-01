@@ -58,11 +58,7 @@ export class BackfillService implements OnApplicationBootstrap {
 
       this.logger.log('Starting initial backfill of program signatures');
       await this.run_full_backfill();
-      await this.write_cursor({
-        last_signature: null,
-        last_slot: null,
-        backfill_completed_at: new Date(),
-      });
+      await this.mark_backfill_completed();
       this.logger.log('Initial backfill complete');
     } catch (error) {
       this.logger.error('Initial backfill failed', error);
@@ -197,19 +193,23 @@ export class BackfillService implements OnApplicationBootstrap {
   private async write_cursor(input: {
     last_signature: string | null;
     last_slot: number | null;
-    backfill_completed_at?: Date | null;
   }): Promise<void> {
     const existing = await this.cursor_service.find({
       where: eq(cursorsTable.scope, RELEASES_CURSOR_SCOPE),
     });
 
     if (existing) {
+      if (
+        input.last_slot != null &&
+        existing.last_slot != null &&
+        existing.last_slot >= input.last_slot
+      ) {
+        return;
+      }
+
       await this.cursor_service.update(existing.id, {
         last_signature: input.last_signature,
         last_slot: input.last_slot,
-        ...(input.backfill_completed_at !== undefined
-          ? { backfill_completed_at: input.backfill_completed_at }
-          : {}),
       });
       return;
     }
@@ -218,7 +218,29 @@ export class BackfillService implements OnApplicationBootstrap {
       scope: RELEASES_CURSOR_SCOPE,
       last_signature: input.last_signature,
       last_slot: input.last_slot,
-      backfill_completed_at: input.backfill_completed_at ?? null,
+      backfill_completed_at: null,
+    });
+  }
+
+  private async mark_backfill_completed(): Promise<void> {
+    const existing = await this.cursor_service.find({
+      where: eq(cursorsTable.scope, RELEASES_CURSOR_SCOPE),
+    });
+
+    const completed_at = new Date();
+
+    if (existing) {
+      await this.cursor_service.update(existing.id, {
+        backfill_completed_at: completed_at,
+      });
+      return;
+    }
+
+    await this.cursor_service.create({
+      scope: RELEASES_CURSOR_SCOPE,
+      last_signature: null,
+      last_slot: null,
+      backfill_completed_at: completed_at,
     });
   }
 }

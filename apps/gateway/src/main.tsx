@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
 import { App } from '@/App';
+import { QueryProvider } from '@/providers/QueryProvider';
 import { SolanaProviders } from '@/providers/SolanaProviders';
 import '@/styles/globals.css';
 
@@ -14,10 +15,12 @@ if (!root_element) {
 
 createRoot(root_element).render(
   <StrictMode>
-    <SolanaProviders>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </SolanaProviders>
+    <QueryProvider>
+      <SolanaProviders>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </SolanaProviders>
+    </QueryProvider>
   </StrictMode>,
 );

@@ -1,8 +1,6 @@
-import { ArrowUpRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
-
 import { Container } from '@/components/Layout';
 import { LookupForm } from '@/components/LookupForm';
+import { RecentReleases } from '@/components/RecentReleases';
 
 const PROOF_STEPS: ReadonlyArray<{
   index: string;
@@ -28,15 +26,6 @@ const PROOF_STEPS: ReadonlyArray<{
       'Each file is fetched on demand from its own content address and verified against the hash the publisher signed. If a single byte changes, that file does not render.',
   },
 ];
-
-const EXAMPLES: ReadonlyArray<{ name: string; version: string; note: string }> =
-  [
-    {
-      name: 'gutenberg-demo',
-      version: '1.0.0',
-      note: 'project demo',
-    },
-  ];
 
 const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
   {
@@ -112,39 +101,9 @@ export function LandingRoute() {
           </p>
         </div>
 
-        <div>
+        <div className="grid gap-7">
           <LookupForm />
-          <div className="mt-5 px-1">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-              Try an example
-            </p>
-            <ul className="mt-3 grid gap-1.5">
-              {EXAMPLES.map((ex) => (
-                <li key={`${ex.name}@${ex.version}`}>
-                  <Link
-                    to={`/r/${ex.name}/${ex.version}`}
-                    className="group flex items-center justify-between gap-3 rounded-xl border border-border px-3.5 py-2.5 text-[13px] transition-colors hover:border-border-strong"
-                  >
-                    <span className="flex min-w-0 items-baseline gap-2 truncate">
-                      <span className="truncate font-mono text-[12.5px] tabular text-foreground">
-                        {ex.name}
-                        <span className="text-muted-foreground">@</span>
-                        {ex.version}
-                      </span>
-                      <span className="hidden text-[11.5px] text-muted-foreground sm:inline">
-                        {ex.note}
-                      </span>
-                    </span>
-                    <ArrowUpRight
-                      className="size-3.5 shrink-0 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
-                      strokeWidth={1.75}
-                      aria-hidden
-                    />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <RecentReleases limit={5} />
         </div>
       </Container>
 

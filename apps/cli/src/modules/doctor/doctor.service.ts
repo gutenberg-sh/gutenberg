@@ -149,7 +149,7 @@ export class DoctorService {
 
       return error_check_message(
         'gateway_reachable',
-        `Could not reach ${url} (${message}). Start \`pnpm gateway:dev\` or check GUTENBERG_GATEWAY_URL — publishing now happens in the browser.`,
+        `Could not reach ${url} (${message}). Start \`pnpm gateway:dev\` or check GUTENBERG_CLI_GATEWAY_URL — publishing now happens in the browser.`,
       );
     }
   }

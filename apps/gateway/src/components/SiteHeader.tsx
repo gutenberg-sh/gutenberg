@@ -1,9 +1,10 @@
 import { Github } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 
 import { LookupDialog } from '@/components/LookupDialog';
 import { Wordmark } from '@/components/Wordmark';
+import { cn } from '@/lib/utils';
 
 export function SiteHeader() {
   const [is_mac] = useState(
@@ -28,22 +29,30 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/65 backdrop-blur-xl supports-[backdrop-filter]:bg-background/55">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-6 px-6 py-3 lg:px-10">
+        <div className="mx-auto flex w-full max-w-7xl items-center gap-6 px-6 py-3 lg:px-10">
           <Link
             to="/"
             aria-label="Gutenberg gateway, home"
-            className="group inline-flex items-baseline outline-none transition-opacity focus-visible:opacity-80"
+            className="group inline-flex shrink-0 items-baseline outline-none transition-opacity focus-visible:opacity-80"
           >
             <Wordmark className="text-[14px] text-foreground" />
           </Link>
 
-          <div className="flex items-center gap-2 text-[13px]">
+          <nav
+            aria-label="Primary"
+            className="hidden items-center gap-1 sm:flex"
+          >
+            <HeaderLink to="/browse">Browse</HeaderLink>
+            <HeaderLink to="/search">Search</HeaderLink>
+          </nav>
+
+          <div className="ml-auto flex items-center gap-2 text-[13px]">
             <button
               type="button"
               onClick={() => set_lookup_open(true)}
               className="hidden items-center gap-2 rounded-lg border border-border px-2.5 py-1.5 text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground sm:inline-flex"
             >
-              <span className="text-[12.5px]">Lookup release</span>
+              <span className="text-[12.5px]">Open release</span>
               <span className="flex items-center gap-0.5">
                 <span className="kbd">{is_mac ? '⌘' : 'Ctrl'}</span>
                 <span className="kbd">K</span>
@@ -65,5 +74,29 @@ export function SiteHeader() {
 
       <LookupDialog open={lookup_open} on_open_change={set_lookup_open} />
     </>
+  );
+}
+
+function HeaderLink({
+  to,
+  children,
+}: {
+  to: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        cn(
+          'rounded-md px-2.5 py-1.5 text-[12.5px] font-medium transition-colors',
+          isActive
+            ? 'text-foreground'
+            : 'text-muted-foreground hover:text-foreground',
+        )
+      }
+    >
+      {children}
+    </NavLink>
   );
 }

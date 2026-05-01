@@ -7,6 +7,7 @@ import {
 } from '@gutenberg/core';
 
 import {
+  cursorsTable,
   namesTable,
   publishersTable,
   releasesTable,
@@ -16,6 +17,8 @@ import { NamesService } from '../names/names.service';
 import { PublishersService } from '../publishers/publishers.service';
 import { ReleasesService } from '../releases/releases.service';
 
+import { CursorService } from './cursor.service';
+import { RELEASES_CURSOR_SCOPE } from './ingest.types';
 import type {
   IngestableTransaction,
   IngestionResult,
@@ -30,16 +33,13 @@ export class IngestService {
     private readonly names_service: NamesService,
     private readonly releases_service: ReleasesService,
     private readonly manifests_service: ManifestsService,
+    private readonly cursor_service: CursorService,
   ) {}
 
   async ingest_transaction(
     input: IngestableTransaction,
   ): Promise<IngestionResult> {
     const events = decode_release_events_from_logs(input.log_messages);
-
-    if (events.length === 0) {
-      return { events_decoded: 0, releases_indexed: 0 };
-    }
 
     let releases_indexed = 0;
 
@@ -54,10 +54,49 @@ export class IngestService {
       }
     }
 
+    await this.advance_cursor({
+      slot: input.slot,
+      signature: input.signature,
+    });
+
     return {
       events_decoded: events.length,
       releases_indexed,
     };
+  }
+
+  private async advance_cursor(input: {
+    slot: number;
+    signature: string;
+  }): Promise<void> {
+    try {
+      const existing = await this.cursor_service.find({
+        where: eq(cursorsTable.scope, RELEASES_CURSOR_SCOPE),
+      });
+
+      if (!existing) {
+        await this.cursor_service.create({
+          scope: RELEASES_CURSOR_SCOPE,
+          last_signature: input.signature,
+          last_slot: input.slot,
+          backfill_completed_at: null,
+        });
+        return;
+      }
+
+      if (existing.last_slot != null && existing.last_slot >= input.slot) {
+        return;
+      }
+
+      await this.cursor_service.update(existing.id, {
+        last_signature: input.signature,
+        last_slot: input.slot,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to advance cursor to slot ${input.slot}: ${(error as Error).message}`,
+      );
+    }
   }
 
   private async index_event(input: {

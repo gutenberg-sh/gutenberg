@@ -21,17 +21,37 @@
     <script>
       (function () {
         try {
-          var t = document.documentElement;
+          var root = document.documentElement;
           var saved = localStorage.getItem('gutenberg-theme');
-          var prefersDark = window.matchMedia(
-            '(prefers-color-scheme: dark)'
-          ).matches;
-          if (saved === 'dark' || (saved !== 'light' && prefersDark)) {
-            t.classList.add('dark');
-            t.classList.remove('light');
+
+          // Only stamp an explicit class when the user has chosen a theme.
+          // Otherwise leave it unset so the CSS `prefers-color-scheme`
+          // media query reacts live to OS theme changes.
+          if (saved === 'dark') {
+            root.classList.add('dark');
+            root.classList.remove('light');
+          } else if (saved === 'light') {
+            root.classList.add('light');
+            root.classList.remove('dark');
           } else {
-            t.classList.add('light');
-            t.classList.remove('dark');
+            root.classList.remove('dark');
+            root.classList.remove('light');
+          }
+
+          // Belt-and-suspenders: some browsers don't repaint CSS variables
+          // immediately on OS-level theme flips. Nudge them by toggling a
+          // no-op attribute when the system preference changes (only while
+          // the user hasn't pinned a theme).
+          var mql = window.matchMedia('(prefers-color-scheme: dark)');
+          var on_system_change = function () {
+            if (localStorage.getItem('gutenberg-theme')) return;
+            root.classList.remove('dark');
+            root.classList.remove('light');
+          };
+          if (typeof mql.addEventListener === 'function') {
+            mql.addEventListener('change', on_system_change);
+          } else if (typeof mql.addListener === 'function') {
+            mql.addListener(on_system_change);
           }
         } catch (e) {
           console.error(e);

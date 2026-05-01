@@ -17,12 +17,11 @@ export abstract class BaseService<
   TUpdateDto extends Partial<object>,
   TTableName extends TableName,
 > {
-  protected readonly logger: Logger;
+  private readonly logger: Logger = new Logger(this.constructor.name);
 
   constructor(
     protected readonly repository: BaseRepository<any, any, TTableName>,
   ) {
-    this.logger = new Logger(this.constructor.name);
   }
 
   async create(create_dto: TCreateDto): Promise<TDto> {

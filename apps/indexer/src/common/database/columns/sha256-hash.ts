@@ -40,6 +40,13 @@ export const sha256_hash = customType<{
       ).toString('hex')}`;
     }
 
+    if (typeof value === 'string') {
+      const hex = value.startsWith('\\x') ? value.slice(2) : value;
+      if (hex.length === 64 && /^[0-9a-f]+$/i.test(hex)) {
+        return `${sha256_prefix}${hex.toLowerCase()}`;
+      }
+    }
+
     throw new Error('Unexpected sha256_hash driver value');
   },
 });

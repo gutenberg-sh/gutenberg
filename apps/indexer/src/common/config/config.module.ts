@@ -28,21 +28,6 @@ const env_file_path = [
 
 load_dotenv({ path: env_file_path, quiet: true });
 
-function derive_ws_url(http_url: string): string {
-  const url = new URL(http_url);
-  url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-
-  // Solana's local validator exposes JSON-RPC on 8899 and WebSocket on 8900.
-  // Managed providers (Helius, QuickNode, Triton, etc.) multiplex HTTP+WS on
-  // the same port, so we only bump for explicit local hosts.
-  const is_local = ['localhost', '127.0.0.1', '0.0.0.0'].includes(url.hostname);
-  if (is_local && url.port === '8899') {
-    url.port = '8900';
-  }
-
-  return url.toString();
-}
-
 @Global()
 @Module({
   imports: [
@@ -89,17 +74,8 @@ function derive_ws_url(http_url: string): string {
     {
       provide: SOLANA_WS_URL,
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        const explicit = config.get<string>('GUTENBERG_INDEXER_SOLANA_WS_URL');
-
-        if (explicit && explicit.length > 0) {
-          return explicit;
-        }
-
-        return derive_ws_url(
-          config.getOrThrow<string>('GUTENBERG_INDEXER_SOLANA_RPC_URL'),
-        );
-      },
+      useFactory: (config: ConfigService) =>
+        config.getOrThrow<string>('GUTENBERG_INDEXER_SOLANA_WS_URL'),
     },
     {
       provide: PROGRAM_ID,

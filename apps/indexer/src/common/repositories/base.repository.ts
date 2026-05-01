@@ -22,14 +22,13 @@ export abstract class BaseRepository<
   TTable extends PgTableWithColumns<any>,
   TTableName extends keyof RepositorySchema<TSchemaType>,
 > {
-  protected readonly logger: Logger;
+  private readonly logger: Logger = new Logger(this.constructor.name);
 
   constructor(
     protected readonly db: NodePgDatabase<TSchemaType>,
     protected readonly table: TTable,
     protected readonly table_name: TTableName,
   ) {
-    this.logger = new Logger(this.constructor.name);
   }
 
   async create(
