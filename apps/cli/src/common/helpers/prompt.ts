@@ -1,6 +1,8 @@
 import { stderr, stdin } from 'node:process';
 import { createInterface } from 'node:readline';
 
+import { ui } from './ui';
+
 export async function prompt_line(question: string): Promise<string> {
   if (!stdin.isTTY) {
     throw new Error('Cannot prompt: stdin is not a TTY.');
@@ -10,7 +12,7 @@ export async function prompt_line(question: string): Promise<string> {
 
   try {
     return await new Promise<string>((resolve) => {
-      rl.question(question, (answer) => {
+      rl.question(ui.prompt(question), (answer) => {
         resolve(answer);
       });
     });
@@ -24,7 +26,7 @@ export async function prompt_yes_no(
   options: { default_yes: boolean } = { default_yes: true },
 ): Promise<boolean> {
   const suffix = options.default_yes ? '[Y/n]' : '[y/N]';
-  const answer = (await prompt_line(`${question} ${suffix} `))
+  const answer = (await prompt_line(`${question} ${ui.fmt.dim(suffix)}`))
     .trim()
     .toLowerCase();
 
@@ -41,8 +43,4 @@ export async function prompt_yes_no(
   }
 
   return options.default_yes;
-}
-
-export function write_status(line: string): void {
-  stderr.write(`${line}\n`);
 }

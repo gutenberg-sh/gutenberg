@@ -107,7 +107,7 @@ export function LookupForm({
     }
 
     if (!trimmed) {
-      set_error('Type a name to look up.');
+      set_error('Type a name to start.');
       return;
     }
 
@@ -118,7 +118,7 @@ export function LookupForm({
 
     const at = trimmed.indexOf('@');
     if (at <= 0 || at === trimmed.length - 1) {
-      set_error('Releases are addressed as name@version.');
+      set_error('Releases use the form name@version (e.g. gutenberg-demo@1.0.0).');
       return;
     }
 
@@ -127,7 +127,7 @@ export function LookupForm({
 
     if (!NAME_RE.test(name)) {
       set_error(
-        'Name must use lowercase letters, numbers, dots, underscores, or hyphens.',
+        'Names use lowercase letters, numbers, dots, underscores, or hyphens.',
       );
       return;
     }
@@ -275,7 +275,7 @@ export function LookupForm({
               <span className="font-mono tabular text-foreground-soft">
                 name@version
               </span>{' '}
-              jumps straight to a verified release
+              opens that exact release
             </>
           )}
         </p>
@@ -286,16 +286,16 @@ export function LookupForm({
               <SuggestionSkeleton />
             ) : search.isError ? (
               <div className="rounded-2xl border border-border bg-elevated px-4 py-3 text-[12px] text-muted-foreground shadow-lg">
-                Search is offline right now. Try{' '}
+                Search is offline. You can still open a release by typing{' '}
                 <span className="font-mono tabular text-foreground">
                   name@version
-                </span>{' '}
-                to verify directly.
+                </span>
+                .
               </div>
             ) : empty_results ? (
               <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-elevated px-4 py-3 text-[12.5px] text-muted-foreground shadow-lg">
                 <span>
-                  No releases match{' '}
+                  Nothing matches{' '}
                   <span className="font-mono tabular text-foreground">
                     {debounced_query}
                   </span>

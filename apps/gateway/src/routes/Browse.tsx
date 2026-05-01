@@ -35,7 +35,7 @@ export function BrowseRoute() {
         </p>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h1 className="text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
-            Recently published.
+            What just got published.
           </h1>
           <button
             type="button"
@@ -52,9 +52,9 @@ export function BrowseRoute() {
           </button>
         </div>
         <p className="max-w-[60ch] text-[14.5px] leading-[1.6] text-foreground-soft">
-          A live, append-only stream of every release indexed from the
-          Gutenberg registry on Solana. Click a name to verify and read it
-          in your browser.
+          Every release ever published to Gutenberg, newest first. Open one
+          and your browser will check that it&rsquo;s the original before you
+          read it.
         </p>
       </header>
 
@@ -64,8 +64,8 @@ export function BrowseRoute() {
           <ReleaseListSkeleton rows={8} />
         ) : feed.isError ? (
           <ErrorView
-            title="Could not load the feed"
-            message={api_error_message(feed.error, 'Indexer is unreachable.')}
+            title="Couldn't load the feed"
+            message={api_error_message(feed.error, "We can't reach the indexer right now. Try again in a moment.")}
           />
         ) : releases.length === 0 ? (
           <EmptyFeed />
@@ -99,10 +99,10 @@ function EmptyFeed() {
         strokeWidth={1.6}
         aria-hidden
       />
-      <p className="text-[14px] text-foreground">No releases indexed yet.</p>
+      <p className="text-[14px] text-foreground">Nothing here yet.</p>
       <p className="max-w-[40ch] text-[12.5px] leading-relaxed text-muted-foreground">
-        As soon as a publisher records a release on Solana, the indexer
-        picks it up and it appears here.
+        Releases show up here the moment they&rsquo;re published. You could
+        be the first.
       </p>
     </div>
   );

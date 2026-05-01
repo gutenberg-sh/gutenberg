@@ -14,7 +14,6 @@ import { infer_chain_id } from '../../common/helpers/chain-id';
 import { type IrysNetwork } from '../../common/helpers/gateway-list';
 import { guess_mime_for_path } from '../../common/helpers/mime';
 import { open_url_in_browser } from '../../common/helpers/open-browser';
-import { write_status } from '../../common/helpers/prompt';
 import { RegistryService } from '../registry/registry.service';
 import { GUTENBERG_REGISTRY_PROGRAM_ID } from '../registry/solana-registry.repository';
 
@@ -131,7 +130,6 @@ export class PublishService {
 
     try {
       hooks.on_browser_opened?.(browser_url);
-      write_status(`Opening ${browser_url}`);
       open_url_in_browser(browser_url);
 
       const outcome = await server.wait_for_outcome(PUBLISH_TIMEOUT_MS);

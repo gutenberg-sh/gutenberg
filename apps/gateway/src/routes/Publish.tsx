@@ -4,6 +4,12 @@ import {
 } from '@gutenberg/core';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import {
+  ArrowUpRight,
+  Check,
+  ChevronDown,
+  Loader2,
+} from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -11,6 +17,7 @@ import { ErrorView } from '@/components/ErrorView';
 import { Container } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { env } from '@/env';
+import { format_bytes, shorten } from '@/lib/format';
 import {
   estimate_irys_publish_cost,
   estimate_solana_publish_cost,
@@ -30,6 +37,7 @@ import {
   read_session_config_from_url,
   type SessionConfig,
 } from '@/lib/publish-session-client';
+import { cn } from '@/lib/utils';
 
 type LoadState =
   | { kind: 'pending' }
@@ -51,15 +59,12 @@ type RunState =
   | { kind: 'failed'; events: PublishFlowEvent[]; message: string };
 
 const NO_SESSION_MESSAGE =
-  'No publish session found in the URL. Run `gutenberg publish` from your terminal — it will open this page with the session attached.';
+  "We didn't find a publish session in the URL. Run `gutenberg publish` from your terminal — it opens this page with the session attached.";
 
 export function PublishRoute() {
   const wallet = useWallet();
   const cfg = useMemo(
-    () =>
-      read_session_config_from_url(
-        new URL(window.location.href),
-      ),
+    () => read_session_config_from_url(new URL(window.location.href)),
     [],
   );
   const [load, set_load] = useState<LoadState>(() =>
@@ -69,22 +74,16 @@ export function PublishRoute() {
   const fired_run_ref = useRef(false);
 
   useEffect(() => {
-    if (!cfg) {
-      return;
-    }
+    if (!cfg) return;
 
     let cancelled = false;
     fetch_session_input(cfg)
       .then((session) => {
-        if (cancelled) {
-          return;
-        }
+        if (cancelled) return;
         set_load({ kind: 'ready', session, cfg });
       })
       .catch((error: unknown) => {
-        if (cancelled) {
-          return;
-        }
+        if (cancelled) return;
         set_load({
           kind: 'error',
           message: error instanceof Error ? error.message : String(error),
@@ -98,21 +97,22 @@ export function PublishRoute() {
 
   if (load.kind === 'pending') {
     return (
-      <Container className="py-16">
-        <p className="font-mono text-[12px] uppercase tracking-[0.22em] text-muted-foreground">
-          Loading publish session…
+      <Container className="grid gap-4 py-20 lg:py-28">
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+          Loading your publish session
         </p>
+        <div className="grid gap-3" aria-busy>
+          <div className="h-9 w-72 max-w-full animate-pulse rounded-md bg-muted" />
+          <div className="h-3.5 w-2/3 max-w-md animate-pulse rounded-md bg-muted/70" />
+        </div>
       </Container>
     );
   }
 
   if (load.kind === 'error') {
     return (
-      <Container className="py-16">
-        <ErrorView
-          title="Publish session unavailable"
-          message={load.message}
-        />
+      <Container className="py-20 lg:py-28">
+        <ErrorView title="No publish session here" message={load.message} />
       </Container>
     );
   }
@@ -120,9 +120,7 @@ export function PublishRoute() {
   const { session, cfg: session_cfg } = load;
 
   async function on_publish() {
-    if (fired_run_ref.current) {
-      return;
-    }
+    if (fired_run_ref.current) return;
 
     fired_run_ref.current = true;
     const events: PublishFlowEvent[] = [];
@@ -185,79 +183,87 @@ export function PublishRoute() {
   }
 
   return (
-    <Container className="grid gap-10 py-16 lg:py-24">
+    <Container className="grid gap-12 pb-24 pt-12 lg:gap-14 lg:pb-32 lg:pt-16">
       <header className="grid gap-3">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          Gutenberg gateway · publish
+          Publish
         </p>
-        <h1 className="text-[2.25rem] font-semibold leading-none tracking-[-0.03em] text-foreground sm:text-[2.75rem]">
-          Sign and publish&nbsp;
-          <span className="font-mono text-[0.85em] tabular text-muted-foreground">
-            {session.name}@{session.version}
-          </span>
-          .
+        <h1 className="text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
+          Make it permanent.
         </h1>
-        <p className="max-w-[58ch] text-[15px] leading-[1.55] text-foreground-soft">
-          Connect a Solana wallet (Phantom, Solflare, Backpack, etc.). The browser uploads the bundle to Irys, signs the
-          manifest with your key, and registers the release on Solana. Your
-          terminal is waiting for the result.
+        <p className="max-w-[60ch] text-[14.5px] leading-[1.6] text-foreground-soft">
+          Sign your release with your own key. Once it&rsquo;s up, no one —
+          not us, not a court, not even you — can take it down.
         </p>
       </header>
 
-      <SessionSummary session={session} />
+      <Identity session={session} />
 
-      <CostPreview session={session} />
+      <Cost session={session} />
 
-      <section className="grid gap-5 rounded-2xl border border-border bg-card/50 p-6">
-        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-          <div className="grid gap-1">
-            <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-              Wallet
-            </p>
-            <p className="font-mono text-[13px] tabular text-foreground">
-              {wallet.publicKey
-                ? wallet.publicKey.toBase58()
-                : 'Not connected'}
-            </p>
-          </div>
-          <WalletMultiButton style={wallet_button_style} />
-        </div>
+      <Action
+        session={session}
+        wallet_pubkey={wallet.publicKey?.toBase58() ?? null}
+        wallet_connected={Boolean(wallet.connected && wallet.signMessage)}
+        run={run}
+        on_publish={() => void on_publish()}
+        on_cancel={on_cancel}
+      />
 
-        <FlowProgress events={run.kind === 'idle' ? [] : run.events} />
-
-        {run.kind === 'failed' ? (
-          <div className="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-[13px] text-destructive">
-            {run.message}
-          </div>
-        ) : null}
-
-        {run.kind === 'success' ? (
-          <SuccessView
-            result={run.result}
-            name={session.name}
-            version={session.version}
-          />
-        ) : (
-          <div className="flex flex-wrap items-center gap-3">
-            <Button
-              onClick={() => void on_publish()}
-              disabled={
-                !wallet.connected ||
-                !wallet.signMessage ||
-                run.kind === 'running'
-              }
-            >
-              {run.kind === 'running' ? 'Publishing…' : 'Publish release'}
-            </Button>
-            {run.kind === 'running' ? (
-              <Button variant="outline" onClick={on_cancel}>
-                Cancel
-              </Button>
-            ) : null}
-          </div>
-        )}
-      </section>
+      <Advanced session={session} />
     </Container>
+  );
+}
+
+function Identity({ session }: { session: PublishSessionInput }) {
+  const total_bytes = session.files.reduce((acc, f) => acc + f.size_bytes, 0);
+
+  return (
+    <section
+      aria-label="Release identity"
+      className="grid gap-4 border-y border-border py-7"
+    >
+      <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
+        About to publish
+      </p>
+      <h2 className="text-[1.625rem] font-semibold tracking-[-0.02em] text-foreground sm:text-[2rem]">
+        <span>{session.name}</span>
+        <span className="ml-2.5 align-baseline font-mono text-[0.78em] font-normal tabular text-foreground-soft">
+          {session.version}
+        </span>
+      </h2>
+      <dl className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[12px] tabular text-muted-foreground">
+        <DT>{session.files.length} files</DT>
+        <Sep />
+        <DT>{format_bytes(total_bytes)}</DT>
+        <Sep />
+        <DT>{session.chain.chain_id}</DT>
+      </dl>
+      {session.tags && session.tags.length > 0 ? (
+        <div className="flex flex-wrap gap-1.5">
+          {session.tags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded-full border border-border px-2 py-0.5 font-mono text-[10.5px] tabular text-foreground-soft"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function DT({ children }: { children: React.ReactNode }) {
+  return <span className="font-mono tabular">{children}</span>;
+}
+
+function Sep() {
+  return (
+    <span aria-hidden className="text-muted-foreground/40">
+      ·
+    </span>
   );
 }
 
@@ -271,7 +277,7 @@ type IrysCostState =
   | { kind: 'success'; data: IrysCostEstimate }
   | { kind: 'error'; message: string };
 
-function CostPreview({ session }: { session: PublishSessionInput }) {
+function Cost({ session }: { session: PublishSessionInput }) {
   const [solana, set_solana] = useState<SolanaCostState>({ kind: 'pending' });
   const [irys, set_irys] = useState<IrysCostState>({ kind: 'pending' });
 
@@ -284,9 +290,7 @@ function CostPreview({ session }: { session: PublishSessionInput }) {
       program_id: session.chain.program_id,
     })
       .then((data) => {
-        if (!cancelled) {
-          set_solana({ kind: 'success', data });
-        }
+        if (!cancelled) set_solana({ kind: 'success', data });
       })
       .catch((error: unknown) => {
         if (!cancelled) {
@@ -302,9 +306,7 @@ function CostPreview({ session }: { session: PublishSessionInput }) {
       session,
     })
       .then((data) => {
-        if (!cancelled) {
-          set_irys({ kind: 'success', data });
-        }
+        if (!cancelled) set_irys({ kind: 'success', data });
       })
       .catch((error: unknown) => {
         if (!cancelled) {
@@ -320,194 +322,277 @@ function CostPreview({ session }: { session: PublishSessionInput }) {
     };
   }, [session]);
 
-  const total_lamports =
-    solana.kind === 'success' && irys.kind === 'success'
-      ? BigInt(solana.data.total_lamports) + BigInt(irys.data.price_atomic)
-      : undefined;
+  const both_ready = solana.kind === 'success' && irys.kind === 'success';
+  const total_lamports = both_ready
+    ? BigInt(solana.data.total_lamports) + BigInt(irys.data.price_atomic)
+    : undefined;
+  const has_error = solana.kind === 'error' || irys.kind === 'error';
 
   return (
-    <section className="grid gap-5 rounded-2xl border border-border bg-card/40 p-6">
-      <div className="grid gap-1">
-        <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+    <section aria-label="Estimated cost" className="grid gap-5">
+      <div className="grid gap-1.5">
+        <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
           Estimated cost
         </p>
-        <p className="text-[13px] text-foreground-soft">
-          Paid by your connected wallet. Irys covers permanent storage; Solana
-          covers rent for the new release account
+        <div className="flex flex-wrap items-baseline gap-3">
+          <span
+            className={cn(
+              'font-mono text-[2.25rem] font-medium leading-none tabular tracking-[-0.02em] sm:text-[2.75rem]',
+              total_lamports !== undefined
+                ? 'text-foreground'
+                : 'text-muted-foreground/50',
+            )}
+          >
+            {total_lamports !== undefined
+              ? `~${format_lamports_as_sol(total_lamports)}`
+              : has_error
+                ? '—'
+                : '···'}
+          </span>
+          <span className="font-mono text-[14px] tabular text-foreground-soft">
+            SOL
+          </span>
+        </div>
+        <p className="text-[12.5px] text-muted-foreground">
+          Charged to your connected wallet. Covers permanent Irys storage,
+          Solana rent, and a 5,000-lamport base fee
           {solana.kind === 'success' && solana.data.creates_name
-            ? ' plus a one-time name account'
-            : ''}{' '}
-          plus a 5,000-lamport base fee.
+            ? ' · first release for this name'
+            : ''}
+          .
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <CostRow
-          label="Irys upload"
-          state={irys}
-          render={(data) => (
-            <>
-              <span>{format_lamports_as_sol(BigInt(data.price_atomic))} SOL</span>
-              <span className="text-muted-foreground">
-                {' '}
-                · {format_bytes(data.bytes)} ({format_bytes(data.files_bytes)}{' '}
-                files + {format_bytes(data.manifest_bytes)} manifest)
-              </span>
-            </>
-          )}
-        />
-        <CostRow
-          label="Solana transaction"
-          state={solana}
-          render={(data) => (
-            <>
-              <span>{format_lamports_as_sol(data.total_lamports)} SOL</span>
-              <span className="text-muted-foreground">
-                {' '}
-                · rent {format_lamports_as_sol(
-                  data.release_rent_lamports + data.name_rent_lamports,
-                )}{' '}
-                + fee {format_lamports_as_sol(data.base_fee_lamports)}
-                {data.creates_name ? ' · first release for name' : ''}
-              </span>
-            </>
-          )}
-        />
-      </div>
+      <details className="border-t border-border">
+        <summary className="group flex cursor-pointer list-none items-center gap-2 py-3 text-[11.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground-soft [&::-webkit-details-marker]:hidden">
+          <ChevronDown
+            className="size-3.5 transition-transform duration-200 group-open:rotate-180"
+            strokeWidth={2}
+            aria-hidden
+          />
+          <span>Breakdown</span>
+        </summary>
 
-      <div className="grid gap-1 border-t border-border pt-4">
-        <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-          Total
-        </p>
-        <p className="font-mono text-[15px] tabular text-foreground">
-          {total_lamports !== undefined
-            ? `~${format_lamports_as_sol(total_lamports)} SOL`
-            : irys.kind === 'error' || solana.kind === 'error'
-              ? 'unavailable'
-              : 'estimating…'}
-        </p>
-      </div>
+        <dl className="grid divide-y divide-border">
+          <CostLine
+            label="Irys upload"
+            state={irys}
+            primary={(d) => `${format_lamports_as_sol(BigInt(d.price_atomic))} SOL`}
+            secondary={(d) =>
+              `${format_bytes(d.bytes)} · ${format_bytes(d.files_bytes)} files + ${format_bytes(d.manifest_bytes)} manifest`
+            }
+          />
+          <CostLine
+            label="Solana transaction"
+            state={solana}
+            primary={(d) => `${format_lamports_as_sol(d.total_lamports)} SOL`}
+            secondary={(d) =>
+              `rent ${format_lamports_as_sol(d.release_rent_lamports + d.name_rent_lamports)} + fee ${format_lamports_as_sol(d.base_fee_lamports)}`
+            }
+          />
+        </dl>
+      </details>
     </section>
   );
 }
 
-function CostRow<T>({
+function CostLine<T>({
   label,
   state,
-  render,
+  primary,
+  secondary,
 }: {
   label: string;
   state:
     | { kind: 'pending' }
     | { kind: 'success'; data: T }
     | { kind: 'error'; message: string };
-  render: (data: T) => React.ReactNode;
+  primary: (data: T) => string;
+  secondary: (data: T) => string;
 }) {
   return (
-    <div className="grid gap-1">
-      <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-6 gap-y-1 py-3">
+      <dt className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
         {label}
-      </p>
-      {state.kind === 'pending' ? (
-        <p className="font-mono text-[13px] tabular text-muted-foreground">
-          estimating…
+      </dt>
+      <dd className="text-right">
+        {state.kind === 'pending' ? (
+          <span className="font-mono text-[13px] tabular text-muted-foreground/60">
+            estimating…
+          </span>
+        ) : state.kind === 'error' ? (
+          <span
+            className="font-mono text-[12.5px] tabular text-destructive"
+            title={state.message}
+          >
+            unavailable
+          </span>
+        ) : (
+          <span className="font-mono text-[13px] tabular text-foreground">
+            {primary(state.data)}
+          </span>
+        )}
+      </dd>
+      {state.kind === 'success' ? (
+        <p className="col-span-2 font-mono text-[11.5px] tabular text-muted-foreground">
+          {secondary(state.data)}
         </p>
-      ) : state.kind === 'error' ? (
-        <p
-          className="font-mono text-[12.5px] tabular text-destructive"
-          title={state.message}
-        >
-          unavailable: {state.message}
-        </p>
-      ) : (
-        <p className="font-mono text-[13px] tabular text-foreground">
-          {render(state.data)}
-        </p>
-      )}
+      ) : null}
     </div>
   );
 }
 
-function SessionSummary({ session }: { session: PublishSessionInput }) {
-  const total_bytes = session.files.reduce((acc, f) => acc + f.size_bytes, 0);
+function Action({
+  session,
+  wallet_pubkey,
+  wallet_connected,
+  run,
+  on_publish,
+  on_cancel,
+}: {
+  session: PublishSessionInput;
+  wallet_pubkey: string | null;
+  wallet_connected: boolean;
+  run: RunState;
+  on_publish: () => void;
+  on_cancel: () => void;
+}) {
+  if (run.kind === 'success') {
+    return (
+      <Success
+        result={run.result}
+        name={session.name}
+        version={session.version}
+      />
+    );
+  }
+
+  const running = run.kind === 'running';
+  const failed = run.kind === 'failed';
+  const events = run.kind === 'idle' ? [] : run.events;
 
   return (
-    <section className="grid gap-5 rounded-2xl border border-border bg-card p-6">
-      <div className="grid gap-2 sm:grid-cols-2">
-        <Field label="Name" value={session.name} mono />
-        <Field label="Version" value={session.version} mono />
-        <Field label="Entry" value={session.entry} mono />
-        <Field label="Chain" value={session.chain.chain_id} mono />
-        <Field label="Program" value={session.chain.program_id} mono truncate />
-        <Field label="Irys network" value={session.irys_network} mono />
+    <section
+      aria-label="Publish action"
+      className="grid gap-5 rounded-2xl border border-border bg-card p-6 sm:p-7"
+    >
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+        <div className="grid min-w-0 gap-1">
+          <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
+            Wallet
+          </p>
+          <p
+            className={cn(
+              'truncate font-mono text-[13px] tabular',
+              wallet_pubkey ? 'text-foreground' : 'text-muted-foreground',
+            )}
+            title={wallet_pubkey ?? undefined}
+          >
+            {wallet_pubkey ?? 'Connect a wallet to continue'}
+          </p>
+        </div>
+        <WalletMultiButton style={wallet_button_style} />
       </div>
-      <div className="grid gap-2 sm:grid-cols-3">
-        <Field label="Files" value={String(session.files.length)} />
-        <Field label="Bytes" value={format_bytes(total_bytes)} />
-        <Field label="RPC" value={session.rpc_url} truncate />
-      </div>
-      {session.tags && session.tags.length > 0 ? (
-        <Field label="Tags" value={session.tags.join(', ')} />
+
+      {events.length > 0 ? (
+        <CurrentStep events={events} active={running} />
       ) : null}
+
+      {failed ? (
+        <p className="rounded-xl border border-destructive/40 bg-destructive/5 px-3.5 py-2.5 text-[13px] text-destructive">
+          {run.message}
+        </p>
+      ) : null}
+
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-5">
+        {running ? (
+          <Button variant="ghost" onClick={on_cancel}>
+            Cancel
+          </Button>
+        ) : null}
+        <Button
+          size="lg"
+          onClick={on_publish}
+          disabled={!wallet_connected || running}
+        >
+          {running ? (
+            <>
+              <Loader2 className="size-3.5 animate-spin" strokeWidth={2} />
+              Publishing
+            </>
+          ) : (
+            <>Publish release</>
+          )}
+        </Button>
+      </div>
     </section>
   );
 }
 
-function Field({
-  label,
-  value,
-  mono = false,
-  truncate = false,
+function CurrentStep({
+  events,
+  active,
 }: {
-  label: string;
-  value: string;
-  mono?: boolean;
-  truncate?: boolean;
+  events: PublishFlowEvent[];
+  active: boolean;
 }) {
-  return (
-    <div className="grid gap-1">
-      <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-        {label}
-      </p>
-      <p
-        className={`text-[13px] text-foreground ${
-          mono ? 'font-mono tabular' : ''
-        } ${truncate ? 'truncate' : ''}`}
-        title={value}
-      >
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function FlowProgress({ events }: { events: PublishFlowEvent[] }) {
-  if (events.length === 0) {
-    return null;
-  }
+  const last = events[events.length - 1];
+  if (!last) return null;
 
   return (
-    <ol className="grid gap-1 rounded-xl border border-border bg-background px-4 py-3 text-[12.5px]">
-      {events.map((event, idx) => (
-        <li
-          key={`${event.kind}-${idx}`}
-          className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-3 font-mono tabular"
-        >
-          <span className="text-muted-foreground">
-            {String(idx + 1).padStart(2, '0')}
-          </span>
-          <span className="text-foreground-soft">
-            {progress_message(event)}
-          </span>
-        </li>
-      ))}
-    </ol>
+    <details className="grid gap-2">
+      <summary className="group flex cursor-pointer list-none items-center gap-3 [&::-webkit-details-marker]:hidden">
+        <span className="relative inline-flex size-2 items-center justify-center">
+          <span
+            aria-hidden
+            className={cn(
+              'absolute inline-flex size-2 rounded-full opacity-60',
+              active ? 'animate-ping bg-accent/60' : '',
+            )}
+          />
+          <span
+            aria-hidden
+            className={cn(
+              'relative inline-flex size-1.5 rounded-full',
+              active ? 'bg-accent' : 'bg-muted-foreground/60',
+            )}
+          />
+        </span>
+        <span className="min-w-0 flex-1 truncate font-mono text-[12.5px] tabular text-foreground-soft">
+          {progress_message(last)}
+        </span>
+        <span className="inline-flex items-center gap-1 font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground transition-colors group-hover:text-foreground-soft">
+          {events.length} step{events.length === 1 ? '' : 's'}
+          <ChevronDown
+            className="size-3 transition-transform duration-200 group-open:rotate-180"
+            strokeWidth={2}
+            aria-hidden
+          />
+        </span>
+      </summary>
+
+      <ol className="grid gap-1 rounded-lg border border-border bg-background px-3 py-2.5">
+        {events.map((event, idx) => (
+          <li
+            key={`${event.kind}-${idx}`}
+            className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-3 font-mono text-[11.5px] tabular"
+          >
+            <span className="text-muted-foreground/70">
+              {String(idx + 1).padStart(2, '0')}
+            </span>
+            <span className="text-foreground-soft">
+              {progress_message(event)}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </details>
   );
 }
 
 const REDIRECT_AFTER_SECONDS = 5;
 
-function SuccessView({
+function Success({
   result,
   name,
   version,
@@ -526,32 +611,119 @@ function SuccessView({
       return;
     }
 
-    const handle = setTimeout(
-      () => set_seconds_left((s) => s - 1),
-      1000,
-    );
-
+    const handle = setTimeout(() => set_seconds_left((s) => s - 1), 1000);
     return () => clearTimeout(handle);
   }, [seconds_left, navigate, target]);
 
   return (
-    <div className="grid gap-3 rounded-xl border border-accent/40 bg-accent/5 px-4 py-4 text-[13px]">
-      <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-accent">
-        Published
-      </p>
-      <Field label="Manifest" value={result.manifest_uri} mono truncate />
-      <Field label="Manifest hash" value={result.manifest_hash} mono truncate />
-      <Field label="Release" value={result.release_address} mono truncate />
-      <Field label="Signature" value={result.signature} mono truncate />
-      <p className="text-foreground-soft">
-        Opening your release in {seconds_left}s…{' '}
+    <section
+      aria-label="Published"
+      className="grid gap-5 rounded-2xl border border-accent/30 bg-accent/5 p-6 sm:p-7"
+    >
+      <div className="flex items-center gap-3">
+        <span className="inline-flex size-8 items-center justify-center rounded-full bg-accent text-accent-foreground">
+          <Check className="size-4" strokeWidth={2.4} aria-hidden />
+        </span>
+        <div className="grid gap-0.5">
+          <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-accent">
+            Published
+          </p>
+          <p className="text-[15px] font-medium tracking-[-0.005em] text-foreground">
+            {name}{' '}
+            <span className="font-mono tabular text-foreground-soft">
+              {version}
+            </span>{' '}
+            is live.
+          </p>
+        </div>
+      </div>
+
+      <dl className="grid gap-2 border-t border-accent/20 pt-4 text-[12px] sm:grid-cols-2">
+        <Receipt label="Release" value={result.release_address} />
+        <Receipt label="Signature" value={result.signature} />
+        <Receipt label="Manifest hash" value={result.manifest_hash} />
+        <Receipt label="Manifest URI" value={result.manifest_uri} />
+      </dl>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-accent/20 pt-4 text-[12.5px]">
+        <p className="text-foreground-soft">
+          Taking you to your release in{' '}
+          <span className="font-mono tabular text-foreground">
+            {seconds_left}s
+          </span>
+          .
+        </p>
         <Link
           to={target}
-          className="font-medium text-accent underline-offset-2 hover:underline"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-[12.5px] font-medium text-background transition-colors hover:bg-foreground/92 active:translate-y-px"
         >
-          go now
+          Open now
+          <ArrowUpRight className="size-3.5" strokeWidth={2} aria-hidden />
         </Link>
-        .
+      </div>
+    </section>
+  );
+}
+
+function Receipt({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="grid gap-0.5">
+      <dt className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        {label}
+      </dt>
+      <dd
+        className="truncate font-mono text-[12px] tabular text-foreground"
+        title={value}
+      >
+        {shorten(value, 10, 8)}
+      </dd>
+    </div>
+  );
+}
+
+function Advanced({ session }: { session: PublishSessionInput }) {
+  return (
+    <details className="border-t border-border">
+      <summary className="group flex cursor-pointer list-none items-center gap-2 py-4 text-[11.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground-soft [&::-webkit-details-marker]:hidden">
+        <ChevronDown
+          className="size-3.5 transition-transform duration-200 group-open:rotate-180"
+          strokeWidth={2}
+          aria-hidden
+        />
+        <span>Advanced details</span>
+      </summary>
+
+      <dl className="grid gap-3 pb-2 sm:grid-cols-2">
+        <Detail label="Entry" value={session.entry} />
+        <Detail label="Chain" value={session.chain.chain_id} />
+        <Detail label="Program ID" value={session.chain.program_id} />
+        <Detail label="RPC" value={session.rpc_url} />
+        <Detail label="Irys network" value={session.irys_network} />
+        {session.prev_version ? (
+          <Detail label="Previous version" value={session.prev_version} />
+        ) : null}
+        {session.license ? (
+          <Detail label="License" value={session.license} />
+        ) : null}
+        {session.language ? (
+          <Detail label="Language" value={session.language} />
+        ) : null}
+      </dl>
+    </details>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="grid gap-1">
+      <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        {label}
+      </p>
+      <p
+        className="truncate font-mono text-[12.5px] tabular text-foreground"
+        title={value}
+      >
+        {value}
       </p>
     </div>
   );
@@ -567,16 +739,6 @@ const wallet_button_style: React.CSSProperties = {
   fontFamily: 'inherit',
   fontWeight: 500,
 };
-
-function format_bytes(bytes: number): string {
-  if (bytes < 1024) {
-    return `${bytes} B`;
-  }
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
 
 function progress_kind(
   event: PublishFlowEvent,
@@ -599,25 +761,25 @@ function progress_kind(
 function progress_message(event: PublishFlowEvent): string {
   switch (event.kind) {
     case 'preparing':
-      return 'Preparing Irys client…';
+      return 'Preparing the upload client…';
     case 'wallet_connected':
-      return `Connected wallet ${truncate(event.address, 12)}`;
+      return `Wallet connected (${truncate(event.address, 12)})`;
     case 'fund_required':
-      return `Funding required: ${event.amount_atomic} atomic units for ${event.bytes} bytes`;
+      return `Topping up Irys: ${event.amount_atomic} atomic units for ${event.bytes} bytes`;
     case 'funding':
-      return 'Awaiting wallet confirmation for Irys funding tx…';
+      return 'Waiting for you to approve the Irys funding transaction…';
     case 'funded':
       return 'Irys balance topped up.';
     case 'manifest_signing':
-      return 'Awaiting wallet signature on manifest…';
+      return 'Waiting for you to sign the manifest…';
     case 'uploading_bundle':
-      return `Awaiting wallet signature on Irys bundle (${event.total} item${event.total === 1 ? '' : 's'})…`;
+      return `Waiting for you to sign the Irys bundle (${event.total} item${event.total === 1 ? '' : 's'})…`;
     case 'manifest_uploaded':
-      return `Manifest uploaded: ${event.manifest_uri}`;
+      return `Manifest uploaded: ${truncate(event.manifest_uri, 24)}`;
     case 'tx_sending':
-      return 'Awaiting wallet confirmation on Solana publish_release tx…';
+      return 'Waiting for you to approve the Solana transaction…';
     case 'tx_confirmed':
-      return `Solana tx confirmed: ${truncate(event.signature, 16)}`;
+      return `Release confirmed on Solana (${truncate(event.signature, 16)})`;
   }
 }
 
@@ -637,8 +799,6 @@ function progress_meta(
 }
 
 function truncate(value: string, head: number): string {
-  if (value.length <= head + 4) {
-    return value;
-  }
+  if (value.length <= head + 4) return value;
   return `${value.slice(0, head)}…${value.slice(-4)}`;
 }

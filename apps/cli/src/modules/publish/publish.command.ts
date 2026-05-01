@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 
 import { format_bytes } from '../../common/helpers/format-bytes';
 import { parse_name_at_version } from '../../common/helpers/parse-spec';
-import { write_status } from '../../common/helpers/prompt';
+import { ui } from '../../common/helpers/ui';
 
 import { PublishCancelledError, PublishService } from './publish.service';
 import type { PublishOptions, PublishProgressEvent } from './publish.types';
@@ -56,25 +56,44 @@ export class PublishCommand {
           ...(options.prevVersion ? { prev_version: options.prevVersion } : {}),
         };
 
+        ui.info(
+          `Publishing ${ui.fmt.bold(name)}${ui.fmt.dim('@')}${ui.fmt.bold(version)} from ${ui.fmt.dim(options.folder)}`,
+        );
+        ui.divider();
+
+        const started_at = Date.now();
+
         try {
           const result = await this.publish_service.publish_release(
             publish_options,
             {
+              on_browser_opened: (url) => {
+                ui.info(`Browser opened to sign release`);
+                ui.hint(url);
+              },
               on_progress: report_progress,
             },
           );
 
-          console.log('');
-          console.log(
-            `Uploaded ${format_bytes(result.total_bytes)} across ${result.file_count} file(s)`,
+          ui.divider();
+          ui.success(
+            `Uploaded ${ui.fmt.bold(format_bytes(result.total_bytes))} across ${ui.fmt.bold(`${result.file_count} file${result.file_count === 1 ? '' : 's'}`)}`,
           );
-          console.log(`Publisher: ${result.publisher}`);
-          console.log(`Manifest:  ${result.manifest_uri}`);
-          console.log(`Release:   ${result.release_address}`);
-          console.log(`Signature: ${result.signature}`);
+          ui.kv([
+            { k: 'Publisher', v: ui.fmt.id(result.publisher) },
+            { k: 'Manifest', v: ui.fmt.id(result.manifest_uri) },
+            { k: 'Release', v: ui.fmt.id(result.release_address) },
+            { k: 'Signature', v: ui.fmt.id(result.signature) },
+          ]);
+
+          const elapsed = Date.now() - started_at;
+          ui.done(
+            `Published ${name}@${version} ${ui.fmt.dim(`(${ui.fmt.duration(elapsed)})`)}`,
+          );
         } catch (error) {
           if (error instanceof PublishCancelledError) {
-            write_status(`Publish cancelled. ${error.message}`);
+            ui.divider();
+            ui.failed(`Publish cancelled — ${error.message}`);
             process.exitCode = 1;
             return;
           }
@@ -87,5 +106,27 @@ export class PublishCommand {
 }
 
 function report_progress(event: PublishProgressEvent): void {
-  write_status(`[${event.kind}] ${event.message}`);
+  const message = humanise_progress(event);
+
+  if (message === undefined) {
+    ui.step(event.message);
+    return;
+  }
+
+  ui.success(message);
+}
+
+function humanise_progress(event: PublishProgressEvent): string | undefined {
+  switch (event.kind) {
+    case 'wallet_connected':
+      return `Wallet connected ${ui.fmt.dim(`(${event.message})`)}`;
+    case 'upload_started':
+      return `Uploading bundle to Irys`;
+    case 'upload_complete':
+      return `Bundle uploaded ${ui.fmt.dim(`(${event.message})`)}`;
+    case 'tx_sent':
+      return `Submitted to Solana ${ui.fmt.dim(`(${event.message})`)}`;
+    default:
+      return undefined;
+  }
 }

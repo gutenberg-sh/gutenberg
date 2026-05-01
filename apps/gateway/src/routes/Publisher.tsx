@@ -35,7 +35,7 @@ export function PublisherRoute() {
       <Container className="py-20 lg:py-28">
         <ErrorView
           title="Missing publisher address"
-          message="Open a publisher via /p/<address>."
+          message="Publisher pages live at /p/<address>. Add the public key to the URL and try again."
         />
       </Container>
     );
@@ -46,7 +46,7 @@ export function PublisherRoute() {
       <Container className="py-20 lg:py-28">
         <ErrorView
           title="Publisher not found"
-          message={api_error_message(publisher.error, 'No record on the indexer.')}
+          message={api_error_message(publisher.error, "We don't have a record of this address. Double-check the public key, or browse recent releases.")}
         />
       </Container>
     );
@@ -111,8 +111,8 @@ export function PublisherRoute() {
           <ReleaseListSkeleton rows={6} />
         ) : releases.isError ? (
           <ErrorView
-            title="Could not load releases"
-            message={api_error_message(releases.error)}
+            title="Couldn't load this publisher's releases"
+            message={api_error_message(releases.error, "We can't reach the indexer right now. Try again in a moment.")}
           />
         ) : list.length === 0 ? (
           <EmptyReleases />
@@ -188,8 +188,8 @@ function PublisherStats({ data }: { data: NonNullable<ReturnType<typeof usePubli
           {shorten(data.address, 8, 8)}
         </p>
         <p className="text-[12px] leading-snug text-muted-foreground">
-          A publisher is a Solana keypair. Identity is the public key — there
-          is no profile, only signed releases.
+          On Gutenberg, an author is a key — not a profile, not a display
+          name, just a signature. This is what they&rsquo;ve published.
         </p>
         <Layers
           className="hidden size-3 text-muted-foreground"
@@ -206,7 +206,7 @@ function EmptyReleases() {
     <div className="grid place-items-center gap-2 rounded-xl border border-dashed border-border px-6 py-12 text-center">
       <p className="text-[13.5px] text-foreground">No releases yet.</p>
       <p className="max-w-[40ch] text-[12px] leading-relaxed text-muted-foreground">
-        This publisher is registered but has not signed a release.
+        This key is registered but hasn't signed anything yet.
       </p>
     </div>
   );

@@ -22,7 +22,7 @@ export function RecentReleases({ limit = 8 }: { limit?: number }) {
             Recently published
           </p>
           <h2 className="text-[22px] font-semibold tracking-[-0.02em] text-foreground sm:text-[26px]">
-            What just shipped to the registry.
+            What people just put on the record.
           </h2>
         </div>
         <Link
@@ -113,7 +113,7 @@ function Skeleton({ rows }: { rows: number }) {
 function Empty() {
   return (
     <p className="border-y border-dashed border-border px-1 py-8 text-center text-[12.5px] text-muted-foreground">
-      Indexer is online but no releases have been published yet.
+      Nothing has been published yet. The first one is up for grabs.
     </p>
   );
 }

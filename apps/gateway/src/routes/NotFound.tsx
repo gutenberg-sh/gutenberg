@@ -16,12 +16,11 @@ export function NotFoundRoute() {
         That URL doesn&apos;t resolve.
       </h1>
       <p className="max-w-[58ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
-        Releases are addressed as{' '}
+        Releases live at{' '}
         <code className="rounded-md border border-border bg-card px-1.5 py-0.5 font-mono text-[13px] tabular text-foreground">
           /r/&lt;name&gt;/&lt;version&gt;
         </code>
-        . Double-check the name and version, then try again from the search
-        page.
+        . Double-check both, then try again from search.
       </p>
       <div className="mt-2 flex items-center gap-3">
         <Link

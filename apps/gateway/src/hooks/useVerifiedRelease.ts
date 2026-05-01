@@ -35,15 +35,15 @@ type Action =
   | { kind: 'error'; message: string; failing_step_id?: string };
 
 const INITIAL_STEPS: readonly VerifyStep[] = [
-  { id: 'registry', label: 'Resolving registry release', state: 'pending' },
+  { id: 'registry', label: 'Looking up the release on chain', state: 'pending' },
   {
     id: 'manifest',
-    label: 'Verifying manifest + chain binding',
+    label: 'Checking the manifest signature',
     state: 'pending',
   },
   {
     id: 'index',
-    label: 'Building verified file index',
+    label: 'Hashing the file index',
     state: 'pending',
   },
 ];

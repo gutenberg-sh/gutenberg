@@ -68,8 +68,8 @@ export function LatestReleaseRoute() {
     return (
       <Container className="py-20 lg:py-28">
         <ErrorView
-          title="Invalid release name"
-          message={`"${name ?? ''}" is not a valid release name.`}
+          title="That name doesn't look right"
+          message={`"${name ?? ''}" isn't a valid release name. Names use lowercase letters, numbers, dots, underscores, or hyphens.`}
         />
       </Container>
     );
@@ -88,7 +88,7 @@ export function LatestReleaseRoute() {
     return (
       <Container className="py-20 lg:py-28">
         <ErrorView
-          title="Could not resolve latest release"
+          title="Couldn't find the latest version"
           message={state.message}
         />
       </Container>
@@ -108,13 +108,13 @@ export function LatestReleaseRoute() {
         />
         <div className="grid gap-3">
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-            Resolving latest version
+            Finding the latest version
           </p>
           <h2 className="text-[26px] font-semibold leading-[1.1] tracking-tight text-foreground sm:text-[32px]">
             {name}
           </h2>
           <p className="max-w-[60ch] text-[15px] leading-[1.6] text-foreground-soft">
-            Looking up the most recent release on the Solana registry.
+            Asking Solana for the most recent release of this name.
           </p>
         </div>
       </div>

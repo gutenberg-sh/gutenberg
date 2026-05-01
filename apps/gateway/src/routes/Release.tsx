@@ -16,8 +16,8 @@ export function ReleaseRoute() {
     return (
       <Container className="py-20 lg:py-28">
         <ErrorView
-          title="Invalid release name"
-          message={`"${name ?? ''}" is not a valid release name.`}
+          title="That name doesn't look right"
+          message={`"${name ?? ''}" isn't a valid release name. Names use lowercase letters, numbers, dots, underscores, or hyphens.`}
         />
       </Container>
     );
@@ -27,8 +27,8 @@ export function ReleaseRoute() {
     return (
       <Container className="py-20 lg:py-28">
         <ErrorView
-          title="Missing version"
-          message="Releases are addressed as name@version (e.g. gutenberg-demo@1.0.0)."
+          title="Missing the version"
+          message="Releases use the form name@version (e.g. gutenberg-demo@1.0.0)."
         />
       </Container>
     );

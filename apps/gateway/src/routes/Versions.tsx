@@ -17,8 +17,8 @@ export function VersionsRoute() {
     return (
       <Container className="py-20 lg:py-28">
         <ErrorView
-          title="Invalid release name"
-          message={`"${name ?? ''}" is not a valid release name.`}
+          title="That name doesn't look right"
+          message={`"${name ?? ''}" isn't a valid release name. Names use lowercase letters, numbers, dots, underscores, or hyphens.`}
         />
       </Container>
     );
@@ -52,9 +52,9 @@ function VersionsView({ name }: { name: string }) {
           </Link>
         </div>
         <p className="max-w-[60ch] text-[14.5px] leading-[1.6] text-foreground-soft">
-          Append-only by design — once a version is published, it is
-          permanent. The chain enforces uniqueness on{' '}
-          <span className="font-mono tabular">name@version</span>.
+          Every version this author has ever published under this name,
+          newest first. Each one is permanent — once it&rsquo;s up, it stays
+          up exactly as it was signed.
         </p>
       </header>
 
@@ -62,8 +62,8 @@ function VersionsView({ name }: { name: string }) {
         <Skeleton />
       ) : versions.isError ? (
         <ErrorView
-          title="Could not load versions"
-          message={api_error_message(versions.error, 'Indexer is unreachable.')}
+          title="Couldn't load versions"
+          message={api_error_message(versions.error, "We can't reach the indexer right now. Try again in a moment.")}
         />
       ) : (versions.data?.length ?? 0) === 0 ? (
         <EmptyVersions />
@@ -150,10 +150,10 @@ function EmptyVersions() {
   return (
     <div className="grid place-items-center gap-3 rounded-xl border border-dashed border-border px-6 py-14 text-center">
       <GitBranch className="size-5 text-muted-foreground" strokeWidth={1.6} aria-hidden />
-      <p className="text-[14px] text-foreground">No versions on record.</p>
+      <p className="text-[14px] text-foreground">No versions yet.</p>
       <p className="max-w-[40ch] text-[12.5px] leading-relaxed text-muted-foreground">
-        The indexer hasn’t seen this name yet. It may have just been
-        published — give it a moment.
+        Either this name doesn't exist, or it just shipped and we're still
+        catching up. Refresh in a moment.
       </p>
     </div>
   );

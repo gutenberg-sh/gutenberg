@@ -102,7 +102,7 @@ function IdentityStrip({
       <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
         <Chip
           variant="accent"
-          title="Locally verified: author signature, on-chain manifest hash, content hash, and chain binding"
+          title="Verified in your browser — author signature, manifest hash, and content hash all match the chain."
           icon={<ShieldCheck className="size-3" strokeWidth={1.85} aria-hidden />}
         >
           Verified
@@ -220,7 +220,7 @@ function ProvenanceDisclosure({ release }: { release: VerifiedRelease }) {
       <div className="grid gap-5 pb-1">
         <ProofGroup
           title="Registry"
-          caption="Where this release is recorded on Solana"
+          caption="Where this release lives on Solana"
         >
           <ProofRow
             label="Release"
@@ -245,7 +245,7 @@ function ProvenanceDisclosure({ release }: { release: VerifiedRelease }) {
 
         <ProofGroup
           title="Content"
-          caption="Cryptographic commitment, signed by the publisher"
+          caption="What was signed, and by whom"
         >
           <ProofRow
             label="Hash"
@@ -263,7 +263,7 @@ function ProvenanceDisclosure({ release }: { release: VerifiedRelease }) {
 
         <ProofGroup
           title="Manifest"
-          caption="Off-chain document indexing every file in the release"
+          caption="The signed file index your browser fetched"
         >
           <ProofRow
             label="Hash"

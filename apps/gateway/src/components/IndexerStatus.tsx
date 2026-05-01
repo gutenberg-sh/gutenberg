@@ -41,14 +41,18 @@ function derive_status(health: ReturnType<typeof useIndexerHealth>): {
   title: string;
 } {
   if (health.isLoading) {
-    return { tone: 'unknown', label: 'Indexer · checking', title: 'Pinging the indexer' };
+    return {
+      tone: 'unknown',
+      label: 'Indexer · checking',
+      title: 'Checking the indexer…',
+    };
   }
 
   if (health.isError || !health.data) {
     return {
       tone: 'down',
       label: 'Indexer · offline',
-      title: 'Indexer is unreachable; live feeds will not refresh',
+      title: "We can't reach the indexer. Recent releases won't refresh until it's back.",
     };
   }
 
@@ -57,7 +61,7 @@ function derive_status(health: ReturnType<typeof useIndexerHealth>): {
     return {
       tone: 'unknown',
       label: 'Indexer · syncing',
-      title: 'Indexer connected but slot lag is unknown',
+      title: 'Indexer is connected but still figuring out where it is.',
     };
   }
 
@@ -65,7 +69,7 @@ function derive_status(health: ReturnType<typeof useIndexerHealth>): {
     return {
       tone: 'ok',
       label: 'Indexer · live',
-      title: `${lag} slot${lag === 1 ? '' : 's'} behind chain head`,
+      title: `Up to date — ${lag} slot${lag === 1 ? '' : 's'} behind the chain head.`,
     };
   }
 
@@ -73,13 +77,13 @@ function derive_status(health: ReturnType<typeof useIndexerHealth>): {
     return {
       tone: 'lag',
       label: `Indexer · ~${lag} slots behind`,
-      title: 'Indexer is catching up to chain head',
+      title: 'Catching up to the chain head…',
     };
   }
 
   return {
     tone: 'lag',
     label: 'Indexer · backfilling',
-    title: 'Indexer is performing initial backfill',
+    title: 'Working through the initial backfill — this only happens once.',
   };
 }

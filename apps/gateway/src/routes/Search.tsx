@@ -60,12 +60,11 @@ export function SearchRoute() {
           Search
         </p>
         <h1 className="text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
-          Find a release.
+          Find an author or a release.
         </h1>
         <p className="max-w-[60ch] text-[14.5px] leading-[1.6] text-foreground-soft">
-          Forgiving name search across the registry. Trigram-matched on the
-          publisher-claimed name — partial words and typos still surface
-          results.
+          Search by name across everything ever published to Gutenberg.
+          Partial words and typos still surface matches.
         </p>
       </header>
 
@@ -80,8 +79,8 @@ export function SearchRoute() {
           <ResultsSkeleton />
         ) : search.isError ? (
           <ErrorView
-            title="Search failed"
-            message={api_error_message(search.error, 'Indexer is unreachable.')}
+            title="Search isn't responding"
+            message={api_error_message(search.error, "We can't reach the indexer right now. Try again in a moment.")}
           />
         ) : results.length === 0 ? (
           <NoResults q={trimmed} />
@@ -245,10 +244,10 @@ function EmptyQuery() {
   return (
     <div className="grid place-items-center gap-3 rounded-xl border border-dashed border-border px-6 py-14 text-center">
       <SearchIcon className="size-5 text-muted-foreground" strokeWidth={1.6} aria-hidden />
-      <p className="text-[14px] text-foreground">Type a name to search.</p>
+      <p className="text-[14px] text-foreground">Start typing a name.</p>
       <p className="max-w-[40ch] text-[12.5px] leading-relaxed text-muted-foreground">
-        Names are claimed by publishers on first publish. Search is forgiving —
-        partial words and typos still surface results.
+        Partial words and typos still find matches. A name belongs to its
+        publisher from the first release on.
       </p>
     </div>
   );
@@ -258,12 +257,12 @@ function NoResults({ q }: { q: string }) {
   return (
     <div className="grid place-items-center gap-3 rounded-xl border border-dashed border-border px-6 py-14 text-center">
       <p className="text-[14px] text-foreground">
-        No name matches{' '}
+        Nothing matches{' '}
         <span className="font-mono tabular">{q}</span>.
       </p>
       <p className="max-w-[40ch] text-[12.5px] leading-relaxed text-muted-foreground">
-        Names are claimed on first publish. The publisher you’re looking for
-        may not have claimed a release yet.
+        Check the spelling, or browse what's been shipped recently — the
+        author may not have published yet.
       </p>
     </div>
   );

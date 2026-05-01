@@ -14,63 +14,92 @@ const PROOF_STEPS: ReadonlyArray<{
 }> = [
   {
     index: '01',
-    label: 'On-chain content hash',
+    label: 'Who published it',
     detail:
-      'The Solana release record carries a SHA-256 over the canonical file index. The manifest you fetch must match it byte-for-byte.',
+      'The publisher signs every release with a key only they hold. Your browser checks that signature against the public key the chain has on record.',
   },
   {
     index: '02',
-    label: 'Manifest signature',
+    label: 'What was published',
     detail:
-      'The publisher signs the canonical JSON manifest with their Solana key (Ed25519). We re-check the signature against the on-chain publisher.',
+      'The chain stores a fingerprint of the whole release. The files your browser fetches have to match that fingerprint exactly — every byte.',
   },
   {
     index: '03',
-    label: 'Per-file hashes',
+    label: 'What you\u2019re reading right now',
     detail:
-      'Each file is fetched on demand from its own content address and verified against the hash the publisher signed. If a single byte changes, that file does not render.',
+      'Every file has its own fingerprint too. If a single byte differs from the one the author signed, the file refuses to render.',
   },
 ];
 
 const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
   {
+    q: 'Who can take a release down?',
+    a: (
+      <>
+        No one. There is no unpublish button — not for us, not for the
+        publisher, not for a court. Once a release is signed and recorded,
+        the original is permanent.
+      </>
+    ),
+  },
+  {
+    q: 'How do I know what I\u2019m reading is real?',
+    a: (
+      <>
+        Every page on this site verifies itself in your browser before it
+        renders. The signature, the file fingerprints, and the on-chain
+        record all have to line up. If anything is off, the page refuses
+        to load.
+      </>
+    ),
+  },
+  {
     q: 'What can I publish?',
     a: (
       <>
-        Anything that fits in files — markdown, images, PDFs, raw text,
-        archives. Each file gets its own content-addressed Arweave upload.
-        The gateway renders markdown directly and lets readers download
-        other file types verbatim.
+        Anything that fits in a folder — writing, photos, PDFs, archives,
+        whatever. Markdown renders directly here; everything else is served
+        byte-for-byte the way you uploaded it.
       </>
     ),
   },
   {
-    q: 'Where is the content stored?',
+    q: 'How do I publish?',
     a: (
       <>
-        On Arweave, addressed by content hash — each file individually. The
-        Solana program stores publisher, version, manifest pointer, and a
-        digest of the file index. Files survive any one host going away.
+        Install the <Code>gutenberg</Code> CLI, point it at your folder, and
+        run <Code>gutenberg publish</Code>. It opens this site, your wallet
+        signs the release, and your terminal hands you back the URL. See the{' '}
+        <a
+          href="https://github.com/itsmekamal/gutenberg"
+          target="_blank"
+          rel="noreferrer noopener"
+          className="text-foreground underline-offset-4 hover:underline"
+        >
+          repository
+        </a>{' '}
+        for setup.
       </>
     ),
   },
   {
-    q: 'Can a publisher revoke a release?',
+    q: 'What if a publisher loses their key?',
     a: (
       <>
-        No. The registry is append-only by design: there is no
-        unpublish instruction. Once a release is recorded, the on-chain
-        pointer (publisher, manifest URI, content hash) is permanent.
+        Old releases stay valid — they were signed by that key at that time,
+        and that fact is permanent. Anything new has to come from a new key,
+        and readers can see the change.
       </>
     ),
   },
   {
-    q: 'What if a publisher key leaks?',
+    q: 'Is the verifier open?',
     a: (
       <>
-        Old releases stay valid — they were signed by that key at that time.
-        Future releases should be signed by a new key, registered to the same
-        name only if the publisher controls the registry record.
+        Yes. The whole site, the CLI, and the on-chain program are open
+        source. The verifier ships in this page — you can read it, audit it,
+        or run it yourself.
       </>
     ),
   },
@@ -81,30 +110,34 @@ export function LandingRoute() {
     <div className="flex flex-col">
       {}
       <Container className="pb-20 pt-14 lg:pb-28 lg:pt-20">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-10">
-          <div className="grid gap-5">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-              Gutenberg · verifiable publishing on Solana
-            </p>
-            <h1 className="text-[2.25rem] font-semibold leading-[1.02] tracking-[-0.035em] text-foreground sm:text-[2.875rem] lg:text-[3.5rem]">
-              Read what was actually published.
-            </h1>
-            <p className="max-w-[60ch] text-[15.5px] leading-[1.55] text-foreground-soft sm:text-[16.5px]">
-              A public registry of signed releases. The gateway verifies every
-              file in your browser before rendering a single byte — no proxy,
-              no SDK, no edits.
-            </p>
-          </div>
-          <p className="hidden text-[12px] text-muted-foreground lg:block">
-            <span className="font-mono tabular text-foreground-soft">
-              ⌘K
-            </span>{' '}
-            anywhere to search
+        <div className="grid gap-5">
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+            Gutenberg · publish freely. read what&rsquo;s real.
+          </p>
+          <h1 className="text-[2.25rem] font-semibold leading-[1.02] tracking-[-0.035em] text-foreground sm:text-[2.875rem] lg:text-[3.5rem]">
+            Publish what can&rsquo;t be erased.
+          </h1>
+          <p className="max-w-[60ch] text-[15.5px] leading-[1.55] text-foreground-soft sm:text-[16.5px]">
+            Gutenberg is where anyone can publish freely, privately, and
+            permanently. Once a release goes up, no host, court, or platform
+            can take it down — and every reader can see, in their own browser,
+            that what they&rsquo;re reading is the original.
           </p>
         </div>
 
         {}
         <div className="mt-9 max-w-3xl">
+          <div className="mb-2 flex items-baseline justify-between gap-3 px-1">
+            <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
+              Search the registry
+            </p>
+            <p className="hidden text-[11.5px] text-muted-foreground sm:block">
+              <span className="font-mono tabular text-foreground-soft">
+                ⌘K
+              </span>{' '}
+              anywhere
+            </p>
+          </div>
           <LookupForm size="lg" placeholder="find a release or publisher" />
         </div>
 
@@ -117,27 +150,32 @@ export function LandingRoute() {
 
       <Section eyebrow="01 / Why" title="Publishing should outlive its publisher.">
         <p className="max-w-[60ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
-          Whether you like it or not, governments and major outlets enforce a
-          certain narrative. Work that contradicts it gets taken down, sued, or
-          buried. Gutenberg lets you publish freely, privately, and
-          permanently — content is written to durable storage and registered
-          on a public chain, signed by the author. Once published, no host,
-          editor, or court can censor the original.
+          Most of what you read today lives on someone else&rsquo;s servers.
+          That someone can take it down, edit it after the fact, or quietly
+          de-rank it until it&rsquo;s gone. Governments and major platforms
+          do this constantly — and most of the time you&rsquo;ll never know
+          it happened.
+        </p>
+        <p className="mt-4 max-w-[60ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
+          Gutenberg makes that impossible. The author signs the work with
+          their own key, the files go to storage no single company controls,
+          and the record lives on a public chain. Once it&rsquo;s up, the
+          original is permanent. No host, editor, or court can revoke it.
         </p>
 
         <dl className="mt-10 grid divide-y divide-border border-y border-border text-[14.5px]">
           {[
             {
               k: 'Freely',
-              v: 'No platform gatekeeper sits between writer and reader.',
+              v: 'No platform decides who gets to publish. If you can sign, you can publish.',
             },
             {
               k: 'Privately',
-              v: 'Only the publisher key can sign. Identity is a key, not a profile.',
+              v: 'Your identity is a key, not a profile. Nothing connects your release to your name unless you do.',
             },
             {
               k: 'Permanently',
-              v: 'Bundles live on Arweave. Signatures live on Solana. Either survives the other.',
+              v: 'Files live on Arweave. The signed record lives on Solana. Either outlasts the other.',
             },
           ].map((row) => (
             <div
@@ -153,10 +191,12 @@ export function LandingRoute() {
         </dl>
       </Section>
 
-      <Section eyebrow="02 / How" title="Three checks. All local.">
+      <Section eyebrow="02 / Proof" title="How you know it&rsquo;s the original.">
         <p className="max-w-[60ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
-          We do not proxy bundles, we do not import a Solana SDK, we do not
-          re-host content. The verification runs entirely in your browser.
+          Anyone can claim a page is real. Gutenberg lets your own browser
+          prove it. Every release carries a signature from its author and a
+          fingerprint on chain — and your browser checks both before showing
+          you a single word.
         </p>
 
         <ol className="mt-10 grid divide-y divide-border border-y border-border">
@@ -179,12 +219,18 @@ export function LandingRoute() {
             </li>
           ))}
         </ol>
+
+        <p className="mt-8 max-w-[60ch] text-[13.5px] leading-[1.6] text-muted-foreground">
+          We don&rsquo;t proxy releases. We don&rsquo;t re-host content. There
+          is nothing on our side you have to trust — including us.
+        </p>
       </Section>
 
-      <Section eyebrow="03 / Anatomy" title="What a release actually is.">
+      <Section eyebrow="03 / Permanence" title="Built to outlast any one of us.">
         <p className="max-w-[60ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
-          Every release decomposes into three small, replaceable artifacts.
-          None of them depend on a particular host or app surviving.
+          A release isn&rsquo;t a webpage on a server someone can shut down.
+          It&rsquo;s three small, independent pieces that live on networks no
+          one company controls.
         </p>
 
         <div className="mt-10">
@@ -195,18 +241,18 @@ export function LandingRoute() {
           {[
             {
               k: 'manifest.json',
-              t: 'Canonical metadata',
-              v: 'Name, version, entry path, file → {hash, size, ar:// uri}, content_hash, chain binding, publisher pubkey, Ed25519 signature.',
+              t: 'The signed index',
+              v: "Lists every file in the release, what's in it, and who signed it. Small, human-readable, signed by the author.",
             },
             {
-              k: 'ar://<txid> per file',
-              t: 'Content archive',
-              v: 'Each file uploaded individually to Arweave under its content address. Readers fetch only what they actually open.',
+              k: 'ar://<txid>',
+              t: 'The files themselves',
+              v: 'Every file lives on Arweave under its own content address. Your browser only fetches what you actually open.',
             },
             {
-              k: 'release PDA',
-              t: 'On-chain record',
-              v: 'An append-only Solana account at (name, version) carrying publisher, content_hash, content_size, and the manifest pointer.',
+              k: 'solana://release',
+              t: 'The on-chain record',
+              v: "Solana stores a permanent pointer at name + version: who published it, and what the manifest is supposed to look like.",
             },
           ].map((row) => (
             <div
@@ -227,18 +273,7 @@ export function LandingRoute() {
         </dl>
       </Section>
 
-      <Section eyebrow="04 / Stack" title="The whole verifier ships in the page.">
-        <p className="max-w-[64ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
-          The gateway uses <Code>WebCrypto</Code> for SHA-256, the small{' '}
-          <Code>@noble/curves</Code> library for Ed25519, and direct Solana{' '}
-          <Code>JSON-RPC</Code> calls. There is no Solana SDK and no Node
-          runtime in the bundle. Files are fetched lazily — only the page you
-          read crosses the wire — and each is hashed against the manifest
-          before it renders.
-        </p>
-      </Section>
-
-      <Section eyebrow="05 / FAQ" title="Things people ask.">
+      <Section eyebrow="04 / FAQ" title="Things people ask.">
         <dl className="grid divide-y divide-border border-y border-border">
           {FAQ.map(({ q, a }) => (
             <div

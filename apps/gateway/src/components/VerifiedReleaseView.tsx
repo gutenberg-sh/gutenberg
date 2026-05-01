@@ -59,8 +59,8 @@ export function VerifiedReleaseView({
         <VerifyStatus steps={state.steps} />
         <div>
           <ErrorView
-            title="Verification failed"
-            message={state.error ?? 'Unknown error'}
+            title="This release didn't verify"
+            message={state.error ?? 'Something went wrong while checking this release.'}
             extras={
               state.partial_manifest_uri ? (
                 <GatewayLinks
@@ -144,8 +144,8 @@ function VerifiedReleaseRendered({
     return (
       <Container className="py-20 lg:py-28">
         <ErrorView
-          title="File not found"
-          message={`The release does not include ${target_path}.`}
+          title="File not in this release"
+          message={`This release doesn't include ${target_path}. Pick a file from the index, or open the entry page.`}
           back_to={base_path}
         />
       </Container>
@@ -195,7 +195,7 @@ function ActiveFile({
   if (file_state.status === 'error') {
     return (
       <ErrorView
-        title="File verification failed"
+        title="This file didn't verify"
         message={file_state.error}
         back_to={base_path}
         extras={
@@ -255,7 +255,7 @@ function ActiveMarkdown({
   if (asset_state.status === 'error') {
     return (
       <ErrorView
-        title="Linked asset failed verification"
+        title="A linked file didn't verify"
         message={asset_state.error}
         back_to={base_path}
       />
@@ -283,7 +283,7 @@ function FileLoadingSkeleton({ path }: { path: string }) {
   return (
     <div className="grid gap-3" aria-busy aria-live="polite">
       <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-        Verifying {path}
+        Checking {path}
       </p>
       <div className="grid gap-3">
         <Skeleton className="h-6 w-3/4" />

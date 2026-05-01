@@ -7,6 +7,7 @@ import {
   assert_valid_name,
   parse_name_at_version,
 } from '../../common/helpers/parse-spec';
+import { ui } from '../../common/helpers/ui';
 import { RegistryService } from '../registry/registry.service';
 
 @Injectable()
@@ -40,7 +41,12 @@ export class OpenCommand {
         );
         const url = `${gateway_base}/r/${encodeURIComponent(name)}/${encodeURIComponent(version)}`;
 
-        console.log(url);
+        ui.success(
+          `Opening ${ui.fmt.bold(name)}${ui.fmt.dim('@')}${ui.fmt.bold(version)}`,
+        );
+        ui.hint(url);
+
+        process.stdout.write(`${url}\n`);
 
         open_url_in_browser(url);
       },

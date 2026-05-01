@@ -10,8 +10,8 @@ export function SiteFooter() {
         <div className="grid gap-3">
           <Wordmark className="text-foreground" showSubmark={false} />
           <p className="max-w-[44ch] text-[13.5px] leading-relaxed text-foreground-soft">
-            Gutenberg lets anyone publish freely, privately, and permanently
-            on Solana.
+            Publish freely, privately, and permanently. Verified by every
+            browser, owned by no one.
           </p>
         </div>
 
