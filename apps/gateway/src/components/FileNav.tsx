@@ -16,7 +16,10 @@ export function FileNav({
   }
 
   return (
-    <nav aria-label="Pages" className="lg:sticky lg:top-24">
+    <nav
+      aria-label="Pages"
+      className="lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto"
+    >
       <p className="mb-3 flex items-baseline justify-between text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground/80">
         <span>Index</span>
         <span className="font-mono tabular text-muted-foreground/70 normal-case tracking-normal">

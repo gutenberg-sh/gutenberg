@@ -18,9 +18,7 @@ export function parse_gateway_list(raw: string): string[] {
     }
 
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      throw new Error(
-        `Gateway URL must use http(s): "${entry.trim()}"`,
-      );
+      throw new Error(`Gateway URL must use http(s): "${entry.trim()}"`);
     }
 
     if (seen.has(trimmed)) {

@@ -78,52 +78,96 @@ function IdentityStrip({
   created_at: string;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[12.5px]">
-      <span
-        title="Locally verified: author signature, on-chain manifest hash, content hash, and chain binding"
-        className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-[11px] font-medium tracking-tight text-accent"
+    <div className="flex flex-wrap items-center gap-2">
+      <Chip
+        icon={<Calendar className="size-3" strokeWidth={1.85} aria-hidden />}
       >
-        <ShieldCheck className="size-3.5" strokeWidth={1.85} aria-hidden />
-        Verified
-      </span>
-
-      <PublisherTag publisher={publisher} />
-
-      <span className="inline-flex items-center gap-1.5 text-foreground-soft">
-        <Calendar
-          className="size-3 text-muted-foreground"
-          strokeWidth={1.85}
-          aria-hidden
-        />
         {format_date(created_at)}
-      </span>
+      </Chip>
+
+      <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+        <Chip
+          variant="accent"
+          title="Locally verified: author signature, on-chain manifest hash, content hash, and chain binding"
+          icon={<ShieldCheck className="size-3" strokeWidth={1.85} aria-hidden />}
+        >
+          Verified
+        </Chip>
+
+        <span className="inline-flex items-center gap-1">
+          <Chip
+            mono
+            title={`View ${publisher} on the Solana explorer`}
+            href={explorer_address_url(publisher)}
+            icon={
+              <Fingerprint className="size-3" strokeWidth={1.85} aria-hidden />
+            }
+            trailing={
+              <ExternalLink
+                className="size-2.5 opacity-70"
+                strokeWidth={1.85}
+                aria-hidden
+              />
+            }
+          >
+            {shorten(publisher, 6, 6)}
+          </Chip>
+          <CopyButton value={publisher} label="Publisher" inline />
+        </span>
+      </div>
     </div>
   );
 }
 
-function PublisherTag({ publisher }: { publisher: string }) {
-  return (
-    <span className="inline-flex items-center gap-1">
+function Chip({
+  icon,
+  children,
+  trailing,
+  variant = 'default',
+  mono,
+  href,
+  title,
+}: {
+  icon?: ReactNode;
+  children: ReactNode;
+  trailing?: ReactNode;
+  variant?: 'default' | 'accent';
+  mono?: boolean;
+  href?: string;
+  title?: string;
+}) {
+  const base = cn(
+    'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11.5px] font-medium tracking-tight',
+    variant === 'accent'
+      ? 'border-accent/30 bg-accent/10 text-accent'
+      : 'border-border bg-surface/50 text-foreground-soft',
+    mono && 'font-mono tabular text-foreground',
+  );
+
+  if (href) {
+    return (
       <a
-        href={explorer_address_url(publisher)}
+        href={href}
         target="_blank"
         rel="noreferrer noopener"
-        title={`View ${publisher} on the Solana explorer`}
-        className="group/tag inline-flex items-center gap-1.5 rounded-md border border-border bg-surface/50 px-2 py-0.5 font-mono text-[12px] text-foreground transition-colors hover:border-border-strong hover:bg-surface"
+        title={title}
+        className={cn(
+          base,
+          'transition-colors hover:border-border-strong hover:bg-surface hover:text-foreground',
+        )}
       >
-        <Fingerprint
-          className="size-3 text-muted-foreground transition-colors group-hover/tag:text-foreground-soft"
-          strokeWidth={1.85}
-          aria-hidden
-        />
-        {shorten(publisher, 6, 6)}
-        <ExternalLink
-          className="size-3 text-muted-foreground transition-colors group-hover/tag:text-foreground-soft"
-          strokeWidth={1.85}
-          aria-hidden
-        />
+        {icon}
+        {children}
+        {trailing}
       </a>
-      <CopyButton value={publisher} label="Publisher" inline />
+    );
+  }
+
+  return (
+    <span title={title} className={base}>
+      {icon}
+      {children}
+      {trailing}
     </span>
   );
 }

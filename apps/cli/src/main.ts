@@ -15,6 +15,7 @@ void main().catch((error: unknown) => {
 async function main(): Promise<void> {
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: false,
+    abortOnError: false,
   });
 
   try {

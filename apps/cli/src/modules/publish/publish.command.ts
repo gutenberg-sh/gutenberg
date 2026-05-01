@@ -3,14 +3,10 @@ import { Injectable } from '@nestjs/common';
 
 import { format_bytes } from '../../common/helpers/format-bytes';
 import { parse_name_at_version } from '../../common/helpers/parse-spec';
-import { prompt_yes_no, write_status } from '../../common/helpers/prompt';
+import { write_status } from '../../common/helpers/prompt';
 
 import { PublishCancelledError, PublishService } from './publish.service';
-import type {
-  FileUploadEvent,
-  PublishCostPreview,
-  PublishOptions,
-} from './publish.types';
+import type { PublishOptions, PublishProgressEvent } from './publish.types';
 
 @Injectable()
 export class PublishCommand {
@@ -19,7 +15,7 @@ export class PublishCommand {
   build() {
     return command({
       name: 'publish',
-      desc: 'Publish a folder of writing as content-addressed files via Irys and register on Solana',
+      desc: 'Publish a folder of writing via the browser wallet (Phantom & friends)',
       options: {
         pkg: positional('pkg')
           .desc('Site name and version, npm-style: name@version')
@@ -64,20 +60,21 @@ export class PublishCommand {
           const result = await this.publish_service.publish_site(
             publish_options,
             {
-              confirm_cost: confirm_publish_cost,
-              on_file_uploaded: report_file_uploaded,
+              on_progress: report_progress,
             },
           );
 
+          console.log('');
           console.log(
             `Uploaded ${format_bytes(result.total_bytes)} across ${result.file_count} file(s)`,
           );
-          console.log(`Manifest: ${result.manifest_uri}`);
-          console.log(`Release PDA: ${result.release_pda}`);
-          console.log(`Read with: gutenberg open ${name}@${version}`);
+          console.log(`Publisher:    ${result.publisher}`);
+          console.log(`Manifest:     ${result.manifest_uri}`);
+          console.log(`Release PDA:  ${result.release_pda}`);
+          console.log(`Tx signature: ${result.tx_signature}`);
         } catch (error) {
           if (error instanceof PublishCancelledError) {
-            write_status('Publish cancelled.');
+            write_status(`Publish cancelled. ${error.message}`);
             process.exitCode = 1;
             return;
           }
@@ -89,28 +86,6 @@ export class PublishCommand {
   }
 }
 
-async function confirm_publish_cost(
-  preview: PublishCostPreview,
-): Promise<boolean> {
-  const { files_bytes, manifest_bytes, total_bytes, file_count, cost } =
-    preview;
-
-  write_status(
-    `About to upload ${file_count} file(s) individually: files ${format_bytes(files_bytes)} + manifest ${format_bytes(manifest_bytes)} = ${format_bytes(total_bytes)}.`,
-  );
-  write_status(
-    `Estimated Irys cost: ${cost.display_amount} ${cost.ticker} (${cost.atomic_units} atomic units).`,
-  );
-
-  return prompt_yes_no('Continue with publish?', { default_yes: true });
-}
-
-function report_file_uploaded(event: FileUploadEvent): void {
-  const idx = String(event.index + 1).padStart(
-    String(event.total).length,
-    ' ',
-  );
-  write_status(
-    `[${idx}/${event.total}] ${event.site_path} (${format_bytes(event.size_bytes)})`,
-  );
+function report_progress(event: PublishProgressEvent): void {
+  write_status(`[${event.kind}] ${event.message}`);
 }

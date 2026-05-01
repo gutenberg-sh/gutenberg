@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { Link } from 'react-router-dom';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import remarkGfm from 'remark-gfm';
 
@@ -50,13 +51,24 @@ export function MarkdownContent({
         ...rest
       }: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
         const resolved = href ? resolve_url(href) : undefined;
+        const final_href = resolved ?? href;
+
+        if (final_href && final_href.startsWith('/')) {
+          return (
+            <Link {...rest} to={final_href}>
+              {children}
+            </Link>
+          );
+        }
+
         const is_external =
-          resolved !== undefined &&
-          (resolved.startsWith('http://') || resolved.startsWith('https://'));
+          final_href !== undefined &&
+          (final_href.startsWith('http://') ||
+            final_href.startsWith('https://'));
 
         return (
           <a
-            href={resolved ?? href}
+            href={final_href}
             target={is_external ? '_blank' : undefined}
             rel={is_external ? 'noopener noreferrer' : undefined}
             {...rest}

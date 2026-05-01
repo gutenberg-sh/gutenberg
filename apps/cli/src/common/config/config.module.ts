@@ -8,18 +8,13 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { env } from '../../env';
-import {
-  parse_gateway_list,
-  type IrysNetwork,
-} from '../helpers/gateway-list';
+import { type IrysNetwork } from '../helpers/gateway-list';
 
 import { IRYS_GATEWAY_BY_NETWORK } from './defaults';
 import {
-  ARWEAVE_MIRRORS,
   GATEWAY_URL,
   IRYS_GATEWAY_URL,
   IRYS_NETWORK,
-  SOLANA_PRIVATE_KEY,
   SOLANA_RPC_URL,
 } from './config.tokens';
 
@@ -65,15 +60,6 @@ load_dotenv({ path: env_file_path, quiet: true });
       },
     },
     {
-      provide: ARWEAVE_MIRRORS,
-      inject: [ConfigService],
-      useFactory: (config: ConfigService): readonly string[] => {
-        const raw = config.getOrThrow<string>('GUTENBERG_ARWEAVE_MIRRORS');
-
-        return Object.freeze(parse_gateway_list(raw));
-      },
-    },
-    {
       provide: IRYS_NETWORK,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
@@ -86,12 +72,6 @@ load_dotenv({ path: env_file_path, quiet: true });
         config.getOrThrow<string>('GUTENBERG_SOLANA_RPC_URL'),
     },
     {
-      provide: SOLANA_PRIVATE_KEY,
-      inject: [ConfigService],
-      useFactory: (config: ConfigService): string | undefined =>
-        config.get<string>('GUTENBERG_SOLANA_PRIVATE_KEY'),
-    },
-    {
       provide: GATEWAY_URL,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
@@ -100,11 +80,9 @@ load_dotenv({ path: env_file_path, quiet: true });
   ],
   exports: [
     NestConfigModule,
-    ARWEAVE_MIRRORS,
     GATEWAY_URL,
     IRYS_GATEWAY_URL,
     IRYS_NETWORK,
-    SOLANA_PRIVATE_KEY,
     SOLANA_RPC_URL,
   ],
 })

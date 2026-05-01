@@ -1,16 +1,34 @@
 import { ArrowRight } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { cn } from '@/lib/utils';
 
 const NAME_RE = /^[a-z0-9][a-z0-9._-]*$/;
 
-export function LookupForm() {
+export function LookupForm({
+  auto_focus = false,
+  on_navigate,
+}: {
+  auto_focus?: boolean;
+  on_navigate?: () => void;
+} = {}) {
   const navigate = useNavigate();
+  const input_ref = useRef<HTMLInputElement>(null);
+  const input_id = useId();
+  const error_id = `${input_id}-error`;
   const [release_spec, set_release_spec] = useState('');
   const [error, set_error] = useState<string | undefined>();
   const [focused, set_focused] = useState(false);
+
+  useEffect(() => {
+    if (!auto_focus) return;
+    const frame = requestAnimationFrame(() => {
+      input_ref.current?.focus();
+      input_ref.current?.select();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [auto_focus]);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -34,6 +52,7 @@ export function LookupForm() {
       return;
     }
 
+    on_navigate?.();
     void navigate(
       `/r/${encodeURIComponent(name)}/${encodeURIComponent(version)}`,
     );
@@ -49,7 +68,7 @@ export function LookupForm() {
     >
       <div className="flex items-baseline justify-between gap-3">
         <label
-          htmlFor="release-spec"
+          htmlFor={input_id}
           className="text-[12px] font-medium tracking-[-0.005em] text-foreground"
         >
           Open a release
@@ -76,12 +95,13 @@ export function LookupForm() {
           /r/
         </span>
         <input
-          id="release-spec"
+          ref={input_ref}
+          id={input_id}
           type="text"
           autoComplete="off"
           spellCheck={false}
           aria-invalid={has_error || undefined}
-          aria-describedby={has_error ? 'release-spec-error' : undefined}
+          aria-describedby={has_error ? error_id : undefined}
           placeholder="gutenberg-demo@1.0.0"
           value={release_spec}
           onFocus={() => set_focused(true)}
@@ -101,7 +121,7 @@ export function LookupForm() {
       </div>
 
       <p
-        id={has_error ? 'release-spec-error' : undefined}
+        id={has_error ? error_id : undefined}
         role={has_error ? 'alert' : undefined}
         className={cn(
           'text-[12px]',

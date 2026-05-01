@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
 import { App } from '@/App';
+import { SolanaProviders } from '@/providers/SolanaProviders';
 import '@/styles/globals.css';
 
 const root_element = document.getElementById('root');
@@ -13,8 +14,10 @@ if (!root_element) {
 
 createRoot(root_element).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <SolanaProviders>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </SolanaProviders>
   </StrictMode>,
 );

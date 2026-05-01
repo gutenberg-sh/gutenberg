@@ -1,8 +1,9 @@
+import {
+  decode_publisher_public_key,
+  is_content_uri,
+  is_sha256_hash,
+} from '@gutenberg/core';
 import { Injectable } from '@nestjs/common';
-
-import { is_content_uri } from '../../common/helpers/content-uri';
-import { is_sha256_hash } from '../../common/helpers/multihash';
-import { ManifestService } from '../manifest/manifest.service';
 
 import {
   release_event_type,
@@ -11,66 +12,14 @@ import {
   type GutenbergReleaseEvent,
   type HasReleaseInput,
 } from './registry.types';
-import {
-  SolanaRegistryRepository,
-  type PublishReleaseInput,
-} from './solana-registry.repository';
+import { SolanaRegistryRepository } from './solana-registry.repository';
 
 @Injectable()
 export class RegistryService {
-  constructor(
-    private readonly manifest_service: ManifestService,
-    private readonly registry_repository: SolanaRegistryRepository,
-  ) {}
-
-  async assert_can_publish(): Promise<void> {
-    const { public_key, sol } =
-      await this.registry_repository.get_wallet_balance();
-
-    if (sol === 0) {
-      throw new Error(
-        `Solana wallet ${public_key.toBase58()} has 0 SOL on the configured RPC cluster`,
-      );
-    }
-  }
+  constructor(private readonly registry_repository: SolanaRegistryRepository) {}
 
   async assert_name_claimable(input: ClaimNameInput): Promise<void> {
     await this.registry_repository.assert_name_claimable(input);
-  }
-
-  async append_release(input: PublishReleaseInput): Promise<void> {
-    if (
-      typeof input.name !== 'string' ||
-      !/^[a-z0-9][a-z0-9._-]*$/.test(input.name)
-    ) {
-      throw new Error('Release name is invalid');
-    }
-
-    if (typeof input.version !== 'string' || input.version.length === 0) {
-      throw new Error('Release version is required');
-    }
-
-    if (!is_content_uri(input.manifest_uri)) {
-      throw new Error('Release manifest_uri must be ar://<arweave-tx-id>');
-    }
-
-    if (!is_sha256_hash(input.manifest_hash)) {
-      throw new Error('Release manifest_hash must be sha256:<64 hex>');
-    }
-
-    if (!is_sha256_hash(input.content_hash)) {
-      throw new Error('Release content_hash must be sha256:<64 hex>');
-    }
-
-    if (
-      typeof input.content_size_bytes !== 'number' ||
-      !Number.isInteger(input.content_size_bytes) ||
-      input.content_size_bytes < 0
-    ) {
-      throw new Error('Release content_size_bytes must be a u64-safe integer');
-    }
-
-    await this.registry_repository.publish_release(input);
   }
 
   async list_releases(): Promise<GutenbergReleaseEvent[]> {
@@ -100,7 +49,7 @@ export class RegistryService {
   }
 
   release_address(input: { name: string; version: string }): string {
-    return this.registry_repository.release_address(input).toBase58();
+    return this.registry_repository.release_address(input);
   }
 
   is_valid_release_event(event: unknown): event is GutenbergReleaseEvent {
@@ -174,7 +123,7 @@ export class RegistryService {
     if (typeof value.publisher !== 'string') {
       throw new Error('Release event publisher must be a Solana public key');
     }
-    this.manifest_service.decode_publisher_public_key(value.publisher);
+    decode_publisher_public_key(value.publisher);
 
     if (
       typeof value.created_at !== 'string' ||

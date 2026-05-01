@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { AssetView } from '@/components/AssetView';
 import { ErrorView } from '@/components/ErrorView';
@@ -11,7 +11,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { VerifyStatus } from '@/components/VerifyStatus';
 import { env } from '@/env';
 import { useReferencedAssets } from '@/hooks/useReferencedAssets';
-import { useVerifiedFile } from '@/hooks/useVerifiedFile';
+import {
+  prefetch_verified_file,
+  useVerifiedFile,
+} from '@/hooks/useVerifiedFile';
 import {
   useVerifiedRelease,
   type ReleaseSource,
@@ -124,6 +127,18 @@ function VerifiedReleaseRendered({
         .sort() as Array<`/${string}`>,
     [manifest.files],
   );
+
+  useEffect(() => {
+    const handle = schedule_idle(() => {
+      for (const path of all_paths) {
+        if (path === target_path) continue;
+        const file = release.files.get(path);
+        if (file) prefetch_verified_file(file);
+      }
+    });
+
+    return () => cancel_idle(handle);
+  }, [all_paths, release.files, target_path]);
 
   if (!target_file) {
     return (
@@ -284,6 +299,25 @@ function extension_of(path: `/${string}`): string {
   const idx = path.lastIndexOf('.');
 
   return idx >= 0 ? path.slice(idx).toLowerCase() : '';
+}
+
+type IdleHandle = { kind: 'idle'; id: number } | { kind: 'timeout'; id: number };
+
+function schedule_idle(cb: () => void): IdleHandle {
+  if (typeof window.requestIdleCallback === 'function') {
+    return { kind: 'idle', id: window.requestIdleCallback(cb, { timeout: 2000 }) };
+  }
+
+  return { kind: 'timeout', id: window.setTimeout(cb, 200) };
+}
+
+function cancel_idle(handle: IdleHandle): void {
+  if (handle.kind === 'idle' && typeof window.cancelIdleCallback === 'function') {
+    window.cancelIdleCallback(handle.id);
+    return;
+  }
+
+  window.clearTimeout(handle.id);
 }
 
 function resolve_relative_url(input: {

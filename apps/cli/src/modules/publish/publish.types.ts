@@ -1,9 +1,6 @@
-import type {
-  ContentUri,
-  GutenbergManifest,
-} from '../../common/types/manifest.types';
+import type { ContentUri, Sha256Hash } from '@gutenberg/core';
+
 import type { GutenbergReleaseEvent } from '../registry/registry.types';
-import type { UploadCostEstimate } from '../storage/storage.service';
 
 export type PublishOptions = {
   folder: string;
@@ -16,31 +13,23 @@ export type PublishOptions = {
   prev_version?: string;
 };
 
-export type PublishCostPreview = {
-  files_bytes: number;
-  manifest_bytes: number;
-  total_bytes: number;
-  file_count: number;
-  cost: UploadCostEstimate;
-};
-
-export type FileUploadEvent = {
-  index: number;
-  total: number;
-  site_path: `/${string}`;
-  size_bytes: number;
+export type PublishProgressEvent = {
+  kind: 'wallet_connected' | 'upload_started' | 'upload_complete' | 'tx_sent';
+  message: string;
 };
 
 export type PublishHooks = {
-  confirm_cost?: (preview: PublishCostPreview) => Promise<boolean>;
-  on_file_uploaded?: (event: FileUploadEvent) => void;
+  on_browser_opened?: (url: string) => void;
+  on_progress?: (event: PublishProgressEvent) => void;
 };
 
 export type PublishResult = {
-  manifest: GutenbergManifest;
   manifest_uri: ContentUri;
-  release: GutenbergReleaseEvent;
+  manifest_hash: Sha256Hash;
+  release: GutenbergReleaseEvent | undefined;
   release_pda: string;
+  tx_signature: string;
+  publisher: string;
   file_count: number;
   total_bytes: number;
 };
