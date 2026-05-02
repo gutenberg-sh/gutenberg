@@ -1,4 +1,4 @@
-import { ArrowUpRight, Search as SearchIcon, X } from 'lucide-react';
+import { ArrowUpRight, PackageSearch, Search as SearchIcon, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -43,62 +43,125 @@ export function SearchRoute() {
     }
   }, [debounced_query, params, set_params]);
 
+  const offset = page * PAGE_SIZE;
+
   const search = useNameSearch({
     q: debounced_query,
     limit: PAGE_SIZE,
+    offset,
     includes: 'releases',
   });
 
   const results = search.data ?? [];
   const has_next = results.length === PAGE_SIZE;
   const trimmed = debounced_query.trim();
+  const showing_range_start = trimmed ? offset + 1 : 0;
+  const showing_range_end = trimmed ? offset + results.length : 0;
 
   return (
-    <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
-      <header className="grid gap-3">
+    <Container className="grid gap-10 pb-24 pt-10 lg:gap-12 lg:pb-32 lg:pt-14">
+      <header className="grid gap-3 lg:max-w-[62ch]">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          Search
+          Registry search
         </p>
-        <h1 className="text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
-          Find an author or a release.
+        <h1 className="text-[1.875rem] font-semibold leading-[1.07] tracking-[-0.03em] text-foreground sm:text-[2.25rem]">
+          Search packages by name.
         </h1>
-        <p className="max-w-[60ch] text-[14.5px] leading-[1.6] text-foreground-soft">
-          Search by name across everything ever published to Gutenberg.
-          Partial words and typos still surface matches.
+        <p className="text-[15px] leading-relaxed text-foreground-soft">
+          Same idea as a package registry: type part of a name, pick a match,
+          then open the latest or pin an exact version with{' '}
+          <span className="font-mono text-[0.95em] tabular text-foreground">
+            name@version
+          </span>{' '}
+          from the header search.
         </p>
       </header>
 
-      <div className="max-w-3xl">
-        <SearchInput value={query} on_change={set_query} />
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-start xl:grid-cols-[minmax(0,1fr)_248px] xl:gap-14">
+        <div className="grid gap-6">
+          <SearchInput value={query} on_change={set_query} />
+
+          {trimmed && !search.isError && !search.isLoading ? (
+            <p className="text-[12.5px] text-muted-foreground">
+              {results.length === 0 ? (
+                <>No hits on this page.</>
+              ) : (
+                <>
+                  Showing{' '}
+                  <span className="font-mono tabular text-foreground-soft">
+                    {showing_range_start}
+                  </span>
+                  –
+                  <span className="font-mono tabular text-foreground-soft">
+                    {showing_range_end}
+                  </span>{' '}
+                  for{' '}
+                  <span className="font-mono tabular text-foreground">{trimmed}</span>
+                </>
+              )}
+            </p>
+          ) : null}
+
+          <section className="grid gap-3">
+            {!trimmed ? (
+              <EmptyQuery />
+            ) : search.isLoading ? (
+              <ResultsSkeleton />
+            ) : search.isError ? (
+              <ErrorView
+                title="Search isn't responding"
+                message={api_error_message(search.error, "We can't reach the indexer right now. Try again in a moment.")}
+              />
+            ) : results.length === 0 ? (
+              <NoResults q={trimmed} />
+            ) : (
+              <ResultsList results={results} />
+            )}
+
+            {trimmed && !search.isError ? (
+              <Pagination
+                page={page + 1}
+                has_prev={page > 0}
+                has_next={has_next}
+                loading={search.isFetching}
+                on_prev={() => set_page((p) => Math.max(0, p - 1))}
+                on_next={() => set_page((p) => p + 1)}
+              />
+            ) : null}
+          </section>
+        </div>
+
+        <aside className="registry-command-shell hidden grid gap-4 self-start p-4 lg:grid">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            Search tips
+          </p>
+          <ul className="grid gap-3 text-[12.5px] leading-relaxed text-foreground-soft">
+            <li>
+              Prefer short fragments — the indexer fuzzy-matches names the way
+              readers hunt for packages.
+            </li>
+            <li>
+              Row opens the{' '}
+              <span className="font-medium text-foreground">latest</span>{' '}
+              ship for that name. Publisher links stay put when you need the
+              signing key context.
+            </li>
+            <li>
+              Already know the version? Press{' '}
+              <span className="kbd">⌘K</span> / <span className="kbd">Ctrl K</span>{' '}
+              and paste{' '}
+              <span className="font-mono tabular text-foreground">name@version</span>.
+            </li>
+          </ul>
+          <Link
+            to="/browse"
+            className="inline-flex items-center gap-1 text-[12.5px] font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            Browse the firehose
+            <ArrowUpRight className="size-3" strokeWidth={1.85} aria-hidden />
+          </Link>
+        </aside>
       </div>
-
-      <section className="grid gap-3">
-        {!trimmed ? (
-          <EmptyQuery />
-        ) : search.isLoading ? (
-          <ResultsSkeleton />
-        ) : search.isError ? (
-          <ErrorView
-            title="Search isn't responding"
-            message={api_error_message(search.error, "We can't reach the indexer right now. Try again in a moment.")}
-          />
-        ) : results.length === 0 ? (
-          <NoResults q={trimmed} />
-        ) : (
-          <ResultsList results={results} />
-        )}
-
-        {trimmed && !search.isLoading && !search.isError ? (
-          <Pagination
-            page={page + 1}
-            has_prev={page > 0}
-            has_next={has_next}
-            loading={search.isFetching}
-            on_prev={() => set_page((p) => Math.max(0, p - 1))}
-            on_next={() => set_page((p) => p + 1)}
-          />
-        ) : null}
-      </section>
     </Container>
   );
 }
@@ -114,7 +177,7 @@ function SearchInput({
     <div
       role="search"
       aria-label="Search the registry"
-      className="flex items-stretch overflow-hidden rounded-2xl border border-border-strong/70 bg-card shadow-[0_1px_0_0_rgb(0_0_0/0.02)] transition-colors focus-within:border-foreground/35"
+      className="flex items-stretch overflow-hidden rounded-2xl border border-border-strong/70 bg-card shadow-[inset_0_1px_0_oklch(1_0_0/6%)] transition-colors focus-within:border-foreground/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/8%)]"
     >
       <span
         aria-hidden
@@ -126,22 +189,27 @@ function SearchInput({
         type="text"
         value={value}
         onChange={(e) => on_change(e.target.value)}
-        placeholder="gutenberg-demo"
+        placeholder="Try atlas-manual, workshop-kit, …"
         autoFocus
         spellCheck={false}
         autoComplete="off"
         className="h-14 min-w-0 flex-1 bg-transparent pr-2 font-mono tabular text-[15px] text-foreground placeholder:text-muted-foreground/55 focus:outline-none"
       />
-      {value ? (
-        <button
-          type="button"
-          aria-label="Clear search"
-          onClick={() => on_change('')}
-          className="mr-2 my-2 inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-surface hover:text-foreground active:translate-y-px"
-        >
-          <X className="size-3.5" strokeWidth={1.85} aria-hidden />
-        </button>
-      ) : null}
+      <div
+        className="mr-2 my-2 flex size-9 shrink-0 items-center justify-center"
+        aria-hidden={!value}
+      >
+        {value ? (
+          <button
+            type="button"
+            aria-label="Clear search"
+            onClick={() => on_change('')}
+            className="inline-flex size-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-surface hover:text-foreground active:translate-y-px"
+          >
+            <X className="size-3.5" strokeWidth={1.85} aria-hidden />
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -242,12 +310,12 @@ function ResultsSkeleton() {
 
 function EmptyQuery() {
   return (
-    <div className="grid place-items-center gap-3 rounded-xl border border-dashed border-border px-6 py-14 text-center">
-      <SearchIcon className="size-5 text-muted-foreground" strokeWidth={1.6} aria-hidden />
-      <p className="text-[14px] text-foreground">Start typing a name.</p>
-      <p className="max-w-[40ch] text-[12.5px] leading-relaxed text-muted-foreground">
-        Partial words and typos still find matches. A name belongs to its
-        publisher from the first release on.
+    <div className="registry-command-shell grid place-items-center gap-3 px-6 py-14 text-center">
+      <PackageSearch className="size-5 text-muted-foreground" strokeWidth={1.6} aria-hidden />
+      <p className="text-[14px] text-foreground">Start typing to search the registry.</p>
+      <p className="max-w-[42ch] text-[12.5px] leading-relaxed text-muted-foreground">
+        Names behave like packages: the first publisher to claim a string keeps
+        it. Partial matches work — you don&rsquo;t need the full slug.
       </p>
     </div>
   );

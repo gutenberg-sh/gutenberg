@@ -31,11 +31,11 @@ export function BrowseRoute() {
     <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
       <header className="grid gap-3">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          Browse
+          New releases
         </p>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h1 className="text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
-            What just got published.
+            Everything publishing right now.
           </h1>
           <button
             type="button"
@@ -51,10 +51,9 @@ export function BrowseRoute() {
             Refresh
           </button>
         </div>
-        <p className="max-w-[60ch] text-[14.5px] leading-[1.6] text-foreground-soft">
-          Every release ever published to Gutenberg, newest first. Open one
-          and your browser will check that it&rsquo;s the original before you
-          read it.
+        <p className="max-w-[62ch] text-[15px] leading-relaxed text-foreground-soft">
+          Like npm&rsquo;s recent publishes feed — every ship is immutable.
+          Open any row and verification runs locally before you read a byte.
         </p>
       </header>
 

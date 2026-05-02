@@ -78,8 +78,12 @@ const STALE_HEALTH = 15_000;
 export const query_keys = {
   feed: (input: { limit: number; offset: number; includes?: string }) =>
     ['indexer', 'feed', input] as const,
-  search: (input: { q: string; limit: number; includes?: string }) =>
-    ['indexer', 'search', input] as const,
+  search: (input: {
+    q: string;
+    limit: number;
+    offset: number;
+    includes?: string;
+  }) => ['indexer', 'search', input] as const,
   name: (name: string, includes?: string) =>
     ['indexer', 'name', name, includes ?? null] as const,
   name_latest: (name: string, includes?: string) =>
@@ -124,17 +128,22 @@ export function useFeed(
 }
 
 export function useNameSearch(
-  input: { q: string; limit?: number; includes?: string },
+  input: {
+    q: string;
+    limit?: number;
+    offset?: number;
+    includes?: string;
+  },
   options?: Pick<UseQueryOptions<NameDto[]>, 'enabled'>,
 ) {
-  const { q, limit = 8, includes } = input;
+  const { q, limit = 8, offset = 0, includes } = input;
   const trimmed = q.trim();
 
   return useQuery<NameDto[]>({
-    queryKey: query_keys.search({ q: trimmed, limit, includes }),
+    queryKey: query_keys.search({ q: trimmed, limit, offset, includes }),
     queryFn: async () => {
       const { data } = await api.get<NameDto[]>('/search', {
-        params: build_params({ q: trimmed, limit, includes }),
+        params: build_params({ q: trimmed, limit, offset, includes }),
       });
       return data;
     },

@@ -22,7 +22,7 @@ export function RecentReleases({ limit = 8 }: { limit?: number }) {
             Recently published
           </p>
           <h2 className="text-[22px] font-semibold tracking-[-0.02em] text-foreground sm:text-[26px]">
-            What people just put on the record.
+            Fresh packages hitting the registry.
           </h2>
         </div>
         <Link

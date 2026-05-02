@@ -10,7 +10,12 @@ export function Container({
   as?: 'div' | 'section' | 'article' | 'header';
 }) {
   return (
-    <As className={cn('mx-auto w-full max-w-6xl px-6 lg:px-10', className)}>
+    <As
+      className={cn(
+        'mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-10',
+        className,
+      )}
+    >
       {children}
     </As>
   );

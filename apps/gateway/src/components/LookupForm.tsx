@@ -243,7 +243,9 @@ export function LookupForm({
               lg ? 'mx-1.5 my-1.5 rounded-xl px-4 text-[13.5px]' : 'mx-1 my-1 rounded-lg px-3 text-[12.5px]',
             )}
           >
-            <span>{has_at ? 'Verify' : 'Search'}</span>
+            <span className="inline-flex min-w-[4.25rem] justify-center">
+              {has_at ? 'Verify' : 'Search'}
+            </span>
             <ArrowRight
               className={lg ? 'size-3.5' : 'size-3'}
               strokeWidth={2}
@@ -316,7 +318,7 @@ export function LookupForm({
                 id={list_id}
                 ref={list_ref}
                 role="listbox"
-                className="grid divide-y divide-border overflow-hidden rounded-2xl border border-border bg-elevated shadow-lg"
+                className="grid max-h-[min(70vh,340px)] divide-y divide-border overflow-y-auto overscroll-contain rounded-2xl border border-border bg-elevated shadow-lg"
               >
                 {suggestions.map((item, idx) => (
                   <SuggestionItem

@@ -186,14 +186,15 @@ export function PublishRoute() {
     <Container className="grid gap-12 pb-24 pt-12 lg:gap-14 lg:pb-32 lg:pt-16">
       <header className="grid gap-3">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          Publish
+          Publish · npm-style permanence
         </p>
         <h1 className="text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
-          Make it permanent.
+          Ship a version that never unpublishes.
         </h1>
-        <p className="max-w-[60ch] text-[14.5px] leading-[1.6] text-foreground-soft">
-          Sign your release with your own key. Once it&rsquo;s up, no one —
-          not us, not a court, not even you — can take it down.
+        <p className="max-w-[62ch] text-[15px] leading-relaxed text-foreground-soft">
+          The CLI hands off to this page the same way publish flows feel on a
+          registry: review the manifest, connect the wallet that owns the name,
+          pay storage once, and the package becomes independently verifiable.
         </p>
       </header>
 

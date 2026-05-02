@@ -108,37 +108,63 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
 export function LandingRoute() {
   return (
     <div className="flex flex-col">
-      {}
-      <Container className="pb-20 pt-14 lg:pb-28 lg:pt-20">
-        <div className="grid gap-5">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-            Gutenberg · publish freely. read what&rsquo;s real.
-          </p>
-          <h1 className="text-[2.25rem] font-semibold leading-[1.02] tracking-[-0.035em] text-foreground sm:text-[2.875rem] lg:text-[3.5rem]">
-            Publish what can&rsquo;t be erased.
-          </h1>
-          <p className="max-w-[60ch] text-[15.5px] leading-[1.55] text-foreground-soft sm:text-[16.5px]">
-            Gutenberg is where anyone can publish freely, privately, and
-            permanently. Once a release goes up, no host, court, or platform
-            can take it down — and every reader can see, in their own browser,
-            that what they&rsquo;re reading is the original.
-          </p>
-        </div>
-
-        {}
-        <div className="mt-9 max-w-3xl">
-          <div className="mb-2 flex items-baseline justify-between gap-3 px-1">
-            <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
-              Search the registry
+      <Container className="pb-16 pt-10 lg:pb-24 lg:pt-14">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start lg:gap-16">
+          <div className="grid content-start gap-5 lg:pt-2">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+              Public registry · permanent releases
             </p>
-            <p className="hidden text-[11.5px] text-muted-foreground sm:block">
+            <h1 className="text-[2.125rem] font-semibold leading-[1.06] tracking-[-0.032em] text-foreground sm:text-[2.625rem] lg:text-[3rem]">
+              Find, publish, and read releases that verify themselves.
+            </h1>
+            <p className="max-w-[56ch] text-[15px] leading-relaxed text-foreground-soft sm:text-[16px]">
+              Think of it like a package registry for immutable work: search by
+              name, open an exact version with{' '}
+              <span className="font-mono text-[0.92em] tabular text-foreground">
+                name@version
+              </span>
+              , and read knowing your browser checked the author&rsquo;s
+              signature and fingerprints before rendering a byte.
+            </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Link
+                to="/browse"
+                className="inline-flex items-center rounded-lg bg-foreground px-3.5 py-2 text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 active:translate-y-px"
+              >
+                Browse new releases
+              </Link>
+              <Link
+                to="/search"
+                className="registry-command-shell inline-flex items-center px-3.5 py-2 text-[13px] font-medium text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
+              >
+                Advanced search
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid gap-3 lg:sticky lg:top-28">
+            <div className="flex items-baseline justify-between gap-3 px-1">
+              <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
+                Jump to a release
+              </p>
+              <p className="hidden text-[11.5px] text-muted-foreground sm:block">
+                <span className="kbd">⌘K</span> / <span className="kbd">Ctrl K</span>{' '}
+                anywhere
+              </p>
+            </div>
+            <LookupForm
+              size="lg"
+              placeholder="search packages… try ledger-notes or demo@1.2.0"
+              className="shadow-[0_16px_50px_-34px_oklch(0_0_0/0.28)] dark:shadow-[0_20px_56px_-36px_oklch(0_0_0/0.65)]"
+            />
+            <p className="px-1 text-[12px] leading-relaxed text-muted-foreground">
+              Matches stream in as you type. Submit opens search;{' '}
               <span className="font-mono tabular text-foreground-soft">
-                ⌘K
+                name@version
               </span>{' '}
-              anywhere
+              jumps straight to that release.
             </p>
           </div>
-          <LookupForm size="lg" placeholder="find a release or publisher" />
         </div>
 
         <StatsStrip />
@@ -280,7 +306,13 @@ export function LandingRoute() {
               key={q}
               className="grid items-baseline gap-3 py-7 sm:grid-cols-[minmax(0,0.85fr)_minmax(0,1.6fr)] sm:gap-10"
             >
-              <dt className="text-[16.5px] font-medium tracking-[-0.005em] text-foreground sm:text-[17.5px]">
+              <dt
+                id={q === 'How do I publish?' ? 'cli-publish' : undefined}
+                className={cn(
+                  'text-[16.5px] font-medium tracking-[-0.005em] text-foreground sm:text-[17.5px]',
+                  q === 'How do I publish?' && 'scroll-mt-28',
+                )}
+              >
                 {q}
               </dt>
               <dd className="max-w-[62ch] text-[14.5px] leading-[1.65] text-foreground-soft">

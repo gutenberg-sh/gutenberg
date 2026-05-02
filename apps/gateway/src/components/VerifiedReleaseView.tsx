@@ -1,4 +1,6 @@
 import { useEffect, useMemo } from 'react';
+import { FileCode2, Fingerprint, GitBranch } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import { AssetView } from '@/components/AssetView';
 import { ErrorView } from '@/components/ErrorView';
@@ -10,6 +12,7 @@ import { ReleaseHeader } from '@/components/ReleaseHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VerifyStatus } from '@/components/VerifyStatus';
 import { env } from '@/env';
+import { shorten } from '@/lib/format';
 import { useReferencedAssets } from '@/hooks/useReferencedAssets';
 import {
   prefetch_verified_file,
@@ -36,17 +39,13 @@ export function VerifiedReleaseView({
     return (
       <Container className="grid gap-8 pb-20 pt-8 lg:gap-10 lg:pb-28 lg:pt-10">
         <ReleaseHeaderSkeleton />
-        <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-12">
-          <div className="grid content-start gap-3">
-            <Skeleton className="h-3 w-16" />
-            <div className="grid gap-3 py-4">
-              <Skeleton className="h-3.5 w-32" />
-              <Skeleton className="h-3.5 w-24" />
-              <Skeleton className="h-3.5 w-28" />
-            </div>
-          </div>
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-12">
           <div className="min-w-0">
             <VerifyStatus steps={state.steps} />
+          </div>
+          <div className="grid content-start gap-3">
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-40 w-full rounded-xl" />
           </div>
         </div>
       </Container>
@@ -140,6 +139,11 @@ function VerifiedReleaseRendered({
     return () => cancel_idle(handle);
   }, [all_paths, release.files, target_path]);
 
+  const canonical_url = useMemo(
+    () => `${window.location.origin}${base_path}`,
+    [base_path],
+  );
+
   if (!target_file) {
     return (
       <Container className="py-20 lg:py-28">
@@ -154,24 +158,131 @@ function VerifiedReleaseRendered({
 
   return (
     <Container className="grid gap-8 pb-20 pt-8 lg:gap-10 lg:pb-28 lg:pt-10">
-      <ReleaseHeader release={release} />
+      <ReleaseHeader release={release} canonical_url={canonical_url} />
 
-      <div className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-12">
-        <FileNav
-          files={all_paths}
-          base_path={base_path}
-          current_path={target_path}
-        />
-
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_18.5rem] xl:gap-14">
         <div className="min-w-0">
+          <div className="mb-5 lg:hidden">
+            <ViewingStrip entry={manifest.entry} path={target_path} />
+          </div>
           <ActiveFile
             release={release}
             target_path={target_path}
             base_path={base_path}
           />
         </div>
+
+        <aside className="grid gap-6 lg:sticky lg:top-24 lg:self-start">
+          <div className="hidden lg:block">
+            <ViewingStrip entry={manifest.entry} path={target_path} />
+          </div>
+
+          <ReleasePackageAside
+            release={release}
+            page_count={all_paths.length}
+          />
+
+          <FileNav
+            files={all_paths}
+            base_path={base_path}
+            current_path={target_path}
+          />
+        </aside>
       </div>
     </Container>
+  );
+}
+
+function ViewingStrip({
+  entry,
+  path,
+}: {
+  entry: `/${string}`;
+  path: `/${string}`;
+}) {
+  const is_default_doc =
+    path === entry && path.toLowerCase().endsWith('.md');
+  const headline = is_default_doc
+    ? 'Readme'
+    : path.replace(/^\//, '') || path;
+
+  return (
+    <div className="border-b border-border pb-3">
+      <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+        {is_default_doc ? 'Documentation' : 'File'}
+      </p>
+      <p
+        className="mt-1 truncate font-mono text-[13px] tabular text-foreground"
+        title={path}
+      >
+        {headline}
+      </p>
+    </div>
+  );
+}
+
+function ReleasePackageAside({
+  release,
+  page_count,
+}: {
+  release: VerifiedRelease;
+  page_count: number;
+}) {
+  const m = release.manifest;
+  const publisher = m.publisher;
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4 shadow-[inset_0_1px_0_oklch(1_0_0/6%)] dark:shadow-[inset_0_1px_0_oklch(1_0_0/8%)]">
+      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+        Package details
+      </p>
+      <dl className="mt-4 grid gap-4 text-[13px]">
+        <div className="grid gap-1">
+          <dt className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Publisher
+          </dt>
+          <dd>
+            <Link
+              to={`/p/${encodeURIComponent(publisher)}`}
+              className="inline-flex items-center gap-1.5 font-mono text-[12.5px] tabular text-foreground underline-offset-4 hover:underline"
+              title={publisher}
+            >
+              <Fingerprint className="size-3.5 text-muted-foreground" strokeWidth={1.75} aria-hidden />
+              {shorten(publisher, 6, 6)}
+            </Link>
+          </dd>
+        </div>
+
+        <div className="grid gap-1">
+          <dt className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Entry
+          </dt>
+          <dd className="flex items-start gap-1.5 font-mono text-[12px] tabular text-foreground-soft">
+            <FileCode2 className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" strokeWidth={1.75} aria-hidden />
+            <span className="break-all">{m.entry}</span>
+          </dd>
+        </div>
+
+        <div className="grid gap-1">
+          <dt className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Pages in bundle
+          </dt>
+          <dd className="font-mono text-[12px] tabular text-foreground-soft">
+            {page_count} markdown file{page_count === 1 ? '' : 's'}
+          </dd>
+        </div>
+
+        <div className="border-t border-border pt-4">
+          <Link
+            to={`/r/${encodeURIComponent(m.name)}/versions`}
+            className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            <GitBranch className="size-3.5 text-muted-foreground" strokeWidth={1.75} aria-hidden />
+            View all versions
+          </Link>
+        </div>
+      </dl>
+    </div>
   );
 }
 

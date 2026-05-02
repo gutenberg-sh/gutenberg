@@ -17,7 +17,13 @@ import { explorer_address_url } from '@/lib/explorer';
 import type { VerifiedRelease } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
-export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
+export function ReleaseHeader({
+  release,
+  canonical_url,
+}: {
+  release: VerifiedRelease;
+  canonical_url: string;
+}) {
   const manifest = release.manifest;
   const file_count = Object.keys(manifest.files).length;
   const sub_meta = [
@@ -34,26 +40,32 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
         published_at={manifest.published_at}
       />
 
-      <h1 className="text-balance font-semibold tracking-[-0.02em] text-foreground">
-        <Link
-          to={`/r/${encodeURIComponent(manifest.name)}`}
-          className="text-[1.75rem] leading-[1.1] hover:underline sm:text-[2.125rem] lg:text-[2.5rem]"
-          title="Open the latest version"
-        >
-          {manifest.name}
-        </Link>
-        <span className="ml-3 align-baseline font-mono text-[1rem] font-normal tabular text-foreground-soft sm:text-[1.125rem] lg:text-[1.25rem]">
-          {manifest.version}
-        </span>
-        <Link
-          to={`/r/${encodeURIComponent(manifest.name)}/versions`}
-          className="ml-3 inline-flex items-center gap-1 align-middle text-[11.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
-          title="View all versions"
-        >
-          <GitBranch className="size-3" strokeWidth={1.85} aria-hidden />
-          versions
-        </Link>
-      </h1>
+      <div className="grid gap-4">
+        <h1 className="text-balance font-semibold tracking-[-0.02em] text-foreground">
+          <Link
+            to={`/r/${encodeURIComponent(manifest.name)}`}
+            className="text-[1.625rem] leading-[1.12] hover:underline sm:text-[2rem] lg:text-[2.35rem]"
+            title="Open the latest version"
+          >
+            {manifest.name}
+          </Link>
+          <span className="ml-2.5 inline-flex align-middle">
+            <span className="rounded-md border border-border-strong bg-surface px-2 py-0.5 font-mono text-[0.72em] font-normal tabular text-foreground sm:text-[0.76em]">
+              {manifest.version}
+            </span>
+          </span>
+          <Link
+            to={`/r/${encodeURIComponent(manifest.name)}/versions`}
+            className="ml-2.5 inline-flex items-center gap-1 align-middle text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground sm:ml-3"
+            title="Version history"
+          >
+            <GitBranch className="size-3" strokeWidth={1.85} aria-hidden />
+            Versions
+          </Link>
+        </h1>
+
+        <CanonicalUrlRow url={canonical_url} />
+      </div>
 
       {sub_meta.length > 0 ? (
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-foreground-soft">
@@ -81,6 +93,53 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
 
       <ProvenanceDisclosure release={release} />
     </section>
+  );
+}
+
+function CanonicalUrlRow({ url }: { url: string }) {
+  const [copied, set_copied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+
+    const id = window.setTimeout(() => set_copied(false), 1600);
+
+    return () => window.clearTimeout(id);
+  }, [copied]);
+
+  return (
+    <div className="registry-command-shell flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:gap-3">
+      <span className="shrink-0 text-[10.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        Install · share
+      </span>
+      <code className="min-w-0 flex-1 truncate rounded-md bg-background/80 px-2 py-1 font-mono text-[12px] tabular text-foreground ring-1 ring-border/80 dark:bg-background/40">
+        {url}
+      </code>
+      <button
+        type="button"
+        aria-label="Copy canonical URL"
+        title="Copy URL"
+        onClick={() => {
+          navigator.clipboard
+            .writeText(url)
+            .then(() => set_copied(true))
+            .catch(() => set_copied(false));
+        }}
+        className="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-lg bg-foreground px-3 py-1.5 text-[12px] font-medium text-background transition-colors hover:bg-foreground/90 active:translate-y-px sm:self-auto"
+      >
+        {copied ? (
+          <>
+            <Check className="size-3.5" strokeWidth={2.2} aria-hidden />
+            Copied
+          </>
+        ) : (
+          <>
+            <Copy className="size-3.5" strokeWidth={1.85} aria-hidden />
+            Copy
+          </>
+        )}
+      </button>
+    </div>
   );
 }
 

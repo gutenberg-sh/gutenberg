@@ -67,7 +67,7 @@ function Dot() {
 export function ReleaseListHeader() {
   return (
     <div className="hidden grid-cols-[minmax(0,1fr)_auto] gap-x-6 border-b border-border pb-2 text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground sm:grid">
-      <div className="px-2">Release</div>
+      <div className="px-2">Package</div>
       <div className="px-2 text-right">Published</div>
     </div>
   );

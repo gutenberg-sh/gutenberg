@@ -54,9 +54,20 @@ export function LookupDialog({
         >
           <X className="size-3.5" strokeWidth={1.85} aria-hidden />
         </button>
+        <div className="mb-3 px-1">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            Registry quick open
+          </p>
+          <p className="mt-1 text-[13px] text-foreground-soft">
+            Search like npm — or paste{' '}
+            <span className="font-mono tabular text-foreground">name@version</span>{' '}
+            to verify an exact release.
+          </p>
+        </div>
         <LookupForm
           auto_focus
           size="lg"
+          placeholder="ledger-field-guide or aurora-kit@2.4.1"
           on_navigate={() => on_open_change(false)}
         />
       </div>
