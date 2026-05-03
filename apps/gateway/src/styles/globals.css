@@ -416,7 +416,10 @@ html.dark #root::before {
     text-transform: uppercase;
   }
   .wallet-adapter-button,
-  .wallet-adapter-button-trigger,
+  .wallet-adapter-button-trigger {
+    cursor: pointer;
+    border-radius: 0 !important;
+  }
   .wallet-adapter-modal-wrapper,
   .wallet-adapter-modal {
     border-radius: 0 !important;

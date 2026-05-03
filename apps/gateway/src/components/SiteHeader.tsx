@@ -4,6 +4,7 @@ import { Link, NavLink } from 'react-router-dom';
 
 import { LookupDialog } from '@/components/LookupDialog';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { Button } from '@/components/ui/button';
 import { Wordmark } from '@/components/Wordmark';
 import { useIsApplePlatform } from '@/hooks/usePlatform';
 import { cn } from '@/lib/utils';
@@ -45,11 +46,12 @@ export function SiteHeader() {
           </nav>
 
           <div className="hidden min-w-0 flex-1 justify-center px-2 md:flex">
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => set_lookup_open(true)}
               aria-label="Search publications"
-              className="registry-command-shell flex w-full max-w-xl items-center gap-2.5 px-3 py-2 text-left font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground"
+              className="registry-command-shell h-auto w-full max-w-xl justify-start gap-2.5 px-3 py-2 text-left font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground"
             >
               <Search className="size-3.5 shrink-0" strokeWidth={1.85} aria-hidden />
               <span className="min-w-0 flex-1 truncate text-foreground-soft">
@@ -59,29 +61,37 @@ export function SiteHeader() {
                 <span className="kbd">{is_mac ? '⌘' : 'Ctrl'}</span>
                 <span className="kbd">K</span>
               </span>
-            </button>
+            </Button>
           </div>
 
           <div className="ml-auto flex items-center gap-1.5 text-[13px] sm:gap-2">
             <ThemeToggle />
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon"
               onClick={() => set_lookup_open(true)}
               aria-label="Open search"
-              className="inline-flex size-9 items-center justify-center rounded-none border border-border bg-card text-foreground-soft transition-colors hover:border-border-strong hover:bg-elevated hover:text-foreground md:hidden"
+              className="rounded-none border-border bg-card text-foreground-soft hover:border-border-strong hover:bg-elevated hover:text-foreground md:hidden"
             >
               <Search className="size-4" strokeWidth={1.85} aria-hidden />
-            </button>
+            </Button>
 
-            <a
-              href="https://github.com/leonmeka/gutenberg"
-              target="_blank"
-              rel="noreferrer noopener"
-              aria-label="Project source on GitHub"
-              className="inline-flex size-9 items-center justify-center rounded-none text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-none text-muted-foreground hover:bg-muted hover:text-foreground"
+              asChild
             >
-              <Github className="size-4" strokeWidth={1.75} aria-hidden />
-            </a>
+              <a
+                href="https://github.com/leonmeka/gutenberg"
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label="Project source on GitHub"
+              >
+                <Github className="size-4" strokeWidth={1.75} aria-hidden />
+              </a>
+            </Button>
           </div>
         </div>
       </header>

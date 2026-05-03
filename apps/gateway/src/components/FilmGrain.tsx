@@ -7,7 +7,7 @@ import { useEffect, useRef, type CSSProperties } from 'react';
 const SCALE = 1;
 const FPS = 14;
 /** Luminance swing around BASE_GRAY (keeps texture dark, not milky). */
-const NOISE_CONTRAST = 0.35;
+const NOISE_CONTRAST = 0.75;
 /** Center noise toward shadow gray so blended layer reads darker. */
 const BASE_GRAY = 72;
 const REDUCED_MOTION_MS = 3200;

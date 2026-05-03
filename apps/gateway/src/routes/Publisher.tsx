@@ -1,10 +1,11 @@
-import { Check, Copy, ExternalLink } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ExternalLink } from 'lucide-react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { ErrorView } from '@/components/ErrorView';
 import { Container } from '@/components/Layout';
 import { PublisherAvatar } from '@/components/PublisherAvatar';
+import { PublisherTip } from '@/components/PublisherTip';
 import { Pagination } from '@/components/Pagination';
 import {
   PublicationFeedFooter,
@@ -24,7 +25,7 @@ const chip_focus =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
 const chip_pressable =
-  'transition-[color,border-color,background-color,transform] duration-200 ease-out hover:border-border-strong hover:bg-surface/50 hover:text-foreground active:translate-y-px';
+  'cursor-pointer transition-[color,border-color,background-color,transform] duration-200 ease-out hover:border-border-strong hover:bg-surface/50 hover:text-foreground active:translate-y-px';
 
 export function PublisherRoute() {
   const params = useParams();
@@ -43,7 +44,9 @@ export function PublisherRoute() {
       <Container className="py-20 lg:py-28">
         <ErrorView
           title="Missing publisher address"
-          message="Publisher pages live at /p/<address>. Add the public key to the URL and try again."
+          message={
+            'Publisher pages live at /publisher/<address>. Add the public key to the URL and try again.'
+          }
           back_to="/browse"
         />
       </Container>
@@ -55,7 +58,9 @@ export function PublisherRoute() {
       <Container className="py-20 lg:py-28">
         <ErrorView
           title="Invalid Solana address"
-          message="Use a base58-encoded public key (32 bytes), for example from your wallet. Publisher pages use /p/ followed by that key in the URL."
+          message={
+            'Use a base58-encoded public key (32 bytes), for example from your wallet. Publisher pages use /publisher/ followed by that key in the URL.'
+          }
           back_to="/browse"
         />
       </Container>
@@ -89,7 +94,7 @@ export function PublisherRoute() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <CopyChip value={address} label="address" />
+            <PublisherTip recipient_address={address} />
             <a
               href={explorer_address_url(address)}
               target="_blank"
@@ -196,41 +201,5 @@ export function PublisherRoute() {
         )}
       </PublicationFeedSection>
     </Container>
-  );
-}
-
-function CopyChip({ value, label }: { value: string; label: string }) {
-  const [copied, set_copied] = useState(false);
-
-  useEffect(() => {
-    if (!copied) return;
-    const id = window.setTimeout(() => set_copied(false), 1400);
-    return () => window.clearTimeout(id);
-  }, [copied]);
-
-  return (
-    <button
-      type="button"
-      aria-label={`Copy ${label}`}
-      onClick={() => {
-        navigator.clipboard
-          .writeText(value)
-          .then(() => set_copied(true))
-          .catch(() => set_copied(false));
-      }}
-      className={cn(
-        'inline-flex cursor-pointer items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] font-medium text-foreground-soft disabled:cursor-not-allowed',
-        chip_pressable,
-        copied && 'border-border-strong bg-surface/80 text-foreground',
-        chip_focus,
-      )}
-    >
-      {copied ? (
-        <Check className="size-3.5 text-accent" strokeWidth={2.4} aria-hidden />
-      ) : (
-        <Copy className="size-3.5" strokeWidth={1.85} aria-hidden />
-      )}
-      {copied ? 'Copied' : 'Copy'}
-    </button>
   );
 }

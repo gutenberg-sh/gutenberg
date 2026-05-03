@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { ErrorView } from '@/components/ErrorView';
 import { Container } from '@/components/Layout';
+import { Button } from '@/components/ui/button';
 import { Pagination } from '@/components/Pagination';
 import {
   PublicationFeedFooter,
@@ -185,14 +186,16 @@ function SearchInput({
         aria-hidden={!value}
       >
         {value ? (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             aria-label="Clear search"
             onClick={() => on_change('')}
-            className="inline-flex size-9 items-center justify-center rounded-none text-muted-foreground transition-colors hover:bg-surface hover:text-foreground active:translate-y-px"
+            className="rounded-none text-muted-foreground hover:bg-surface hover:text-foreground"
           >
             <X className="size-3.5" strokeWidth={1.85} aria-hidden />
-          </button>
+          </Button>
         ) : null}
       </div>
     </div>

@@ -11,6 +11,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import { PublisherAddressLink } from '@/components/PublisherAddressLink';
+import { Button } from '@/components/ui/button';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { format_relative_time, shorten } from '@/lib/format';
 import { useNameSearch, type NameDto } from '@/lib/queries';
@@ -236,11 +237,11 @@ export function LookupForm({
             )}
           />
 
-          <button
+          <Button
             type="submit"
             aria-label={has_at ? 'Open publication' : 'Search'}
             className={cn(
-              'inline-flex shrink-0 items-center gap-1.5 bg-primary font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+              'shrink-0 gap-1.5 font-medium active:translate-y-px',
               lg ? 'mx-1.5 my-1.5 rounded-none px-4 text-[13.5px]' : 'mx-1 my-1 rounded-none px-3 text-[12.5px]',
             )}
           >
@@ -252,7 +253,7 @@ export function LookupForm({
               strokeWidth={2}
               aria-hidden
             />
-          </button>
+          </Button>
         </div>
 
         <p
@@ -304,15 +305,16 @@ export function LookupForm({
                   </span>
                   .
                 </span>
-                <button
+                <Button
                   type="button"
+                  variant="link"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => go_to_search(debounced_query)}
-                  className="inline-flex items-center gap-1 font-medium text-foreground hover:underline"
+                  className="h-auto gap-1 px-0 py-0 font-medium text-foreground hover:underline"
                 >
                   Open search
                   <ArrowUpRight className="size-3" strokeWidth={1.85} />
-                </button>
+                </Button>
               </div>
             ) : (
               <ul
@@ -332,11 +334,12 @@ export function LookupForm({
                   />
                 ))}
                 <li>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => go_to_search(debounced_query)}
-                    className="flex w-full items-center justify-between gap-2 bg-surface/40 px-4 py-2.5 text-[12px] text-muted-foreground transition-colors hover:bg-surface/80 hover:text-foreground"
+                    className="h-auto w-full justify-between gap-2 rounded-none bg-surface/40 px-4 py-2.5 text-[12px] font-normal text-muted-foreground hover:bg-surface/80 hover:text-foreground"
                   >
                     <span>
                       See all results for{' '}
@@ -345,7 +348,7 @@ export function LookupForm({
                       </span>
                     </span>
                     <CornerDownLeft className="size-3" strokeWidth={1.85} />
-                  </button>
+                  </Button>
                 </li>
               </ul>
             )}

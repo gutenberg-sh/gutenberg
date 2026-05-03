@@ -10,6 +10,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import { GatewayLinks } from '@/components/GatewayLinks';
+import { Button } from '@/components/ui/button';
 import { env } from '@/env';
 import { explorer_address_url } from '@/lib/explorer';
 import type { VerifiedRelease } from '@/lib/types';
@@ -439,8 +440,10 @@ function CopyButton({
   }, [copied]);
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       aria-label={`Copy ${label}`}
       title={`Copy ${label}`}
       onClick={() => {
@@ -450,7 +453,7 @@ function CopyButton({
           .catch(() => set_copied(false));
       }}
       className={cn(
-        'inline-flex items-center justify-center rounded-none text-muted-foreground transition-colors hover:bg-surface hover:text-foreground active:translate-y-px',
+        'rounded-none text-muted-foreground hover:bg-surface hover:text-foreground',
         inline ? 'size-5' : 'size-6',
       )}
     >
@@ -467,6 +470,6 @@ function CopyButton({
           aria-hidden
         />
       )}
-    </button>
+    </Button>
   );
 }

@@ -485,14 +485,16 @@ function PublishConfirmDialog({
               {session.version}
             </p>
           </div>
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="icon"
             aria-label="Close"
-            className="inline-flex size-8 shrink-0 items-center justify-center border-2 border-border text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+            className="size-8 shrink-0 rounded-none border-2 border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground"
             onClick={() => on_open_change(false)}
           >
             <X className="size-3.5" strokeWidth={1.9} />
-          </button>
+          </Button>
         </div>
         <div className="mt-4">
           <CostBreakdown precomputed={precomputed} />

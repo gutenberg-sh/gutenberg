@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
 import { LookupForm } from '@/components/LookupForm';
+import { Button } from '@/components/ui/button';
 
 export function LookupDialog({
   open,
@@ -46,14 +47,16 @@ export function LookupDialog({
         onClick={(event) => event.stopPropagation()}
         className="relative w-full max-w-2xl"
       >
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="icon"
           aria-label="Close"
           onClick={() => on_open_change(false)}
-          className="absolute -right-2 -top-2 z-10 inline-flex size-7 items-center justify-center rounded-none border-2 border-border bg-card text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+          className="absolute -right-2 -top-2 z-10 size-7 rounded-none border-2 border-border bg-card text-muted-foreground hover:border-foreground/40 hover:text-foreground"
         >
           <X className="size-3.5" strokeWidth={1.85} aria-hidden />
-        </button>
+        </Button>
         <div className="mb-3 px-1">
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             Registry quick open

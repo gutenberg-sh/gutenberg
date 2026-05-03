@@ -19,7 +19,7 @@ export function PublisherAddressLink({
 }) {
   return (
     <Link
-      to={`/p/${encodeURIComponent(address)}`}
+      to={`/publisher/${encodeURIComponent(address)}`}
       onClick={onClick}
       className={cn('inline-flex min-w-0 items-center gap-2', className)}
       title={address}

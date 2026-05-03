@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const page_btn_focus =
@@ -65,19 +66,21 @@ function PageButton({
   on_click: () => void;
 }) {
   return (
-    <button
+    <Button
       type="button"
+      variant="outline"
+      size="sm"
       onClick={on_click}
       disabled={disabled}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] font-medium text-foreground-soft transition-[color,border-color,background-color,transform] duration-200 ease-out',
+        'gap-1.5 px-2.5 py-1.5 text-[12px] font-medium text-foreground-soft transition-[color,border-color,background-color,transform] duration-200 ease-out',
         page_btn_focus,
         disabled
-          ? 'cursor-not-allowed opacity-40'
+          ? 'opacity-40'
           : 'hover:border-border-strong hover:bg-surface/50 hover:text-foreground active:translate-y-px',
       )}
     >
       {children}
-    </button>
+    </Button>
   );
 }

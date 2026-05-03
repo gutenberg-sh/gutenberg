@@ -54,7 +54,7 @@ function PlainLink({ link }: { link: ResolvedGatewayLink }) {
       target="_blank"
       rel="noreferrer noopener"
       title={title}
-      className="group inline-flex max-w-full items-center gap-1.5 text-[11px] font-mono tabular leading-snug text-muted-foreground underline-offset-4 transition-colors hover:text-foreground"
+      className="group inline-flex max-w-full cursor-pointer items-center gap-1.5 text-[11px] font-mono tabular leading-snug text-muted-foreground underline-offset-4 transition-colors hover:text-foreground"
     >
       <span className="min-w-0 truncate">{host}</span>
       <ExternalLink
@@ -83,7 +83,7 @@ function Chip({ link }: { link: ResolvedGatewayLink }) {
           ? `Canonical: open via ${host} (Irys)`
           : `Mirror: open via ${host}`
       }
-      className={`inline-flex items-center gap-1 rounded-none border px-1.5 py-0 font-mono text-[10px] tabular transition-colors ${classes}`}
+      className={`inline-flex cursor-pointer items-center gap-1 rounded-none border px-1.5 py-0 font-mono text-[10px] tabular transition-colors ${classes}`}
     >
       {host}
       <ExternalLink className="size-2.5" strokeWidth={1.85} aria-hidden />

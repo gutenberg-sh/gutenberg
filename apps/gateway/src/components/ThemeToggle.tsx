@@ -1,6 +1,7 @@
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
+import { Button } from '@/components/ui/button';
 import { applyStoredTheme, getThemeMode, type ThemeMode } from '@/lib/theme';
 
 /**
@@ -36,10 +37,12 @@ export function ThemeToggle() {
         : 'Color theme: Dark. Click to use system setting.';
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       onClick={cycle}
-      className="inline-flex size-9 items-center justify-center rounded-none text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      className="rounded-none text-muted-foreground hover:bg-muted hover:text-foreground"
       aria-label={label}
       title={label}
     >
@@ -50,6 +53,6 @@ export function ThemeToggle() {
       ) : (
         <Moon className="size-4" strokeWidth={1.75} aria-hidden />
       )}
-    </button>
+    </Button>
   );
 }

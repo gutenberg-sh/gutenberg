@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { ErrorView } from '@/components/ErrorView';
 import { Container } from '@/components/Layout';
+import { Button } from '@/components/ui/button';
 import { Pagination } from '@/components/Pagination';
 import {
   PublicationFeedFooter,
@@ -43,8 +44,10 @@ export function BrowseRoute() {
           <h1 className="text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
             Everything publishing right now.
           </h1>
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             aria-busy={manual_refresh}
             onClick={() => {
               set_manual_refresh(true);
@@ -55,7 +58,7 @@ export function BrowseRoute() {
                 }),
               ]).finally(() => set_manual_refresh(false));
             }}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground disabled:cursor-not-allowed"
+            className="gap-1.5 px-2.5 py-1.5 text-[12px] text-foreground-soft hover:border-border-strong hover:text-foreground"
             disabled={refresh_locked}
           >
             <RefreshCw
@@ -67,7 +70,7 @@ export function BrowseRoute() {
               aria-hidden
             />
             Refresh
-          </button>
+          </Button>
         </div>
         <p className="max-w-[62ch] text-[15px] leading-[1.68] text-foreground-soft">
           A living feed of new publications — each row is a signed, immutable
