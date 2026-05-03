@@ -4,7 +4,7 @@ import {
   type UseQueryOptions,
 } from '@tanstack/react-query';
 
-import { api } from '@/lib/api';
+import { api, type ApiError } from '@/lib/api';
 
 export type Sha256Hash = `sha256:${string}`;
 
@@ -207,14 +207,20 @@ export function useNameVersions(
 }
 
 export function usePublisher(address: string | undefined, includes?: string) {
-  return useQuery<PublisherDto>({
+  return useQuery<PublisherDto | null>({
     queryKey: query_keys.publisher(address ?? '', includes),
     queryFn: async () => {
-      const { data } = await api.get<PublisherDto>(
-        `/publishers/${encodeURIComponent(address!)}`,
-        { params: build_params({ includes }) },
-      );
-      return data;
+      try {
+        const { data } = await api.get<PublisherDto>(
+          `/publishers/${encodeURIComponent(address!)}`,
+          { params: build_params({ includes }) },
+        );
+        return data;
+      } catch (error) {
+        const status = (error as ApiError).response?.status;
+        if (status === 404) return null;
+        throw error;
+      }
     },
     enabled: Boolean(address),
     staleTime: STALE_LOOKUP,
@@ -233,11 +239,17 @@ export function usePublisherReleases(
       includes,
     }),
     queryFn: async () => {
-      const { data } = await api.get<ReleaseDto[]>(
-        `/publishers/${encodeURIComponent(address!)}/releases`,
-        { params: build_params({ limit, offset, includes }) },
-      );
-      return data;
+      try {
+        const { data } = await api.get<ReleaseDto[]>(
+          `/publishers/${encodeURIComponent(address!)}/releases`,
+          { params: build_params({ limit, offset, includes }) },
+        );
+        return data;
+      } catch (error) {
+        const status = (error as ApiError).response?.status;
+        if (status === 404) return [];
+        throw error;
+      }
     },
     enabled: Boolean(address),
     staleTime: STALE_LOOKUP,

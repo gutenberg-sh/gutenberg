@@ -1,6 +1,6 @@
-import { Check, Copy, ExternalLink, Library } from 'lucide-react';
+import { Check, Copy, ExternalLink } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { ErrorView } from '@/components/ErrorView';
 import { Container } from '@/components/Layout';
@@ -12,6 +12,7 @@ import {
 } from '@/components/PublicationFeedSection';
 import { PublicationList, ReleaseRow } from '@/components/ReleaseRow';
 import { api_error_message } from '@/lib/api';
+import { is_valid_publisher_address } from '@/lib/ed25519';
 import { explorer_address_url } from '@/lib/explorer';
 import { format_date_short } from '@/lib/format';
 import { usePublisher, usePublisherReleases } from '@/lib/queries';
@@ -49,12 +50,12 @@ export function PublisherRoute() {
     );
   }
 
-  if (publisher.isError) {
+  if (!is_valid_publisher_address(address)) {
     return (
       <Container className="py-20 lg:py-28">
         <ErrorView
-          title="Publisher not found"
-          message={api_error_message(publisher.error, "We don't have a record of this address. Double-check the public key, or browse recent publications.")}
+          title="Invalid Solana address"
+          message="Use a base58-encoded public key (32 bytes), for example from your wallet. Publisher pages use /p/ followed by that key in the URL."
           back_to="/browse"
         />
       </Container>
@@ -173,7 +174,19 @@ export function PublisherRoute() {
             back_to="/browse"
           />
         ) : list.length === 0 ? (
-          <EmptyReleases />
+          <PublicationList>
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 py-10 px-1 sm:px-2">
+              <p className="text-[13px] text-muted-foreground">
+                No publications from this address.
+              </p>
+              <span
+                className="text-right font-mono text-[11.5px] tabular text-muted-foreground"
+                aria-hidden
+              >
+                —
+              </span>
+            </div>
+          </PublicationList>
         ) : (
           <PublicationList>
             {list.map((r) => (
@@ -183,47 +196,6 @@ export function PublisherRoute() {
         )}
       </PublicationFeedSection>
     </Container>
-  );
-}
-
-function EmptyReleases() {
-  return (
-    <div className="grid place-items-center gap-4 rounded-none border border-dashed border-border bg-surface/30 px-6 py-14 text-center sm:py-16">
-      <Library
-        className="size-5 text-muted-foreground"
-        strokeWidth={1.6}
-        aria-hidden
-      />
-      <div className="grid max-w-[42ch] gap-2">
-        <p className="text-[14px] font-medium text-foreground">
-          No publications yet
-        </p>
-        <p className="text-[12.5px] leading-[1.65] text-muted-foreground">
-          This key is registered but has not signed a release we have indexed.
-        </p>
-      </div>
-      <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-        <Link
-          to="/browse"
-          className={cn(
-            'inline-flex items-center gap-1.5 rounded-none border border-border px-3 py-2 text-[12px] font-medium text-foreground-soft',
-            chip_pressable,
-            chip_focus,
-          )}
-        >
-          Browse registry
-        </Link>
-        <Link
-          to="/publish"
-          className={cn(
-            'inline-flex items-center gap-1.5 rounded-none border border-border-strong bg-foreground px-3 py-2 text-[12px] font-medium text-background transition-[color,background-color,border-color,transform] duration-200 ease-out hover:bg-foreground/90 active:translate-y-px dark:border-transparent',
-            chip_focus,
-          )}
-        >
-          Publish a release
-        </Link>
-      </div>
-    </div>
   );
 }
 
