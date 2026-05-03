@@ -1,9 +1,9 @@
-import { PublicKey } from '@solana/web3.js';
+import { address } from '@solana/addresses';
 
-/** True when `address` is a valid Solana `PublicKey` (base58, on-curve). */
-export function is_valid_publisher_address(address: string): boolean {
+/** True when `address` is a valid Solana base account address. */
+export function is_valid_publisher_address(value: string): boolean {
   try {
-    new PublicKey(address);
+    address(value);
     return true;
   } catch {
     return false;

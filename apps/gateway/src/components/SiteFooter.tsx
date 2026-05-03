@@ -1,7 +1,9 @@
+import { Github } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { IndexerStatus } from '@/components/IndexerStatus';
 import { SolanaHorizontalLogo } from '@/components/SolanaHorizontalLogo';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Wordmark } from '@/components/Wordmark';
 
 const GUTENBERG_REPO_HREF = 'https://github.com/leonmeka/gutenberg';
@@ -29,25 +31,28 @@ export function SiteFooter() {
           </p>
         </div>
 
-        <div className="flex justify-start border-t border-border pt-8">
+        <div className="flex flex-col gap-4 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
           <a
             href="https://solana.com"
             target="_blank"
             rel="noreferrer noopener"
             aria-label="Built on Solana — opens solana.com"
-            className="inline-flex items-center gap-3 text-muted-foreground transition-colors hover:text-foreground active:translate-y-px"
+            className="inline-flex w-fit items-center gap-3 text-muted-foreground transition-colors hover:text-foreground active:translate-y-px"
           >
             <span className="font-mono text-[11px] uppercase tracking-[0.14em]">
               Built on
             </span>
             <SolanaHorizontalLogo className="h-[13px] w-auto shrink-0 text-foreground sm:h-[14px] md:h-[15px]" />
           </a>
+          <div className="flex w-full justify-start sm:w-auto sm:shrink-0 sm:justify-end">
+            <ThemeToggle />
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border pt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+        <div className="flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-6 sm:gap-y-0">
           <nav
             aria-label="Footer"
-            className="flex flex-wrap items-center gap-x-6 gap-y-2"
+            className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground"
           >
             <FooterLink to="/browse">Browse</FooterLink>
             <FooterLink to="/search">Search</FooterLink>
@@ -55,12 +60,13 @@ export function SiteFooter() {
               href={GUTENBERG_REPO_HREF}
               target="_blank"
               rel="noreferrer noopener"
-              className="transition-colors hover:text-foreground"
+              className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
             >
-              Source
+              <Github className="size-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
+              GitHub
             </a>
           </nav>
-          <div className="ml-auto shrink-0">
+          <div className="min-w-0 self-start sm:max-w-[min(100%,32rem)] sm:self-auto sm:shrink-0 sm:text-right">
             <IndexerStatus />
           </div>
         </div>

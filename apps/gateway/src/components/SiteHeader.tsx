@@ -1,16 +1,12 @@
-import { Github, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
 import { LookupDialog } from '@/components/LookupDialog';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { Button } from '@/components/ui/button';
+import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
 import { Wordmark } from '@/components/Wordmark';
-import { useIsApplePlatform } from '@/hooks/usePlatform';
 import { cn } from '@/lib/utils';
 
 export function SiteHeader() {
-  const is_mac = useIsApplePlatform();
   const [lookup_open, set_lookup_open] = useState(false);
 
   useEffect(() => {
@@ -28,7 +24,7 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b-2 border-border bg-background">
-        <div className="mx-auto flex w-full max-w-[1400px] items-center gap-3 px-4 py-2.5 sm:gap-4 sm:px-6 lg:px-10">
+        <div className="mx-auto flex w-full max-w-[1400px] items-center gap-2 px-4 py-2.5 sm:gap-3 sm:px-6 lg:gap-4 lg:px-10">
           <Link
             to="/"
             aria-label="Gutenberg gateway, home"
@@ -37,66 +33,36 @@ export function SiteHeader() {
             <Wordmark className="text-[17px] text-foreground sm:text-[19px]" />
           </Link>
 
+          <NavLink
+            to="/publish"
+            className={({ isActive }) =>
+              cn(
+                'registry-command-shell shrink-0 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors sm:hidden',
+                isActive
+                  ? 'border-primary/45 bg-primary/10 text-foreground'
+                  : 'text-muted-foreground hover:border-border-strong hover:text-foreground',
+              )
+            }
+          >
+            [ publish ]
+          </NavLink>
+
           <nav
             aria-label="Primary"
             className="hidden items-center font-mono text-[10px] uppercase tracking-[0.2em] sm:flex"
           >
             <HeaderLink to="/browse">[ browse ]</HeaderLink>
             <HeaderLink to="/search">[ search ]</HeaderLink>
-            <HeaderLink to="/publish">[ publish ]</HeaderLink>
+            <HeaderLink to="/publish" emphasis="high">
+              [ publish ]
+            </HeaderLink>
           </nav>
 
-          <div className="hidden min-w-0 flex-1 justify-center px-2 md:flex">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => set_lookup_open(true)}
-              aria-label="Search publications"
-              className="registry-command-shell h-auto w-full max-w-xl justify-start gap-2.5 px-3 py-2 text-left font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground"
-            >
-              <Search
-                className="size-3.5 shrink-0"
-                strokeWidth={1.85}
-                aria-hidden
-              />
-              <span className="min-w-0 flex-1 truncate text-foreground-soft">
-                registry_id@version
-              </span>
-              <span className="hidden shrink-0 items-center gap-0.5 sm:flex">
-                <span className="kbd">{is_mac ? '⌘' : 'Ctrl'}</span>
-                <span className="kbd">K</span>
-              </span>
-            </Button>
-          </div>
-
-          <div className="ml-auto flex items-center gap-1.5 text-[13px] sm:gap-2">
-            <ThemeToggle />
-            <Button
-              type="button"
+          <div className="ms-auto flex shrink-0 items-center">
+            <ConnectWalletButton
               variant="outline"
-              size="icon"
-              onClick={() => set_lookup_open(true)}
-              aria-label="Open search"
-              className="rounded-none border-border bg-card text-foreground-soft hover:border-border-strong hover:bg-elevated hover:text-foreground md:hidden"
-            >
-              <Search className="size-4" strokeWidth={1.85} aria-hidden />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-none text-muted-foreground hover:bg-muted hover:text-foreground"
-              asChild
-            >
-              <a
-                href="https://github.com/leonmeka/gutenberg"
-                target="_blank"
-                rel="noreferrer noopener"
-                aria-label="Project source on GitHub"
-              >
-                <Github className="size-4" strokeWidth={1.75} aria-hidden />
-              </a>
-            </Button>
+              className="registry-command-shell h-9 shrink-0 px-2.5 text-[11px] font-mono uppercase tracking-[0.14em] hover:border-border-strong hover:bg-elevated sm:px-3 sm:text-[12px]"
+            />
           </div>
         </div>
       </header>
@@ -109,9 +75,11 @@ export function SiteHeader() {
 function HeaderLink({
   to,
   children,
+  emphasis = 'default',
 }: {
   to: string;
   children: React.ReactNode;
+  emphasis?: 'default' | 'high';
 }) {
   return (
     <NavLink
@@ -121,7 +89,9 @@ function HeaderLink({
           'group relative px-2.5 py-1.5 transition-colors',
           isActive
             ? 'text-foreground'
-            : 'text-muted-foreground hover:text-foreground',
+            : emphasis === 'high'
+              ? 'text-foreground-soft hover:text-foreground'
+              : 'text-muted-foreground hover:text-foreground',
         )
       }
     >

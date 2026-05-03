@@ -2,8 +2,7 @@ import {
   type PublishSessionInput,
   type PublishSessionResult,
 } from '@gutenberg/core';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { useWallet, useWalletSession } from '@solana/react-hooks';
 import { ArrowUpRight, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -38,6 +37,7 @@ export function PublishFlowPanel({
   session: PublishSessionInput;
 }) {
   const wallet = useWallet();
+  const wallet_session = useWalletSession();
   const [run, set_run] = useState<RunState>({ kind: 'idle' });
   const publish_lock_ref = useRef(false);
   const cost_state = usePublishCostEstimates(session);
@@ -50,9 +50,13 @@ export function PublishFlowPanel({
     set_run({ kind: 'running', events });
 
     try {
+      if (!wallet_session) {
+        throw new Error('Connect a wallet to publish.');
+      }
+
       const result = await run_publish_flow({
         session,
-        wallet,
+        wallet_session,
         irys_bundler_url: env.VITE_GUTENBERG_IRYS_GATEWAY,
         on_event: (event) => {
           events.push(event);
@@ -98,8 +102,16 @@ export function PublishFlowPanel({
       <Action
         session={session}
         cost={cost_state}
-        wallet_pubkey={wallet.publicKey?.toBase58() ?? null}
-        wallet_connected={Boolean(wallet.connected && wallet.signMessage)}
+        wallet_pubkey={
+          wallet.status === 'connected' && wallet_session
+            ? wallet_session.account.address.toString()
+            : null
+        }
+        wallet_connected={Boolean(
+          wallet.status === 'connected' &&
+            wallet_session?.signMessage &&
+            wallet_session?.signTransaction,
+        )}
         run={run}
         on_publish={() => void on_publish()}
         on_cancel={on_cancel}
@@ -362,22 +374,19 @@ function Action({
         </p>
         <CostBreakdown precomputed={cost} />
       </div>
-      <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-        <div className="grid min-w-0 gap-0.5">
-          <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
-            Wallet
-          </p>
-          <p
-            className={cn(
-              'truncate font-mono text-[13px] tabular',
-              wallet_pubkey ? 'text-foreground' : 'text-muted-foreground',
-            )}
-            title={wallet_pubkey ?? undefined}
-          >
-            {wallet_pubkey ?? 'Connect a wallet to continue'}
-          </p>
-        </div>
-        <WalletMultiButton style={wallet_button_style} />
+      <div className="grid min-w-0 gap-0.5">
+        <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
+          Wallet
+        </p>
+        <p
+          className={cn(
+            'font-mono text-[13px] leading-snug tabular',
+            wallet_pubkey ? 'text-foreground' : 'text-muted-foreground',
+          )}
+          title={wallet_pubkey ?? undefined}
+        >
+          {wallet_pubkey ?? 'Connect a wallet in the header to publish.'}
+        </p>
       </div>
 
       {events.length > 0 ? (
@@ -582,17 +591,6 @@ function Receipt({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-
-const wallet_button_style: React.CSSProperties = {
-  background: 'var(--foreground)',
-  color: 'var(--background)',
-  borderRadius: '0.5rem',
-  height: '2.25rem',
-  padding: '0 0.875rem',
-  fontSize: '13px',
-  fontFamily: 'inherit',
-  fontWeight: 500,
-};
 
 function progress_message(event: PublishFlowEvent): string {
   switch (event.kind) {

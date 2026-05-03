@@ -1,14 +1,6 @@
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
+import { useSolTransfer, useWalletConnection } from '@solana/react-hooks';
 import { Check, Coins, ExternalLink, Loader2, Wallet, X } from 'lucide-react';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type CSSProperties,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { PublisherAvatar } from '@/components/PublisherAvatar';
@@ -16,17 +8,6 @@ import { Button } from '@/components/ui/button';
 import { explorer_transaction_url } from '@/lib/explorer';
 import { shorten } from '@/lib/format';
 import { cn } from '@/lib/utils';
-
-const wallet_button_style: CSSProperties = {
-  background: 'var(--foreground)',
-  color: 'var(--background)',
-  borderRadius: '0.5rem',
-  height: '2.5rem',
-  padding: '0 0.875rem',
-  fontSize: '13px',
-  fontFamily: 'inherit',
-  fontWeight: 600,
-};
 
 const PRESET_SOL_LABELS = ['0.01', '0.05', '0.1', '0.25', '0.5', '1'] as const;
 
@@ -78,19 +59,19 @@ export function PublisherTip({
 }: {
   recipient_address: string;
 }) {
-  const { connection } = useConnection();
-  const { publicKey, connected, sendTransaction, wallet } = useWallet();
+  const { connected, wallet } = useWalletConnection();
+  const { send, isSending, reset } = useSolTransfer();
 
   const [open, set_open] = useState(false);
   const [amount_input, set_amount_input] = useState('0.05');
-  const [busy, set_busy] = useState(false);
   const [error, set_error] = useState<string | null>(null);
   const [last_signature, set_last_signature] = useState<string | null>(null);
   const [sent_amount_label, set_sent_amount_label] = useState<string | null>(
     null,
   );
 
-  const is_self = connected && publicKey?.toBase58() === recipient_address;
+  const sender_address = wallet?.account.address.toString();
+  const is_self = connected && sender_address === recipient_address;
 
   const amount_parsed = useMemo(
     () => parse_sol_input(amount_input),
@@ -100,26 +81,26 @@ export function PublisherTip({
     connected &&
     !is_self &&
     amount_parsed.ok &&
-    !busy &&
+    !isSending &&
     last_signature === null;
 
   const try_close_dialog = useCallback(() => {
-    if (busy) return;
+    if (isSending) return;
     set_open(false);
     set_error(null);
     set_last_signature(null);
     set_sent_amount_label(null);
-    set_busy(false);
-  }, [busy]);
+    reset();
+  }, [isSending, reset]);
 
   const open_dialog = useCallback(() => {
     set_error(null);
     set_last_signature(null);
     set_sent_amount_label(null);
-    set_busy(false);
+    reset();
     set_amount_input('0.05');
     set_open(true);
-  }, []);
+  }, [reset]);
 
   useEffect(() => {
     if (!open) return;
@@ -141,12 +122,12 @@ export function PublisherTip({
   }, [open, try_close_dialog]);
 
   async function submit_send() {
-    if (!publicKey || !sendTransaction) {
+    if (!wallet) {
       set_error('Connect a wallet that can send transactions.');
       return;
     }
 
-    if (publicKey.toBase58() === recipient_address) {
+    if (sender_address === recipient_address) {
       set_error('You cannot tip your own wallet.');
       return;
     }
@@ -159,48 +140,25 @@ export function PublisherTip({
 
     set_error(null);
     set_last_signature(null);
-    set_busy(true);
 
     try {
-      const recipient = new PublicKey(recipient_address);
-      const { blockhash, lastValidBlockHeight } =
-        await connection.getLatestBlockhash('confirmed');
-
-      const tx = new Transaction({
-        feePayer: publicKey,
-        recentBlockhash: blockhash,
-      }).add(
-        SystemProgram.transfer({
-          fromPubkey: publicKey,
-          toPubkey: recipient,
-          lamports: parsed.lamports,
-        }),
-      );
-
-      const signature = await sendTransaction(tx, connection, {
-        skipPreflight: false,
+      const sig = await send({
+        amount: parsed.lamports,
+        destination: recipient_address,
       });
-
-      await connection.confirmTransaction(
-        { signature, blockhash, lastValidBlockHeight },
-        'confirmed',
-      );
-
       set_sent_amount_label(format_lamports_display(parsed.lamports));
-      set_last_signature(signature);
+      set_last_signature(String(sig));
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       set_error(message || 'Something went wrong. Try again.');
-    } finally {
-      set_busy(false);
     }
   }
 
   const tx_href = last_signature
     ? explorer_transaction_url(last_signature)
     : undefined;
-  const wallet_label = wallet?.adapter?.name ?? 'Wallet';
-  const from_short = publicKey ? shorten(publicKey.toBase58(), 4, 4) : null;
+  const wallet_label = wallet?.connector.name ?? 'Wallet';
+  const from_short = sender_address ? shorten(sender_address, 4, 4) : null;
 
   const show_success = last_signature !== null && sent_amount_label !== null;
 
@@ -246,7 +204,7 @@ export function PublisherTip({
                     variant="outline"
                     size="icon"
                     aria-label="Close"
-                    disabled={busy}
+                    disabled={isSending}
                     className="shrink-0 rounded-none border-border text-muted-foreground hover:border-foreground/35 hover:text-foreground disabled:opacity-40"
                     onClick={() => try_close_dialog()}
                   >
@@ -255,7 +213,7 @@ export function PublisherTip({
                 </div>
 
                 <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain">
-                  {busy ? (
+                  {isSending ? (
                     <div
                       className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-card/80 px-4"
                       aria-live="polite"
@@ -343,13 +301,13 @@ export function PublisherTip({
                       </div>
                     </div>
                   ) : !connected ? (
-                    <div className="grid gap-4 px-3 py-6 text-center sm:px-4">
+                    <div className="grid gap-2 px-3 py-6 text-center sm:px-4">
                       <p className="text-[13px] font-medium text-foreground">
                         Connect a wallet to send SOL.
                       </p>
-                      <div className="flex justify-center">
-                        <WalletMultiButton style={wallet_button_style} />
-                      </div>
+                      <p className="text-[12.5px] leading-relaxed text-muted-foreground">
+                        Use the wallet control in the top right of the page.
+                      </p>
                     </div>
                   ) : is_self ? (
                     <div className="px-3 py-6 text-center sm:px-4">
@@ -398,7 +356,7 @@ export function PublisherTip({
                               set_error(null);
                               set_amount_input(e.target.value);
                             }}
-                            disabled={busy}
+                            disabled={isSending}
                             className="min-w-0 max-w-[10ch] border-0 bg-transparent text-center font-mono text-[2.1rem] font-semibold leading-none tracking-tight text-foreground tabular-nums outline-none ring-0 placeholder:text-muted-foreground/40 focus:ring-0 sm:text-[2.25rem]"
                             placeholder="0.00"
                           />
@@ -428,7 +386,7 @@ export function PublisherTip({
                                 key={label}
                                 type="button"
                                 variant="outline"
-                                disabled={busy}
+                                disabled={isSending}
                                 onClick={() => {
                                   set_error(null);
                                   set_amount_input(label);

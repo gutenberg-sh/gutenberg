@@ -94,8 +94,8 @@ export function LandingRoute() {
   return (
     <div className="flex flex-col">
       <Container className="pb-16 pt-10 lg:pb-24 lg:pt-14">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start lg:gap-16">
-          <div className="grid content-start gap-6 lg:pt-2">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-stretch lg:gap-16">
+          <div className="grid content-start gap-6 self-start lg:pt-2">
             <h1 className="tactical-display text-[clamp(1.65rem,6vw,3.25rem)] leading-[1.14] tracking-[-0.042em] text-foreground sm:max-w-[20ch]">
               Publish work that stays public.
             </h1>
@@ -103,36 +103,38 @@ export function LandingRoute() {
               Anyone can publish; once it&rsquo;s on the record, nobody can
               unpublish it.
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
               <Link
-                to="/browse"
-                className="inline-flex items-center rounded-none bg-primary px-3.5 py-2 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px"
+                to="/publish"
+                className="inline-flex items-center rounded-none bg-primary px-4 py-2.5 text-[13px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px sm:px-5 sm:text-[14px]"
               >
-                Browse publications
+                Publish a release
               </Link>
               <Link
-                to="/search"
+                to="/browse"
                 className="registry-command-shell inline-flex items-center px-3.5 py-2 text-[13px] font-medium text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
               >
-                Search
+                Browse publications
               </Link>
             </div>
           </div>
 
-          <div className="grid gap-3 lg:self-center">
-            <div className="flex items-baseline justify-between gap-3 px-1">
-              <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
-                Find a publication
-              </p>
-              <p className="hidden text-[11.5px] text-muted-foreground sm:block">
-                <span className="kbd">⌘K</span> /{' '}
-                <span className="kbd">Ctrl K</span> anywhere
-              </p>
+          <div className="flex min-h-0 flex-col justify-center">
+            <div className="grid w-full gap-3">
+              <div className="flex items-baseline justify-between gap-3 px-1">
+                <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
+                  Find a publication
+                </p>
+                <p className="hidden text-[11.5px] text-muted-foreground sm:block">
+                  <span className="kbd">⌘K</span> /{' '}
+                  <span className="kbd">Ctrl K</span> anywhere
+                </p>
+              </div>
+              <LookupForm
+                size="lg"
+                placeholder="registry_id or registry_id@version"
+              />
             </div>
-            <LookupForm
-              size="lg"
-              placeholder="registry_id or registry_id@version"
-            />
           </div>
         </div>
 

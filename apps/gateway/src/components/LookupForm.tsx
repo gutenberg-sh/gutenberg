@@ -237,7 +237,7 @@ export function LookupForm({
             className={cn(
               'shrink-0 gap-1.5 font-medium active:translate-y-px',
               lg
-                ? 'mx-1.5 my-1.5 rounded-none px-4 text-[13.5px]'
+                ? 'h-full min-h-14 self-stretch rounded-none border-l-2 border-border px-4 py-0 text-[13.5px]'
                 : 'mx-1 my-1 rounded-none px-3 text-[12.5px]',
             )}
           >
@@ -267,11 +267,7 @@ export function LookupForm({
               <span className="font-mono tabular text-foreground-soft">↑↓</span>{' '}
               to pick ·{' '}
               <span className="font-mono tabular text-foreground-soft">↵</span>{' '}
-              to open ·{' '}
-              <span className="font-mono tabular text-foreground-soft">
-                registry_id@version
-              </span>{' '}
-              opens that exact release
+              to open
             </>
           )}
         </p>

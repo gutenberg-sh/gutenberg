@@ -18,7 +18,7 @@ import {
 import { ArweaveSigner } from '@irys/bundles';
 import { WebUploader } from '@irys/web-upload';
 import { WebSolana } from '@irys/web-upload-solana';
-import type { WalletContextState } from '@solana/wallet-adapter-react';
+import type { WalletSession } from '@solana/client';
 import {
   Connection,
   PublicKey,
@@ -26,6 +26,11 @@ import {
   Transaction,
   TransactionInstruction,
 } from '@solana/web3.js';
+
+import {
+  create_irys_kit_wallet_provider,
+  sign_legacy_transaction_and_send_raw,
+} from '@/lib/irys-kit-wallet-bridge';
 
 const SYSTEM_PROGRAM_ID = SystemProgram.programId;
 
@@ -52,39 +57,33 @@ type PublishFlowResult = {
 
 export async function run_publish_flow(input: {
   session: PublishSessionInput;
-  wallet: WalletContextState;
+  wallet_session: WalletSession;
   irys_bundler_url: string;
   on_event: (event: PublishFlowEvent) => void;
 }): Promise<PublishFlowResult> {
-  const { session, wallet, irys_bundler_url, on_event } = input;
+  const { session, wallet_session, irys_bundler_url, on_event } = input;
 
-  if (!wallet.publicKey) {
-    throw new Error('Wallet is not connected');
-  }
-
-  if (!wallet.signMessage) {
+  if (!wallet_session.signMessage) {
     throw new Error(
       "This wallet doesn't expose signMessage; pick a wallet like Phantom or Solflare.",
     );
   }
 
-  if (!wallet.signTransaction || !wallet.sendTransaction) {
+  if (!wallet_session.signTransaction) {
     throw new Error(
-      "This wallet doesn't expose signTransaction/sendTransaction; pick a wallet like Phantom or Solflare.",
+      "This wallet doesn't expose signTransaction; pick a wallet like Phantom or Solflare.",
     );
   }
 
-  const publisher = wallet.publicKey.toBase58();
+  const publisher = wallet_session.account.address.toString();
   on_event({ kind: 'wallet_connected', address: publisher });
-
-  if (!wallet.wallet?.adapter) {
-    throw new Error('Connected wallet adapter is not available');
-  }
 
   on_event({ kind: 'preparing' });
 
+  const irys_provider = create_irys_kit_wallet_provider(wallet_session);
+
   const irys = await build_irys(
-    wallet.wallet.adapter,
+    irys_provider,
     session.rpc_url,
     session.irys_network,
     irys_bundler_url,
@@ -125,14 +124,6 @@ export async function run_publish_flow(input: {
     }
   }
 
-  // Pre-sign every file's Irys data item with a one-shot ephemeral Arweave
-  // key. Irys's `uploadFolder` does the same internally, but it then makes
-  // the wallet sign both the Irys folder-manifest *and* the bundle wrapper —
-  // doing that ourselves cuts those popups, and lets us bundle our own
-  // signed Gutenberg manifest into the same upload. The wallet is only used
-  // to sign (a) the Gutenberg manifest payload, (b) the bundle wrapper, and
-  // (c) the Solana publish_release tx — three popups regardless of file
-  // count.
   const throwaway_key = await irys.bundles.getCryptoDriver().generateJWK();
   const ephemeral_signer = new ArweaveSigner(throwaway_key);
 
@@ -180,7 +171,7 @@ export async function run_publish_flow(input: {
 
   const canonical_text = canonical_json(unsigned_manifest);
   const message_bytes = new TextEncoder().encode(canonical_text);
-  const signature_bytes = await wallet.signMessage(message_bytes);
+  const signature_bytes = await wallet_session.signMessage(message_bytes);
 
   const manifest = sign_into_manifest(unsigned_manifest, signature_bytes);
   const signed_canonical = canonical_json(manifest);
@@ -216,8 +207,8 @@ export async function run_publish_flow(input: {
   on_event({ kind: 'tx_sending' });
 
   const signature = await send_publish_release_tx({
-    wallet,
     rpc_url: session.rpc_url,
+    session: wallet_session,
     program_id: session.chain.program_id,
     registry_id: session.registry_id,
     version: session.version,
@@ -246,13 +237,13 @@ export async function run_publish_flow(input: {
 }
 
 async function build_irys(
-  adapter: unknown,
+  provider: ReturnType<typeof create_irys_kit_wallet_provider>,
   rpc_url: string,
   network: 'mainnet' | 'devnet',
   bundler_url: string,
 ) {
   const builder = WebUploader(WebSolana)
-    .withProvider(adapter)
+    .withProvider(provider)
     .withRpc(rpc_url)
     .bundlerUrl(bundler_url)
     .withTokenOptions({ disablePriorityFees: true });
@@ -280,8 +271,8 @@ function sign_into_manifest(
 }
 
 async function send_publish_release_tx(input: {
-  wallet: WalletContextState;
   rpc_url: string;
+  session: WalletSession;
   program_id: string;
   registry_id: string;
   version: string;
@@ -290,12 +281,8 @@ async function send_publish_release_tx(input: {
   content_hash: Sha256Hash;
   content_size_bytes: number;
 }): Promise<string> {
-  const { wallet, rpc_url, program_id, registry_id, version, manifest_uri } =
+  const { rpc_url, session, program_id, registry_id, version, manifest_uri } =
     input;
-
-  if (!wallet.publicKey) {
-    throw new Error('Wallet disconnected mid-flow');
-  }
 
   if (program_id !== GUTENBERG_REGISTRY_PROGRAM_ID) {
     throw new Error(
@@ -324,10 +311,14 @@ async function send_publish_release_tx(input: {
     content_size_bytes: input.content_size_bytes,
   });
 
-  const ix = new TransactionInstruction({
+  const legacy_ix = new TransactionInstruction({
     programId: program_pubkey,
     keys: [
-      { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
+      {
+        pubkey: new PublicKey(session.account.address.toString()),
+        isSigner: true,
+        isWritable: true,
+      },
       { pubkey: publication_addr, isSigner: false, isWritable: true },
       { pubkey: release_addr, isSigner: false, isWritable: true },
       { pubkey: SYSTEM_PROGRAM_ID, isSigner: false, isWritable: false },
@@ -339,18 +330,16 @@ async function send_publish_release_tx(input: {
   const { blockhash, lastValidBlockHeight } =
     await connection.getLatestBlockhash('confirmed');
 
-  const tx = new Transaction({
-    feePayer: wallet.publicKey,
+  const legacy_tx = new Transaction({
+    feePayer: new PublicKey(session.account.address.toString()),
     blockhash,
     lastValidBlockHeight,
-  }).add(ix);
+  }).add(legacy_ix);
 
-  if (!wallet.signTransaction) {
-    throw new Error('Connected wallet does not support signTransaction');
-  }
-
-  const signed_tx = await wallet.signTransaction(tx);
-  const signature = await connection.sendRawTransaction(signed_tx.serialize(), {
+  const signature = await sign_legacy_transaction_and_send_raw({
+    session,
+    legacy_tx,
+    connection,
     skipPreflight: false,
   });
 
