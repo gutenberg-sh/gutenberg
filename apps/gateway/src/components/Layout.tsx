@@ -7,7 +7,7 @@ export function Container({
 }: {
   children: React.ReactNode;
   className?: string;
-  as?: 'div' | 'section' | 'article' | 'header';
+  as?: 'div' | 'main' | 'section' | 'article' | 'header';
 }) {
   return (
     <As

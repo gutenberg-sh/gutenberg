@@ -5,10 +5,10 @@ import { ErrorView } from '@/components/ErrorView';
 import { Container } from '@/components/Layout';
 import { Pagination } from '@/components/Pagination';
 import {
-  ReleaseListHeader,
-  ReleaseListSkeleton,
-  ReleaseRow,
-} from '@/components/ReleaseRow';
+  PublicationFeedFooter,
+  PublicationFeedSection,
+} from '@/components/PublicationFeedSection';
+import { PublicationList, ReleaseRow } from '@/components/ReleaseRow';
 import { api_error_message } from '@/lib/api';
 import { useFeed } from '@/lib/queries';
 import { cn } from '@/lib/utils';
@@ -75,11 +75,49 @@ export function BrowseRoute() {
         </p>
       </header>
 
-      <section className="grid gap-2">
-        <ReleaseListHeader />
-        {feed.isLoading ? (
-          <ReleaseListSkeleton rows={8} />
-        ) : feed.isError ? (
+      <PublicationFeedSection
+        aria-label="New publications feed"
+        loading={feed.isLoading}
+        skeleton_rows={8}
+        footer={
+          <PublicationFeedFooter
+            summary={
+              feed.isLoading ? (
+                'Loading publications…'
+              ) : feed.isError ? (
+                "Couldn't load this page."
+              ) : releases.length === 0 ? (
+                'No publications on this page.'
+              ) : (
+                <>
+                  Showing{' '}
+                  <span className="text-foreground-soft">{offset + 1}</span>
+                  –
+                  <span className="text-foreground-soft">
+                    {offset + releases.length}
+                  </span>
+                  {has_next
+                    ? ' · more on the next page'
+                    : page > 0
+                      ? ' · end of list'
+                      : null}
+                </>
+              )
+            }
+          >
+            <Pagination
+              page={page + 1}
+              has_prev={page > 0 && !feed.isLoading && !feed.isError}
+              has_next={has_next && !feed.isLoading && !feed.isError}
+              loading={feed.isFetching}
+              on_prev={() => set_page((p) => Math.max(0, p - 1))}
+              on_next={() => set_page((p) => p + 1)}
+              with_top_border={false}
+            />
+          </PublicationFeedFooter>
+        }
+      >
+        {feed.isError ? (
           <ErrorView
             title="Couldn't load the feed"
             message={api_error_message(feed.error, "We can't reach the indexer right now. Try again in a moment.")}
@@ -87,23 +125,13 @@ export function BrowseRoute() {
         ) : releases.length === 0 ? (
           <EmptyFeed />
         ) : (
-          <div className="divide-y divide-border">
+          <PublicationList>
             {releases.map((r) => (
               <ReleaseRow key={r.id} release={r} />
             ))}
-          </div>
+          </PublicationList>
         )}
-        {!feed.isLoading && !feed.isError ? (
-          <Pagination
-            page={page + 1}
-            has_prev={page > 0}
-            has_next={has_next}
-            loading={feed.isFetching}
-            on_prev={() => set_page((p) => Math.max(0, p - 1))}
-            on_next={() => set_page((p) => p + 1)}
-          />
-        ) : null}
-      </section>
+      </PublicationFeedSection>
     </Container>
   );
 }

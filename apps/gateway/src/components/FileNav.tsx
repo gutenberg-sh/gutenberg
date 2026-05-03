@@ -140,25 +140,10 @@ function FileNavRow({
         >
           {index_label}
         </span>
-        <span className="flex min-w-0 items-center gap-2 font-mono text-[12.5px] tabular">
-          <span className="truncate">
-            {label}
-            {is_entry ? (
-              <span className="sr-only">, publication entry</span>
-            ) : null}
-          </span>
+        <span className="min-w-0 truncate font-mono text-[12.5px] tabular">
+          {label}
           {is_entry ? (
-            <span
-              className={cn(
-                'shrink-0 rounded-none border border-border/70 px-1 py-px font-mono text-[9px] font-medium uppercase tracking-[0.14em]',
-                active
-                  ? 'border-accent/45 text-accent'
-                  : 'text-muted-foreground group-hover:text-foreground/80',
-              )}
-              aria-hidden
-            >
-              Entry
-            </span>
+            <span className="sr-only">, publication entry</span>
           ) : null}
         </span>
         <span

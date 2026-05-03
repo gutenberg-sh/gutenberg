@@ -7,13 +7,13 @@ import { cn } from '@/lib/utils';
 const FALLBACK_PRIMARY = '#5b21b6';
 
 /**
- * Deterministic marble avatar from the publisher signing key.
- * Palette follows `--primary` within a purple-only ramp (no neutral black/white).
+ * Deterministic pixel avatar from the publisher signing key.
+ * Palette follows `--primary` within a purple-only ramp.
  * @see https://boringavatars.com/
  */
 export function PublisherAvatar({
   address,
-  size = 96,
+  size = 64,
   className,
 }: {
   address: string;
@@ -56,7 +56,7 @@ export function PublisherAvatar({
     >
       <Avatar
         name={address}
-        variant="marble"
+        variant="pixel"
         square
         size={size}
         colors={colors}

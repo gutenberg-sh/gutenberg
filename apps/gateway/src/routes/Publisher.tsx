@@ -1,16 +1,16 @@
-import { Check, Copy, ExternalLink, Info, Library } from 'lucide-react';
+import { Check, Copy, ExternalLink, Library } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import { ErrorView } from '@/components/ErrorView';
 import { Container } from '@/components/Layout';
 import { PublisherAvatar } from '@/components/PublisherAvatar';
 import { Pagination } from '@/components/Pagination';
 import {
-  ReleaseListHeader,
-  ReleaseListSkeleton,
-  ReleaseRow,
-} from '@/components/ReleaseRow';
+  PublicationFeedFooter,
+  PublicationFeedSection,
+} from '@/components/PublicationFeedSection';
+import { PublicationList, ReleaseRow } from '@/components/ReleaseRow';
 import { api_error_message } from '@/lib/api';
 import { explorer_address_url } from '@/lib/explorer';
 import { format_date_short } from '@/lib/format';
@@ -22,6 +22,9 @@ const PAGE_SIZE = 25;
 const chip_focus =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
+const chip_pressable =
+  'transition-[color,border-color,background-color,transform] duration-200 ease-out hover:border-border-strong hover:bg-surface/50 hover:text-foreground active:translate-y-px';
+
 export function PublisherRoute() {
   const params = useParams();
   const address = params.address;
@@ -31,7 +34,7 @@ export function PublisherRoute() {
   const releases = usePublisherReleases(address, {
     limit: PAGE_SIZE,
     offset: page * PAGE_SIZE,
-    includes: 'name',
+    includes: 'publisher,name',
   });
 
   if (!address) {
@@ -40,6 +43,7 @@ export function PublisherRoute() {
         <ErrorView
           title="Missing publisher address"
           message="Publisher pages live at /p/<address>. Add the public key to the URL and try again."
+          back_to="/browse"
         />
       </Container>
     );
@@ -51,6 +55,7 @@ export function PublisherRoute() {
         <ErrorView
           title="Publisher not found"
           message={api_error_message(publisher.error, "We don't have a record of this address. Double-check the public key, or browse recent publications.")}
+          back_to="/browse"
         />
       </Container>
     );
@@ -58,20 +63,26 @@ export function PublisherRoute() {
 
   const list = releases.data ?? [];
   const has_next = list.length === PAGE_SIZE;
+  const range_start = page * PAGE_SIZE + 1;
+  const range_end = page * PAGE_SIZE + list.length;
   return (
     <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
       <header className="grid gap-3">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
           Publisher
         </p>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="flex min-w-0 flex-wrap items-end gap-4 sm:gap-6">
-            <PublisherAvatar address={address} size={88} className="shrink-0" />
-            <div className="grid min-w-0 gap-2">
-              <h1 className="text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
+
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-4 sm:gap-5">
+            <PublisherAvatar address={address} size={64} className="shrink-0" />
+            <div className="grid min-w-0 gap-1.5">
+              <h1 className="text-balance text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
                 Anonymous
               </h1>
-              <p className="break-all font-mono text-[13px] tabular leading-[1.45] text-foreground-soft sm:text-[14px]">
+              <p
+                className="break-all font-mono text-[13px] tabular leading-normal text-foreground-soft sm:text-[14px]"
+                title={address}
+              >
                 {address}
               </p>
             </div>
@@ -83,7 +94,8 @@ export function PublisherRoute() {
               target="_blank"
               rel="noreferrer noopener"
               className={cn(
-                'inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground',
+                'inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] font-medium text-foreground-soft',
+                chip_pressable,
                 chip_focus,
               )}
             >
@@ -92,77 +104,125 @@ export function PublisherRoute() {
             </a>
           </div>
         </div>
-        {publisher.data ? (
-          <p className="text-[12.5px] text-muted-foreground">
-            First seen{' '}
-            <span className="font-mono tabular text-foreground-soft">
-              {format_date_short(publisher.data.created_at)}
-            </span>
+
+        <div className="grid max-w-[62ch] gap-3 text-[15px] leading-[1.68] text-foreground-soft">
+          {publisher.isLoading ? (
+            <div className="h-4 max-w-xs animate-pulse rounded-none bg-muted/70" aria-hidden />
+          ) : publisher.data ? (
+            <p>
+              First seen{' '}
+              <span className="font-mono tabular text-foreground">
+                {format_date_short(publisher.data.created_at)}
+              </span>
+              .
+            </p>
+          ) : null}
+          <p>
+            The publisher is fully anonymous: no profile or display name, only
+            this public address.
           </p>
-        ) : publisher.isLoading ? (
-          <div className="h-4 max-w-xs animate-pulse bg-muted/70" aria-hidden />
-        ) : null}
+        </div>
       </header>
 
-      <aside
-        className="flex gap-3 rounded-none border border-border bg-surface px-4 py-3 sm:px-5 sm:py-4"
-        aria-label="How publisher keys work"
+      <PublicationFeedSection
+        aria-label="Publications"
+        loading={releases.isLoading}
+        skeleton_rows={6}
+        footer={
+          <PublicationFeedFooter
+            summary={
+              releases.isLoading ? (
+                'Loading publications…'
+              ) : releases.isError ? (
+                "Couldn't load publications."
+              ) : list.length === 0 ? (
+                'No publications on this page.'
+              ) : (
+                <>
+                  Showing{' '}
+                  <span className="text-foreground-soft">
+                    {range_start}–{range_end}
+                  </span>
+                  {has_next
+                    ? ' · more on the next page'
+                    : page > 0
+                      ? ' · end of list'
+                      : null}
+                </>
+              )
+            }
+          >
+            <Pagination
+              page={page + 1}
+              has_prev={page > 0 && !releases.isLoading && !releases.isError}
+              has_next={
+                has_next && !releases.isLoading && !releases.isError
+              }
+              loading={releases.isFetching}
+              on_prev={() => set_page((p) => Math.max(0, p - 1))}
+              on_next={() => set_page((p) => p + 1)}
+              with_top_border={false}
+            />
+          </PublicationFeedFooter>
+        }
       >
-        <Info
-          className="mt-0.5 size-4 shrink-0 text-muted-foreground"
-          strokeWidth={1.85}
-          aria-hidden
-        />
-        <p className="min-w-0 flex-1 text-[13px] leading-relaxed text-foreground-soft">
-          The publisher is fully anonymous: no profile or display name, only this public address. Use Copy or Explorer to see the same entries on the blockchain and confirm them yourself.
-        </p>
-      </aside>
-
-      <section className="grid gap-2">
-        <ReleaseListHeader />
-        {releases.isLoading ? (
-          <ReleaseListSkeleton rows={6} />
-        ) : releases.isError ? (
+        {releases.isError ? (
           <ErrorView
             title="Couldn't load this publisher's publications"
             message={api_error_message(releases.error, "We can't reach the indexer right now. Try again in a moment.")}
+            back_to="/browse"
           />
         ) : list.length === 0 ? (
           <EmptyReleases />
         ) : (
-          <div className="divide-y divide-border">
+          <PublicationList>
             {list.map((r) => (
               <ReleaseRow key={r.id} release={r} />
             ))}
-          </div>
+          </PublicationList>
         )}
-        {!releases.isLoading && !releases.isError && list.length > 0 ? (
-          <Pagination
-            page={page + 1}
-            has_prev={page > 0}
-            has_next={has_next}
-            loading={releases.isFetching}
-            on_prev={() => set_page((p) => Math.max(0, p - 1))}
-            on_next={() => set_page((p) => p + 1)}
-          />
-        ) : null}
-      </section>
+      </PublicationFeedSection>
     </Container>
   );
 }
 
 function EmptyReleases() {
   return (
-    <div className="grid place-items-center gap-3 rounded-none border border-dashed border-border px-6 py-16 text-center">
+    <div className="grid place-items-center gap-4 rounded-none border border-dashed border-border bg-surface/30 px-6 py-14 text-center sm:py-16">
       <Library
         className="size-5 text-muted-foreground"
         strokeWidth={1.6}
         aria-hidden
       />
-      <p className="text-[14px] text-foreground">No publications yet.</p>
-      <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
-        This key is registered but has not signed a release we have indexed.
-      </p>
+      <div className="grid max-w-[42ch] gap-2">
+        <p className="text-[14px] font-medium text-foreground">
+          No publications yet
+        </p>
+        <p className="text-[12.5px] leading-[1.65] text-muted-foreground">
+          This key is registered but has not signed a release we have indexed.
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+        <Link
+          to="/browse"
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-none border border-border px-3 py-2 text-[12px] font-medium text-foreground-soft',
+            chip_pressable,
+            chip_focus,
+          )}
+        >
+          Browse registry
+        </Link>
+        <Link
+          to="/publish"
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-none border border-border-strong bg-foreground px-3 py-2 text-[12px] font-medium text-background transition-[color,background-color,border-color,transform] duration-200 ease-out hover:bg-foreground/90 active:translate-y-px dark:border-transparent',
+            chip_focus,
+          )}
+        >
+          Publish a release
+        </Link>
+      </div>
     </div>
   );
 }
@@ -187,7 +247,9 @@ function CopyChip({ value, label }: { value: string; label: string }) {
           .catch(() => set_copied(false));
       }}
       className={cn(
-        'inline-flex cursor-pointer items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground disabled:cursor-not-allowed',
+        'inline-flex cursor-pointer items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] font-medium text-foreground-soft disabled:cursor-not-allowed',
+        chip_pressable,
+        copied && 'border-border-strong bg-surface/80 text-foreground',
         chip_focus,
       )}
     >

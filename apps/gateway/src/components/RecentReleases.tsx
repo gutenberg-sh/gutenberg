@@ -1,15 +1,28 @@
 import { ArrowUpRight } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { format_relative_time, shorten } from '@/lib/format';
-import { useFeed, type ReleaseDto } from '@/lib/queries';
+import { Pagination } from '@/components/Pagination';
+import {
+  PublicationFeedFooter,
+  PublicationFeedSection,
+} from '@/components/PublicationFeedSection';
+import { PublicationList, ReleaseRow } from '@/components/ReleaseRow';
+import { useFeed } from '@/lib/queries';
 
 export function RecentReleases({ limit = 8 }: { limit?: number }) {
-  const feed = useFeed({ limit, includes: 'publisher,name' });
+  const [page, set_page] = useState(0);
+  const offset = page * limit;
+  const feed = useFeed({ limit, offset, includes: 'publisher,name' });
 
   if (feed.isError) {
     return null;
   }
+
+  const releases = feed.data ?? [];
+  const has_next = releases.length === limit;
+  const range_start = offset + 1;
+  const range_end = offset + releases.length;
 
   return (
     <section
@@ -34,93 +47,61 @@ export function RecentReleases({ limit = 8 }: { limit?: number }) {
         </Link>
       </header>
 
-      {feed.isLoading ? (
-        <Skeleton rows={limit} />
-      ) : (feed.data?.length ?? 0) === 0 ? (
-        <Empty />
-      ) : (
-        <ol className="grid divide-y divide-border border-y border-border">
-          {(feed.data ?? []).map((release) => (
-            <li key={release.id}>
-              <CompactRow release={release} />
-            </li>
-          ))}
-        </ol>
-      )}
-    </section>
-  );
-}
-
-function CompactRow({ release }: { release: ReleaseDto }) {
-  const name = release.name?.name ?? release.name_id;
-  const publisher = release.publisher?.address ?? release.publisher_id;
-  const target = `/publication/${encodeURIComponent(name)}/${encodeURIComponent(release.version)}`;
-
-  return (
-    <Link
-      to={target}
-      className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-1 px-1 py-4 transition-colors hover:bg-surface/40 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto]"
-    >
-      <div className="grid min-w-0 gap-1">
-        <div className="flex min-w-0 items-baseline gap-2.5">
-          <span className="truncate text-[15px] font-medium text-foreground group-hover:underline">
-            {name}
-          </span>
-          <span className="font-mono text-[12px] tabular text-foreground-soft">
-            {release.version}
-          </span>
-        </div>
-        <span className="font-mono text-[11px] tabular text-muted-foreground">
-          by{' '}
-          <Link
-            to={`/p/${encodeURIComponent(publisher)}`}
-            onClick={(e) => e.stopPropagation()}
-            className="text-foreground-soft hover:text-foreground hover:underline"
-            title={publisher}
+      <PublicationFeedSection
+        aria-label="Recently published releases"
+        loading={feed.isLoading}
+        skeleton_rows={limit}
+        footer={
+          <PublicationFeedFooter
+            summary={
+              feed.isLoading ? (
+                'Loading publications…'
+              ) : releases.length === 0 ? (
+                'No publications on this page.'
+              ) : (
+                <>
+                  Showing{' '}
+                  <span className="text-foreground-soft">{range_start}</span>
+                  –
+                  <span className="text-foreground-soft">{range_end}</span>
+                  {has_next
+                    ? ' · more on the next page'
+                    : page > 0
+                      ? ' · end of list'
+                      : null}
+                </>
+              )
+            }
           >
-            {shorten(publisher, 4, 4)}
-          </Link>
-        </span>
-      </div>
-      <span className="hidden text-[12px] text-muted-foreground sm:inline">
-        {format_relative_time(release.published_at)}
-      </span>
-      <ArrowUpRight
-        className="size-3.5 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
-        strokeWidth={1.85}
-        aria-hidden
-      />
-    </Link>
-  );
-}
-
-function Skeleton({ rows }: { rows: number }) {
-  return (
-    <ol
-      aria-busy
-      aria-live="polite"
-      className="grid divide-y divide-border border-y border-border"
-    >
-      {Array.from({ length: rows }).map((_, idx) => (
-        <li
-          key={idx}
-          className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto] items-center gap-x-6 px-1 py-4"
-        >
-          <div className="grid gap-1.5">
-            <div className="h-3.5 w-1/2 max-w-[14rem] animate-pulse rounded-none bg-muted" />
-            <div className="h-3 w-1/3 max-w-[10rem] animate-pulse rounded-none bg-muted/70" />
-          </div>
-          <div className="h-3 w-20 animate-pulse rounded-none bg-muted/70" />
-          <div className="h-3 w-3 animate-pulse rounded-none bg-muted/70" />
-        </li>
-      ))}
-    </ol>
+            <Pagination
+              page={page + 1}
+              has_prev={page > 0 && !feed.isLoading}
+              has_next={has_next && !feed.isLoading}
+              loading={feed.isFetching}
+              on_prev={() => set_page((p) => Math.max(0, p - 1))}
+              on_next={() => set_page((p) => p + 1)}
+              with_top_border={false}
+            />
+          </PublicationFeedFooter>
+        }
+      >
+        {feed.isLoading ? null : releases.length === 0 ? (
+          <Empty />
+        ) : (
+          <PublicationList>
+            {releases.map((release) => (
+              <ReleaseRow key={release.id} release={release} />
+            ))}
+          </PublicationList>
+        )}
+      </PublicationFeedSection>
+    </section>
   );
 }
 
 function Empty() {
   return (
-    <p className="border-y border-dashed border-border px-1 py-8 text-center text-[12.5px] text-muted-foreground">
+    <p className="rounded-none border border-dashed border-border px-6 py-8 text-center text-[12.5px] text-muted-foreground">
       Nothing has been published yet. The first one is up for grabs.
     </p>
   );

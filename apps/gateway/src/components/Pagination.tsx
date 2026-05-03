@@ -2,6 +2,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
+const page_btn_focus =
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
+
 export function Pagination({
   page,
   has_prev,
@@ -9,6 +12,8 @@ export function Pagination({
   loading,
   on_prev,
   on_next,
+  with_top_border = true,
+  className,
 }: {
   page: number;
   has_prev: boolean;
@@ -16,15 +21,18 @@ export function Pagination({
   loading?: boolean;
   on_prev: () => void;
   on_next: () => void;
+  /** When false, omit top rule (parent already separated the list). */
+  with_top_border?: boolean;
+  className?: string;
 }) {
-  if (!has_prev && !has_next && !loading) {
-    return null;
-  }
-
   return (
     <nav
       aria-label="Pagination"
-      className="flex items-center justify-between gap-3 border-t border-border pt-5 text-[12px]"
+      className={cn(
+        'flex items-center justify-between gap-3 text-[12px]',
+        with_top_border ? 'border-t border-border pt-5' : 'pt-0',
+        className,
+      )}
     >
       <p className="font-mono tabular text-muted-foreground">
         Page <span className="text-foreground">{page}</span>
@@ -62,10 +70,11 @@ function PageButton({
       onClick={on_click}
       disabled={disabled}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] font-medium text-foreground-soft transition-colors',
+        'inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] font-medium text-foreground-soft transition-[color,border-color,background-color,transform] duration-200 ease-out',
+        page_btn_focus,
         disabled
           ? 'cursor-not-allowed opacity-40'
-          : 'hover:border-border-strong hover:text-foreground active:translate-y-px',
+          : 'hover:border-border-strong hover:bg-surface/50 hover:text-foreground active:translate-y-px',
       )}
     >
       {children}

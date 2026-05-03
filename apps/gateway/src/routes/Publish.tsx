@@ -17,6 +17,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { ErrorView } from '@/components/ErrorView';
 import { Container } from '@/components/Layout';
+import { PublisherAddressLink } from '@/components/PublisherAddressLink';
 import { Button } from '@/components/ui/button';
 import { env } from '@/env';
 import { format_bytes, shorten } from '@/lib/format';
@@ -796,14 +797,14 @@ function Success({
           <dt className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
             Publisher
           </dt>
-          <dd className="truncate font-mono text-[12px] tabular text-foreground">
-            <Link
-              to={`/p/${encodeURIComponent(result.publisher)}`}
-              className="hover:underline"
-              title={result.publisher}
+          <dd className="min-w-0 font-mono text-[12px] tabular text-foreground">
+            <PublisherAddressLink
+              address={result.publisher}
+              avatarSize={22}
+              className="max-w-full hover:underline"
             >
-              {shorten(result.publisher, 10, 8)}
-            </Link>
+              <span className="min-w-0 truncate">{shorten(result.publisher, 10, 8)}</span>
+            </PublisherAddressLink>
           </dd>
         </div>
         <Receipt label="Publication" value={result.release_address} />

@@ -1,15 +1,19 @@
-import { ArrowUpRight, Search as SearchIcon, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Search as SearchIcon, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { ErrorView } from '@/components/ErrorView';
 import { Container } from '@/components/Layout';
 import { Pagination } from '@/components/Pagination';
+import {
+  PublicationFeedFooter,
+  PublicationFeedSection,
+  SearchPublicationRow,
+} from '@/components/PublicationFeedSection';
+import { PublicationList } from '@/components/ReleaseRow';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { api_error_message } from '@/lib/api';
-import { format_relative_time, shorten } from '@/lib/format';
-import { useNameSearch, type NameDto } from '@/lib/queries';
-import { cn } from '@/lib/utils';
+import { useNameSearch } from '@/lib/queries';
 
 const PAGE_SIZE = 20;
 
@@ -82,54 +86,66 @@ export function SearchRoute() {
       <div className="grid gap-6">
         <SearchInput value={query} on_change={set_query} />
 
-        {trimmed && !search.isError && !search.isLoading ? (
-          <p className="text-[12.5px] text-muted-foreground">
-            {results.length === 0 ? (
-              <>No hits on this page.</>
+        {!trimmed ? (
+          <EmptyQuery />
+        ) : (
+          <PublicationFeedSection
+            aria-label="Search results"
+            loading={search.isLoading}
+            skeleton_rows={5}
+            footer={
+              <PublicationFeedFooter
+                summary={
+                  search.isLoading ? (
+                    'Searching…'
+                  ) : search.isError ? (
+                    "Search isn't responding."
+                  ) : results.length === 0 ? (
+                    'No hits on this page.'
+                  ) : (
+                    <>
+                      Showing{' '}
+                      <span className="text-foreground-soft">
+                        {showing_range_start}
+                      </span>
+                      –
+                      <span className="text-foreground-soft">
+                        {showing_range_end}
+                      </span>{' '}
+                      for{' '}
+                      <span className="text-foreground">{trimmed}</span>
+                    </>
+                  )
+                }
+              >
+                <Pagination
+                  page={page + 1}
+                  has_prev={page > 0 && !search.isLoading && !search.isError}
+                  has_next={has_next && !search.isLoading && !search.isError}
+                  loading={search.isFetching}
+                  on_prev={() => set_page((p) => Math.max(0, p - 1))}
+                  on_next={() => set_page((p) => p + 1)}
+                  with_top_border={false}
+                />
+              </PublicationFeedFooter>
+            }
+          >
+            {search.isError ? (
+              <ErrorView
+                title="Search isn't responding"
+                message={api_error_message(search.error, "We can't reach the indexer right now. Try again in a moment.")}
+              />
+            ) : results.length === 0 ? (
+              <NoResults q={trimmed} />
             ) : (
-              <>
-                Showing{' '}
-                <span className="font-mono tabular text-foreground-soft">
-                  {showing_range_start}
-                </span>
-                –
-                <span className="font-mono tabular text-foreground-soft">
-                  {showing_range_end}
-                </span>{' '}
-                for{' '}
-                <span className="font-mono tabular text-foreground">{trimmed}</span>
-              </>
+              <PublicationList>
+                {results.map((item) => (
+                  <SearchPublicationRow key={item.id} item={item} />
+                ))}
+              </PublicationList>
             )}
-          </p>
-        ) : null}
-
-        <section className="grid gap-3">
-          {!trimmed ? (
-            <EmptyQuery />
-          ) : search.isLoading ? (
-            <ResultsSkeleton />
-          ) : search.isError ? (
-            <ErrorView
-              title="Search isn't responding"
-              message={api_error_message(search.error, "We can't reach the indexer right now. Try again in a moment.")}
-            />
-          ) : results.length === 0 ? (
-            <NoResults q={trimmed} />
-          ) : (
-            <ResultsList results={results} />
-          )}
-
-          {trimmed && !search.isError ? (
-            <Pagination
-              page={page + 1}
-              has_prev={page > 0}
-              has_next={has_next}
-              loading={search.isFetching}
-              on_prev={() => set_page((p) => Math.max(0, p - 1))}
-              on_next={() => set_page((p) => p + 1)}
-            />
-          ) : null}
-        </section>
+          </PublicationFeedSection>
+        )}
       </div>
     </Container>
   );
@@ -179,107 +195,6 @@ function SearchInput({
           </button>
         ) : null}
       </div>
-    </div>
-  );
-}
-
-function ResultsList({ results }: { results: NameDto[] }) {
-  return (
-    <div className="divide-y divide-border border-y border-border">
-      {results.map((item) => (
-        <SearchResultRow key={item.id} item={item} />
-      ))}
-    </div>
-  );
-}
-
-function SearchResultRow({ item }: { item: NameDto }) {
-  const navigate = useNavigate();
-  const publisher_address = item.publisher?.address;
-  const releases = useMemo(
-    () =>
-      [...(item.releases ?? [])].sort((a, b) =>
-        a.published_at < b.published_at ? 1 : -1,
-      ),
-    [item.releases],
-  );
-  const latest = releases[0];
-
-  return (
-    <article
-      className={cn(
-        'group grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-2 py-5 transition-colors hover:bg-surface/40',
-      )}
-      onClick={() =>
-        void navigate(`/publication/${encodeURIComponent(item.name)}`)
-      }
-    >
-      <div className="grid min-w-0 gap-1.5 px-1 sm:px-2">
-        <div className="flex min-w-0 items-baseline gap-2">
-          <h3 className="truncate text-[16px] font-medium tracking-[-0.005em] text-foreground group-hover:underline">
-            {item.name}
-          </h3>
-          {latest ? (
-            <span className="font-mono text-[12px] tabular text-foreground-soft">
-              {latest.version}
-            </span>
-          ) : null}
-        </div>
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-muted-foreground">
-          {publisher_address ? (
-            <Link
-              to={`/p/${encodeURIComponent(publisher_address)}`}
-              onClick={(e) => e.stopPropagation()}
-              className="font-mono tabular text-foreground-soft hover:text-foreground hover:underline"
-              title={publisher_address}
-            >
-              {shorten(publisher_address, 4, 4)}
-            </Link>
-          ) : (
-            <span className="font-mono tabular text-muted-foreground">—</span>
-          )}
-          {latest ? (
-            <>
-              <Dot />
-              <span>{format_relative_time(latest.published_at)}</span>
-            </>
-          ) : null}
-          <Dot />
-          <span>
-            {releases.length} publication{releases.length === 1 ? '' : 's'}
-          </span>
-        </div>
-      </div>
-      <ArrowUpRight
-        className="size-4 text-muted-foreground transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
-        strokeWidth={1.75}
-        aria-hidden
-      />
-    </article>
-  );
-}
-
-function Dot() {
-  return (
-    <span aria-hidden className="text-muted-foreground/50">
-      ·
-    </span>
-  );
-}
-
-function ResultsSkeleton() {
-  return (
-    <div
-      aria-busy
-      aria-live="polite"
-      className="divide-y divide-border border-y border-border"
-    >
-      {Array.from({ length: 5 }).map((_, idx) => (
-        <div key={idx} className="grid gap-2 py-5 px-2">
-          <div className="h-4 w-2/5 max-w-[14rem] animate-pulse rounded-none bg-muted" />
-          <div className="h-3 w-1/3 max-w-[10rem] animate-pulse rounded-none bg-muted/70" />
-        </div>
-      ))}
     </div>
   );
 }

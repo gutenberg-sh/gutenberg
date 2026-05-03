@@ -26,20 +26,22 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
   ].filter((v): v is string => Boolean(v));
 
   return (
-    <section aria-label="Publication" className="grid gap-5">
-      <IdentityStrip published_at={manifest.published_at} />
+    <header aria-label="Publication" className="grid gap-3">
+      <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+        Publication
+      </p>
 
       <div className="grid gap-4">
-        <h1 className="text-balance font-semibold tracking-[-0.02em] text-foreground">
+        <h1 className="text-balance text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
           <Link
             to={`/publication/${encodeURIComponent(manifest.name)}`}
-            className="text-[1.625rem] leading-[1.16] hover:underline sm:text-[2rem] lg:text-[2.35rem]"
+            className="hover:underline"
             title="Open the latest version"
           >
             {manifest.name}
           </Link>
-          <span className="ml-2.5 inline-flex align-middle">
-            <span className="rounded-none border border-border-strong bg-surface px-2 py-0.5 font-mono text-[0.72em] font-normal tabular text-foreground sm:text-[0.76em]">
+          <span className="ml-2.5 inline-flex translate-y-[-0.03em] align-middle">
+            <span className="rounded-none border border-border-strong bg-surface px-2.5 py-1 font-mono text-[14px] font-normal tabular leading-none text-foreground sm:text-[15px]">
               {manifest.version}
             </span>
           </span>
@@ -53,6 +55,8 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
           </Link>
         </h1>
       </div>
+
+      <IdentityStrip published_at={manifest.published_at} />
 
       {sub_meta.length > 0 ? (
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-foreground-soft">
@@ -77,7 +81,7 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
           ))}
         </div>
       ) : null}
-    </section>
+    </header>
   );
 }
 
@@ -177,30 +181,27 @@ export function ProvenancePanel({
       id="provenance"
       aria-labelledby="provenance-heading"
       className={cn(
-        'scroll-mt-8 border-t border-border pt-8 lg:pt-10',
+        'scroll-mt-8 border-t border-border pt-6 lg:pt-8',
         className,
       )}
     >
-      <div className="grid gap-8 lg:gap-10">
-        <header className="grid max-w-[72ch] gap-2">
+      <div className="grid w-full gap-4">
+        <header className="grid w-full max-w-[65ch] gap-1.5 text-left">
           <h2
             id="provenance-heading"
             className="text-[0.95rem] font-semibold leading-tight tracking-[-0.02em] text-foreground"
           >
             Provenance
           </h2>
-          <p className="text-pretty text-[12.5px] leading-relaxed text-muted-foreground">
-            Registry fields, hashes, and signatures for this release. Copy values
-            or follow links to the explorer.
+          <p className="text-[11.5px] leading-[1.45] text-muted-foreground">
+            On-chain accounts, hashes, and signatures. Copy a value or open it
+            in the explorer.
           </p>
         </header>
 
-        <div className="rounded-none border border-border/90 bg-surface/45 p-5 shadow-[inset_0_1px_0_oklch(1_0_0/5%)] sm:p-6 dark:bg-surface/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/6%)]">
-          <div className="grid gap-10 sm:gap-12">
-            <ProofGroup
-              title="Registry"
-              caption="Account and program on Solana"
-            >
+        <div className="rounded-none border border-border/90 bg-surface/45 p-3 shadow-[inset_0_1px_0_oklch(1_0_0/5%)] sm:p-4 lg:p-5 dark:bg-surface/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/6%)]">
+          <div className="grid w-full gap-5">
+            <ProofGroup title="Registry" caption="Solana accounts" className="min-w-0">
               <ProofRow
                 label="Publication"
                 display={shorten(release.release_address, 6, 6)}
@@ -224,7 +225,8 @@ export function ProvenancePanel({
 
             <ProofGroup
               title="Content & signature"
-              caption="Payload hash and author signature on the manifest"
+              caption="Payload hash and author signature"
+              className="min-w-0 border-t border-border/45 pt-5"
             >
               <ProofRow
                 label="Content hash"
@@ -242,7 +244,8 @@ export function ProvenancePanel({
 
             <ProofGroup
               title="Manifest"
-              caption="The signed index for this release"
+              caption="Signed index and fetch locations"
+              className="min-w-0 border-t border-border/45 pt-5"
             >
               <ProofRow
                 label="Manifest hash"
@@ -260,6 +263,7 @@ export function ProvenancePanel({
                 label="Mirrors"
                 aside={
                   <GatewayLinks
+                    variant="plain"
                     uri={release.manifest_uri}
                     irys_gateway={env.VITE_GUTENBERG_IRYS_GATEWAY}
                     arweave_mirrors={env.VITE_GUTENBERG_ARWEAVE_MIRRORS}
@@ -286,16 +290,16 @@ function ProofGroup({
   className?: string;
 }) {
   return (
-    <div className={cn('grid gap-4', className)}>
-      <div className="grid gap-1 border-b border-border/60 pb-3">
-        <h3 className="text-[13px] font-semibold leading-snug tracking-[-0.01em] text-foreground">
+    <div className={cn('grid gap-2', className)}>
+      <div className="grid gap-0.5 border-b border-border/50 pb-2">
+        <h3 className="text-left text-[12px] font-semibold leading-tight tracking-[-0.01em] text-foreground">
           {title}
         </h3>
-        <p className="max-w-[62ch] text-[11.5px] leading-relaxed text-muted-foreground">
+        <p className="text-left text-[10.5px] leading-[1.45] text-muted-foreground">
           {caption}
         </p>
       </div>
-      <dl className="grid gap-0">{children}</dl>
+      <dl className="divide-y divide-border/45">{children}</dl>
     </div>
   );
 }
@@ -322,14 +326,16 @@ function ProofRow({
   );
 
   return (
-    <div className="border-b border-border/40 py-3.5 last:border-b-0 last:pb-0">
-      <dt className="text-[11px] font-medium text-muted-foreground">{label}</dt>
-      <dd className="m-0 mt-2 min-w-0">
+    <div className="grid gap-1 py-2 first:pt-0.5 sm:grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)] sm:items-start sm:gap-x-4 sm:gap-y-0 sm:py-1.5 lg:grid-cols-[minmax(0,10.5rem)_minmax(0,1fr)]">
+      <dt className="text-[11px] font-medium leading-snug text-muted-foreground sm:pt-0.5">
+        {label}
+      </dt>
+      <dd className="m-0 min-w-0">
         {display !== undefined ? (
-          <div className="flex w-full items-start justify-between gap-3">
+          <div className="flex w-full items-start justify-between gap-2">
             <span
-              title={value && display !== value ? value : undefined}
-              className="min-w-0 flex-1 break-all font-mono text-[12px] leading-snug tabular text-foreground"
+              title={value ?? display}
+              className="min-w-0 flex-1 truncate font-mono text-[11.5px] leading-snug tabular text-foreground sm:text-[12px]"
             >
               {display}
             </span>
@@ -349,7 +355,7 @@ function ProofRow({
           <div
             className={cn(
               'flex w-full min-w-0 flex-wrap items-start gap-2',
-              display !== undefined && 'mt-3',
+              display !== undefined && 'mt-2',
             )}
           >
             {icon}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { FileCode2, Fingerprint, GitBranch } from 'lucide-react';
+import { FileCode2, GitBranch } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { AssetView } from '@/components/AssetView';
@@ -7,6 +7,7 @@ import { ErrorView } from '@/components/ErrorView';
 import { FileNav } from '@/components/FileNav';
 import { GatewayLinks } from '@/components/GatewayLinks';
 import { Container } from '@/components/Layout';
+import { PublisherAddressLink } from '@/components/PublisherAddressLink';
 import { MarkdownContent } from '@/components/MarkdownContent';
 import { ProvenancePanel, ReleaseHeader } from '@/components/ReleaseHeader';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -38,7 +39,7 @@ export function VerifiedReleaseView({
 
   if (state.status === 'loading') {
     return (
-      <Container className="grid gap-8 pb-20 pt-8 lg:gap-10 lg:pb-28 lg:pt-10">
+      <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
         <ReleaseHeaderSkeleton />
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_18.5rem] xl:gap-14">
           <div className="min-w-0">
@@ -56,7 +57,7 @@ export function VerifiedReleaseView({
 
   if (state.status === 'error' || !state.result) {
     return (
-      <Container className="grid gap-8 pb-20 pt-8 lg:gap-10 lg:pb-28 lg:pt-10">
+      <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
         <VerifyStatus steps={state.steps} />
         <div>
           <ErrorView
@@ -88,42 +89,43 @@ export function VerifiedReleaseView({
 
 function ProvenancePanelSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn('border-t border-border pt-8 lg:pt-10', className)}>
-      <div className="grid gap-8 lg:gap-10">
-        <header className="grid max-w-[72ch] gap-2">
+    <div className={cn('border-t border-border pt-6 lg:pt-8', className)}>
+      <div className="grid w-full gap-4">
+        <header className="grid w-full max-w-[65ch] gap-1.5 text-left">
           <Skeleton className="h-[0.95rem] w-28 rounded-none" />
-          <div className="grid gap-1.5">
-            <Skeleton className="h-3.5 w-full max-w-lg rounded-none" />
-            <Skeleton className="h-3.5 w-full max-w-md rounded-none" />
-          </div>
+          <Skeleton className="h-3 w-full max-w-sm rounded-none" />
         </header>
-        <div className="rounded-none border border-border/90 bg-surface/45 p-5 shadow-[inset_0_1px_0_oklch(1_0_0/5%)] sm:p-6 dark:bg-surface/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/6%)]">
-          <div className="grid gap-10 sm:gap-12">
-            <div className="grid gap-4">
-              <div className="grid gap-1 border-b border-border/60 pb-3">
-                <Skeleton className="h-[13px] w-24 rounded-none" />
-                <Skeleton className="h-3 w-full max-w-md rounded-none" />
+        <div className="rounded-none border border-border/90 bg-surface/45 p-3 shadow-[inset_0_1px_0_oklch(1_0_0/5%)] sm:p-4 lg:p-5 dark:bg-surface/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/6%)]">
+          <div className="grid w-full gap-5">
+            <div className="grid min-w-0 gap-2">
+              <div className="grid gap-1 border-b border-border/50 pb-2">
+                <Skeleton className="h-3 w-20 rounded-none" />
+                <Skeleton className="h-2.5 w-32 rounded-none" />
               </div>
-              <Skeleton className="h-16 w-full rounded-none" />
-              <Skeleton className="h-16 w-full rounded-none border-t border-border/40 pt-3" />
-              <Skeleton className="h-14 w-full rounded-none border-t border-border/40 pt-3" />
+              <Skeleton className="h-9 w-full rounded-none" />
+              <Skeleton className="h-9 w-full rounded-none" />
+              <Skeleton className="h-9 w-full rounded-none" />
             </div>
-            <div className="grid gap-4">
-              <div className="grid gap-1 border-b border-border/60 pb-3">
-                <Skeleton className="h-[13px] w-40 rounded-none" />
-                <Skeleton className="h-3 w-full max-w-lg rounded-none" />
+            <div className="grid min-w-0 gap-2 border-t border-border/45 pt-5">
+              <div className="grid gap-1 border-b border-border/50 pb-2">
+                <Skeleton className="h-3 w-36 rounded-none" />
+                <Skeleton className="h-2.5 w-44 rounded-none" />
               </div>
-              <Skeleton className="h-16 w-full rounded-none" />
-              <Skeleton className="h-16 w-full rounded-none border-t border-border/40 pt-3" />
+              <Skeleton className="h-9 w-full rounded-none" />
+              <Skeleton className="h-9 w-full rounded-none" />
             </div>
-            <div className="grid gap-4">
-              <div className="grid gap-1 border-b border-border/60 pb-3">
-                <Skeleton className="h-[13px] w-28 rounded-none" />
-                <Skeleton className="h-3 w-full max-w-md rounded-none" />
+            <div className="grid min-w-0 gap-2 border-t border-border/45 pt-5">
+              <div className="grid gap-1 border-b border-border/50 pb-2">
+                <Skeleton className="h-3 w-20 rounded-none" />
+                <Skeleton className="h-2.5 w-48 rounded-none" />
               </div>
-              <Skeleton className="h-16 w-full rounded-none" />
-              <Skeleton className="h-16 w-full rounded-none border-t border-border/40 pt-3" />
-              <Skeleton className="h-20 w-full rounded-none border-t border-border/40 pt-3" />
+              <Skeleton className="h-9 w-full rounded-none" />
+              <Skeleton className="h-9 w-full rounded-none" />
+              <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-border/40 pt-2">
+                <Skeleton className="h-3 w-28 rounded-none" />
+                <Skeleton className="h-3 w-32 rounded-none" />
+                <Skeleton className="h-3 w-32 rounded-none" />
+              </div>
             </div>
           </div>
         </div>
@@ -134,18 +136,20 @@ function ProvenancePanelSkeleton({ className }: { className?: string }) {
 
 function ReleaseHeaderSkeleton() {
   return (
-    <section className="grid gap-5" aria-hidden>
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-3">
-        <Skeleton className="h-[30px] w-19 rounded-none" />
-        <Skeleton className="h-[30px] w-26 rounded-none" />
-      </div>
+    <header className="grid gap-3" aria-hidden>
+      <Skeleton className="h-3 w-24 rounded-none" />
 
       <div className="grid gap-4">
         <div className="flex min-h-13 flex-wrap items-baseline gap-x-2.5 gap-y-2 sm:min-h-[3.85rem] lg:min-h-[4.35rem]">
-          <Skeleton className="h-9 w-full max-w-[min(100%,22rem)] rounded-none sm:h-10 lg:h-11 lg:max-w-[min(100%,28rem)]" />
-          <Skeleton className="h-7 w-14 rounded-none sm:h-8 sm:w-16" />
+          <Skeleton className="h-9 w-full max-w-[min(100%,22rem)] rounded-none sm:h-11 sm:max-w-[min(100%,28rem)]" />
+          <Skeleton className="h-7 w-16 rounded-none sm:h-7 sm:w-[4.5rem]" />
           <Skeleton className="h-3 w-18 rounded-none sm:ml-1" />
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-3">
+        <Skeleton className="h-[30px] w-19 rounded-none" />
+        <Skeleton className="h-[30px] w-26 rounded-none" />
       </div>
 
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -153,7 +157,7 @@ function ReleaseHeaderSkeleton() {
         <Skeleton className="h-[13px] w-22 rounded-none" />
         <Skeleton className="h-[13px] w-24 rounded-none" />
       </div>
-    </section>
+    </header>
   );
 }
 
@@ -269,7 +273,7 @@ function VerifiedReleaseRendered({
   }
 
   return (
-    <Container className="grid gap-8 pb-20 pt-8 lg:gap-10 lg:pb-28 lg:pt-10">
+    <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
       <ReleaseHeader release={release} />
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_18.5rem] xl:gap-14">
@@ -326,14 +330,13 @@ function PublicationAside({
             Publisher
           </dt>
           <dd>
-            <Link
-              to={`/p/${encodeURIComponent(publisher)}`}
-              className="inline-flex items-center gap-1.5 font-mono text-[12.5px] tabular text-foreground underline-offset-4 hover:underline"
-              title={publisher}
+            <PublisherAddressLink
+              address={publisher}
+              avatarSize={26}
+              className="font-mono text-[12.5px] tabular text-foreground underline-offset-4 hover:underline"
             >
-              <Fingerprint className="size-3.5 text-muted-foreground" strokeWidth={1.75} aria-hidden />
               {shorten(publisher, 6, 6)}
-            </Link>
+            </PublisherAddressLink>
           </dd>
         </div>
 

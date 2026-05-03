@@ -34,13 +34,13 @@ function mix_hex(a: string, b: string, t: number): string {
   );
 }
 
-/** Near-black violet (no neutral black). */
-const AVATAR_PURPLE_DARK = '#140826';
-/** Near-white lilac (no neutral white). */
-const AVATAR_PURPLE_LIGHT = '#ede9fe';
+/** Deep purple (shadow end of the ramp). */
+const AVATAR_PURPLE_DARK = '#581c87';
+/** Soft lilac (highlight end of the ramp). */
+const AVATAR_PURPLE_LIGHT = '#e9d5ff';
 
 /**
- * Five colors for boring-avatars marble: purple-only ramp from deep violet to soft lilac.
+ * Five colors for boring-avatars: purple-only ramp from deep violet to soft lilac.
  * Mid tones follow `--primary` at runtime (expected purple family).
  */
 export function publisher_avatar_palette(primary_hex: string): string[] {
@@ -48,8 +48,8 @@ export function publisher_avatar_palette(primary_hex: string): string[] {
   if (!p) {
     return [
       AVATAR_PURPLE_DARK,
-      '#3d1d6e',
-      '#5b21b6',
+      '#6b21a8',
+      '#7c3aed',
       '#c4b5fd',
       AVATAR_PURPLE_LIGHT,
     ];

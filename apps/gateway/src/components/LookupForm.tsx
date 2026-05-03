@@ -8,8 +8,9 @@ import {
   type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
+import { PublisherAddressLink } from '@/components/PublisherAddressLink';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { format_relative_time, shorten } from '@/lib/format';
 import { useNameSearch, type NameDto } from '@/lib/queries';
@@ -397,14 +398,14 @@ function SuggestionItem({
         </div>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
           {publisher_address ? (
-            <Link
-              to={`/p/${encodeURIComponent(publisher_address)}`}
+            <PublisherAddressLink
+              address={publisher_address}
+              avatarSize={18}
               onClick={(e) => e.stopPropagation()}
               className="font-mono tabular text-foreground-soft hover:text-foreground hover:underline"
-              title={publisher_address}
             >
               {shorten(publisher_address, 4, 4)}
-            </Link>
+            </PublisherAddressLink>
           ) : (
             <span className="font-mono tabular text-muted-foreground">—</span>
           )}

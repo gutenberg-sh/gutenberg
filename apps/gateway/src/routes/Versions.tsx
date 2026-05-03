@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import { ErrorView } from '@/components/ErrorView';
 import { Container } from '@/components/Layout';
+import { PublisherAddressLink } from '@/components/PublisherAddressLink';
 import { api_error_message } from '@/lib/api';
 import { format_bytes, format_relative_time, shorten } from '@/lib/format';
 import { useNameVersions, type ReleaseDto } from '@/lib/queries';
@@ -83,8 +84,7 @@ function Timeline({ name, versions }: { name: string; versions: ReleaseDto[] }) 
       />
       {versions.map((release, idx) => {
         const is_latest = idx === 0;
-        const publisher =
-          release.publisher?.address ?? release.publisher_id;
+        const publisher_address = release.publisher?.address;
         return (
           <li key={release.id} className="relative grid pl-7">
             <span
@@ -117,14 +117,19 @@ function Timeline({ name, versions }: { name: string; versions: ReleaseDto[] }) 
                   <span aria-hidden className="text-muted-foreground/50">·</span>
                   <span>{format_bytes(release.content_size_bytes)}</span>
                   <span aria-hidden className="text-muted-foreground/50">·</span>
-                  <Link
-                    to={`/p/${encodeURIComponent(publisher)}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="font-mono tabular text-foreground-soft hover:text-foreground hover:underline"
-                    title={publisher}
-                  >
-                    {shorten(publisher, 6, 6)}
-                  </Link>
+                  {publisher_address ? (
+                    <PublisherAddressLink
+                      address={publisher_address}
+                      onClick={(e) => e.stopPropagation()}
+                      className="font-mono tabular text-foreground-soft hover:text-foreground hover:underline"
+                    >
+                      {shorten(publisher_address, 6, 6)}
+                    </PublisherAddressLink>
+                  ) : (
+                    <span className="font-mono tabular text-muted-foreground">
+                      —
+                    </span>
+                  )}
                 </div>
               </div>
               <ArrowUpRight
