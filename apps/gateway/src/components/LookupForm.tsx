@@ -177,7 +177,7 @@ export function LookupForm({
       >
         <div
           className={cn(
-            'flex items-stretch overflow-hidden rounded-2xl border bg-card shadow-[0_1px_0_0_rgb(0_0_0/0.02)] transition-colors',
+            'flex items-stretch overflow-hidden rounded-none border-2 border-border bg-card transition-colors',
             has_error
               ? 'border-destructive/70'
               : focused
@@ -239,8 +239,8 @@ export function LookupForm({
             type="submit"
             aria-label={has_at ? 'Verify release' : 'Search'}
             className={cn(
-              'inline-flex shrink-0 items-center gap-1.5 bg-foreground font-medium text-background transition-colors hover:bg-foreground/92 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
-              lg ? 'mx-1.5 my-1.5 rounded-xl px-4 text-[13.5px]' : 'mx-1 my-1 rounded-lg px-3 text-[12.5px]',
+              'inline-flex shrink-0 items-center gap-1.5 bg-primary font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+              lg ? 'mx-1.5 my-1.5 rounded-none px-4 text-[13.5px]' : 'mx-1 my-1 rounded-none px-3 text-[12.5px]',
             )}
           >
             <span className="inline-flex min-w-[4.25rem] justify-center">
@@ -287,7 +287,7 @@ export function LookupForm({
             {search.isLoading ? (
               <SuggestionSkeleton />
             ) : search.isError ? (
-              <div className="rounded-2xl border border-border bg-elevated px-4 py-3 text-[12px] text-muted-foreground shadow-lg">
+              <div className="rounded-none border-2 border-border bg-elevated px-4 py-3 text-[12px] text-muted-foreground">
                 Search is offline. You can still open a release by typing{' '}
                 <span className="font-mono tabular text-foreground">
                   name@version
@@ -295,7 +295,7 @@ export function LookupForm({
                 .
               </div>
             ) : empty_results ? (
-              <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-elevated px-4 py-3 text-[12.5px] text-muted-foreground shadow-lg">
+              <div className="flex items-center justify-between gap-3 rounded-none border-2 border-border bg-elevated px-4 py-3 text-[12.5px] text-muted-foreground">
                 <span>
                   Nothing matches{' '}
                   <span className="font-mono tabular text-foreground">
@@ -318,7 +318,7 @@ export function LookupForm({
                 id={list_id}
                 ref={list_ref}
                 role="listbox"
-                className="grid max-h-[min(70vh,340px)] divide-y divide-border overflow-y-auto overscroll-contain rounded-2xl border border-border bg-elevated shadow-lg"
+                className="grid max-h-[min(70vh,340px)] divide-y divide-border overflow-y-auto overscroll-contain rounded-none border-2 border-border bg-elevated"
               >
                 {suggestions.map((item, idx) => (
                   <SuggestionItem
@@ -425,12 +425,12 @@ function SuggestionSkeleton() {
   return (
     <ul
       aria-hidden
-      className="grid divide-y divide-border overflow-hidden rounded-2xl border border-border bg-elevated shadow-lg"
+      className="grid divide-y divide-border overflow-hidden rounded-none border-2 border-border bg-elevated"
     >
       {Array.from({ length: 3 }).map((_, idx) => (
         <li key={idx} className="grid gap-1.5 px-4 py-3">
-          <div className="h-3.5 w-1/2 max-w-[12rem] animate-pulse rounded-md bg-muted" />
-          <div className="h-3 w-1/3 max-w-[10rem] animate-pulse rounded-md bg-muted/70" />
+          <div className="h-3.5 w-1/2 max-w-[12rem] animate-pulse rounded-none bg-muted" />
+          <div className="h-3 w-1/3 max-w-[10rem] animate-pulse rounded-none bg-muted/70" />
         </li>
       ))}
     </ul>

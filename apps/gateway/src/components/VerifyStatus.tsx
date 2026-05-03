@@ -48,7 +48,7 @@ export function VerifyStatus({ steps }: { steps: readonly VerifyStep[] }) {
               key={step.id}
               aria-label={step.label}
               className={cn(
-                'h-1 rounded-full transition-colors duration-500',
+                'h-1 rounded-none transition-colors duration-500',
                 step.state === 'success' &&
                   (has_error ? 'bg-foreground/40' : 'bg-accent'),
                 step.state === 'running' &&
@@ -82,7 +82,7 @@ export function VerifyStatus({ steps }: { steps: readonly VerifyStep[] }) {
             <div className="grid min-w-0 gap-0.5">
               <span
                 className={cn(
-                  'leading-tight',
+                  'leading-snug',
                   step.state === 'pending' && 'text-muted-foreground',
                   step.state === 'error' && 'text-destructive',
                   step.state !== 'pending' &&
@@ -93,7 +93,7 @@ export function VerifyStatus({ steps }: { steps: readonly VerifyStep[] }) {
                 {step.label}
               </span>
               {step.detail ? (
-                <span className="break-all text-[11.5px] text-muted-foreground">
+                <span className="break-all text-[11.5px] leading-[1.55] text-muted-foreground">
                   {step.detail}
                 </span>
               ) : null}
@@ -110,7 +110,7 @@ function StatusIcon({ state }: { state: VerifyStepState }) {
     return (
       <span
         aria-hidden
-        className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-full border border-border bg-background"
+        className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-none border border-border bg-background"
       />
     );
   }
@@ -129,7 +129,7 @@ function StatusIcon({ state }: { state: VerifyStepState }) {
     return (
       <span
         aria-hidden
-        className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground"
+        className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-none bg-accent text-accent-foreground"
       >
         <Check className="size-3" strokeWidth={3} />
       </span>
@@ -139,7 +139,7 @@ function StatusIcon({ state }: { state: VerifyStepState }) {
   return (
     <span
       aria-hidden
-      className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-full bg-destructive text-destructive-foreground"
+      className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-none bg-destructive text-destructive-foreground"
     >
       <X className="size-3" strokeWidth={3} />
     </span>

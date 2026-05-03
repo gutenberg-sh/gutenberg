@@ -4,8 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#0a0b0e" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#fafbfc" media="(prefers-color-scheme: light)" />
+    <meta
+      name="theme-color"
+      content="#0a0a0a"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta
+      name="theme-color"
+      content="#f4f4f0"
+      media="(prefers-color-scheme: light)"
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Gutenberg — publish what can&rsquo;t be erased</title>
     <meta
@@ -15,7 +23,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:ital,opsz,wght@0,14..32,500..800;1,14..32,500..800&display=swap"
       rel="stylesheet"
     />
     <script>
@@ -23,10 +31,6 @@
         try {
           var root = document.documentElement;
           var saved = localStorage.getItem('gutenberg-theme');
-
-          // Only stamp an explicit class when the user has chosen a theme.
-          // Otherwise leave it unset so the CSS `prefers-color-scheme`
-          // media query reacts live to OS theme changes.
           if (saved === 'dark') {
             root.classList.add('dark');
             root.classList.remove('light');
@@ -37,21 +41,17 @@
             root.classList.remove('dark');
             root.classList.remove('light');
           }
-
-          // Belt-and-suspenders: some browsers don't repaint CSS variables
-          // immediately on OS-level theme flips. Nudge them by toggling a
-          // no-op attribute when the system preference changes (only while
-          // the user hasn't pinned a theme).
           var mql = window.matchMedia('(prefers-color-scheme: dark)');
-          var on_system_change = function () {
+          var onSystemChange = function () {
             if (localStorage.getItem('gutenberg-theme')) return;
             root.classList.remove('dark');
             root.classList.remove('light');
+            root.setAttribute('data-pref-refresh', String(Math.random()));
           };
           if (typeof mql.addEventListener === 'function') {
-            mql.addEventListener('change', on_system_change);
+            mql.addEventListener('change', onSystemChange);
           } else if (typeof mql.addListener === 'function') {
-            mql.addListener(on_system_change);
+            mql.addListener(onSystemChange);
           }
         } catch (e) {
           console.error(e);

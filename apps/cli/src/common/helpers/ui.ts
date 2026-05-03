@@ -24,13 +24,11 @@ const c = {
   green: paint(32, 39),
   yellow: paint(33, 39),
   blue: paint(34, 39),
-  magenta: paint(35, 39),
   cyan: paint(36, 39),
   gray: paint(90, 39),
 };
 
 const SYMBOLS = {
-  brand: '▲',
   info: '›',
   ok: '✓',
   warn: '⚠',
@@ -88,7 +86,7 @@ export const ui = {
 
   /** Branded header. Printed once at the start of any command. */
   header(subtitle?: string): void {
-    const brand = `${c.bold(c.magenta(SYMBOLS.brand))} ${c.bold('Gutenberg')} ${c.dim(cli_version())}`;
+    const brand = `${c.bold('Gutenberg')} ${c.dim(cli_version())}`;
     writeln('');
     writeln(`  ${brand}`);
 

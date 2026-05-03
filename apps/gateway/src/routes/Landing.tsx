@@ -111,13 +111,13 @@ export function LandingRoute() {
       <Container className="pb-16 pt-10 lg:pb-24 lg:pt-14">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start lg:gap-16">
           <div className="grid content-start gap-5 lg:pt-2">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-              Public registry · permanent releases
+            <p className="font-mono text-[10.5px] uppercase tracking-[0.28em] text-muted-foreground">
+              [ public registry // permanent release records ]
             </p>
-            <h1 className="text-[2.125rem] font-semibold leading-[1.06] tracking-[-0.032em] text-foreground sm:text-[2.625rem] lg:text-[3rem]">
-              Find, publish, and read releases that verify themselves.
+            <h1 className="tactical-display text-[clamp(1.5rem,5.5vw,2.75rem)] text-foreground sm:max-w-[20ch]">
+              Find, publish, and read releases that verify in-browser.
             </h1>
-            <p className="max-w-[56ch] text-[15px] leading-relaxed text-foreground-soft sm:text-[16px]">
+            <p className="max-w-[56ch] text-[13.5px] leading-[1.68] text-foreground-soft sm:text-[14px] sm:leading-[1.7]">
               Think of it like a package registry for immutable work: search by
               name, open an exact version with{' '}
               <span className="font-mono text-[0.92em] tabular text-foreground">
@@ -129,7 +129,7 @@ export function LandingRoute() {
             <div className="flex flex-wrap gap-2 pt-1">
               <Link
                 to="/browse"
-                className="inline-flex items-center rounded-lg bg-foreground px-3.5 py-2 text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 active:translate-y-px"
+                className="inline-flex items-center rounded-none bg-primary px-3.5 py-2 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px"
               >
                 Browse new releases
               </Link>
@@ -142,7 +142,7 @@ export function LandingRoute() {
             </div>
           </div>
 
-          <div className="grid gap-3 lg:sticky lg:top-28">
+          <div className="grid gap-3 lg:self-center">
             <div className="flex items-baseline justify-between gap-3 px-1">
               <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
                 Jump to a release
@@ -155,15 +155,7 @@ export function LandingRoute() {
             <LookupForm
               size="lg"
               placeholder="search packages… try ledger-notes or demo@1.2.0"
-              className="shadow-[0_16px_50px_-34px_oklch(0_0_0/0.28)] dark:shadow-[0_20px_56px_-36px_oklch(0_0_0/0.65)]"
             />
-            <p className="px-1 text-[12px] leading-relaxed text-muted-foreground">
-              Matches stream in as you type. Submit opens search;{' '}
-              <span className="font-mono tabular text-foreground-soft">
-                name@version
-              </span>{' '}
-              jumps straight to that release.
-            </p>
           </div>
         </div>
 
@@ -175,14 +167,14 @@ export function LandingRoute() {
       </Container>
 
       <Section eyebrow="01 / Why" title="Publishing should outlive its publisher.">
-        <p className="max-w-[60ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
+        <p className="max-w-[60ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
           Most of what you read today lives on someone else&rsquo;s servers.
           That someone can take it down, edit it after the fact, or quietly
           de-rank it until it&rsquo;s gone. Governments and major platforms
           do this constantly — and most of the time you&rsquo;ll never know
           it happened.
         </p>
-        <p className="mt-4 max-w-[60ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
+        <p className="mt-4 max-w-[60ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
           Gutenberg makes that impossible. The author signs the work with
           their own key, the files go to storage no single company controls,
           and the record lives on a public chain. Once it&rsquo;s up, the
@@ -211,14 +203,14 @@ export function LandingRoute() {
               <dt className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 {row.k}
               </dt>
-              <dd className="text-foreground">{row.v}</dd>
+              <dd className="text-foreground leading-[1.68]">{row.v}</dd>
             </div>
           ))}
         </dl>
       </Section>
 
       <Section eyebrow="02 / Proof" title="How you know it&rsquo;s the original.">
-        <p className="max-w-[60ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
+        <p className="max-w-[60ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
           Anyone can claim a page is real. Gutenberg lets your own browser
           prove it. Every release carries a signature from its author and a
           fingerprint on chain — and your browser checks both before showing
@@ -235,10 +227,10 @@ export function LandingRoute() {
                 {index}
               </span>
               <div className="grid gap-2">
-                <h3 className="text-[17px] font-medium tracking-[-0.005em] text-foreground sm:text-[18px]">
+                <h3 className="text-[17px] font-medium leading-[1.3] tracking-[-0.005em] text-foreground sm:text-[18px]">
                   {label}
                 </h3>
-                <p className="max-w-[62ch] text-[14.5px] leading-[1.6] text-foreground-soft">
+                <p className="max-w-[62ch] text-[14.5px] leading-[1.68] text-foreground-soft">
                   {detail}
                 </p>
               </div>
@@ -246,14 +238,14 @@ export function LandingRoute() {
           ))}
         </ol>
 
-        <p className="mt-8 max-w-[60ch] text-[13.5px] leading-[1.6] text-muted-foreground">
+        <p className="mt-8 max-w-[60ch] text-[13.5px] leading-[1.7] text-muted-foreground">
           We don&rsquo;t proxy releases. We don&rsquo;t re-host content. There
           is nothing on our side you have to trust — including us.
         </p>
       </Section>
 
       <Section eyebrow="03 / Permanence" title="Built to outlast any one of us.">
-        <p className="max-w-[60ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
+        <p className="max-w-[60ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
           A release isn&rsquo;t a webpage on a server someone can shut down.
           It&rsquo;s three small, independent pieces that live on networks no
           one company controls.
@@ -293,7 +285,7 @@ export function LandingRoute() {
                   {row.t}
                 </span>
               </dt>
-              <dd className="text-foreground-soft">{row.v}</dd>
+              <dd className="text-foreground-soft leading-[1.68]">{row.v}</dd>
             </div>
           ))}
         </dl>
@@ -315,7 +307,7 @@ export function LandingRoute() {
               >
                 {q}
               </dt>
-              <dd className="max-w-[62ch] text-[14.5px] leading-[1.65] text-foreground-soft">
+              <dd className="max-w-[62ch] text-[14.5px] leading-[1.72] text-foreground-soft">
                 {a}
               </dd>
             </div>
@@ -339,10 +331,10 @@ function Section({
     <Container as="section" className="border-t border-border py-20 lg:py-28">
       <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.5fr)] lg:gap-16">
         <div className="grid content-start gap-5 lg:sticky lg:top-24">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="font-mono text-[10.5px] uppercase tracking-[0.28em] text-muted-foreground">
             {eyebrow}
           </p>
-          <h2 className="text-[28px] font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[36px] lg:text-[44px]">
+          <h2 className="tactical-display text-[clamp(1.25rem,4.5vw,2.5rem)] text-foreground">
             {title}
           </h2>
         </div>
@@ -406,7 +398,7 @@ function StatsStrip() {
 
 function Code({ children }: { children: React.ReactNode }) {
   return (
-    <code className="rounded-md border border-border bg-card px-1.5 py-0.5 font-mono text-[0.85em] tabular text-foreground">
+    <code className="rounded-none border border-border bg-card px-1.5 py-0.5 font-mono text-[0.85em] tabular text-foreground">
       {children}
     </code>
   );
@@ -414,7 +406,7 @@ function Code({ children }: { children: React.ReactNode }) {
 
 function ReleaseDiagram() {
   return (
-    <div className="ring-hairline relative overflow-hidden rounded-2xl bg-card p-5 sm:p-7">
+    <div className="ring-hairline relative overflow-hidden rounded-none bg-card p-5 sm:p-7">
       <div className="mb-5 flex items-center justify-between gap-3">
         <span className="font-mono text-[11.5px] tabular text-foreground">
           gutenberg-demo<span className="text-muted-foreground">@</span>1.0.0
@@ -425,7 +417,7 @@ function ReleaseDiagram() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,0.85fr)] sm:items-stretch sm:gap-0">
-        <div className="grid content-between gap-3 rounded-xl border border-border p-4">
+        <div className="grid content-between gap-3 rounded-none border border-border p-4">
           <div className="flex items-center justify-between">
             <span className="font-mono text-[11.5px] tabular text-foreground">
               files (per-file ar://)
@@ -450,7 +442,7 @@ function ReleaseDiagram() {
         </div>
 
         <div className="grid gap-3">
-          <div className="grid gap-2 rounded-xl border border-border p-4">
+          <div className="grid gap-2 rounded-none border border-border p-4">
             <div className="flex items-center justify-between">
               <span className="font-mono text-[11.5px] tabular text-foreground">
                 manifest.json
@@ -459,7 +451,7 @@ function ReleaseDiagram() {
                 Ed25519
               </span>
             </div>
-            <p className="font-mono text-[11px] leading-relaxed tabular text-foreground-soft">
+            <p className="font-mono text-[11px] leading-[1.65] tabular text-foreground-soft">
               <span className="text-muted-foreground">name</span>: gutenberg
               <br />
               <span className="text-muted-foreground">version</span>: 1.0.0
@@ -479,7 +471,7 @@ function ReleaseDiagram() {
               <span className="text-foreground">sig</span>: ed25519:…
             </p>
           </div>
-          <div className="grid gap-1 rounded-xl border border-border px-4 py-3">
+          <div className="grid gap-1 rounded-none border border-border px-4 py-3">
             <span className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
               Solana PDA
             </span>

@@ -3,7 +3,6 @@
 
 @plugin "@tailwindcss/typography";
 
-/* Dark variant fires for explicit `.dark` AND for system pref when not opted out via `.light`. */
 @custom-variant dark {
   &:where(.dark, .dark *) {
     @slot;
@@ -39,134 +38,142 @@
   --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Mechanical rigidity: zero corner radius. */
+  --radius: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
   --font-sans:
-    'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
     sans-serif;
   --font-mono:
-    'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    'Liberation Mono', 'Courier New', monospace;
+    'IBM Plex Mono', ui-monospace, 'JetBrains Mono', Menlo, Monaco, Consolas,
+    monospace;
   --font-serif:
     'Newsreader', 'Iowan Old Style', 'Apple Garamond', Georgia, Cambria,
     'Times New Roman', Times, serif;
 }
 
-/* ─── Light (default) ────────────────────────────────────────────────────── */
-/*
- * Surfaces (used sparingly — most content lives on `background`):
- *   background  → page floor; the dominant tone
- *   surface     → quiet inline panels
- *   card        → primary lifted blocks (lookup form)
- *   elevated    → highest, popovers / hovered rows
- *
- * Text — three legibility tiers:
- *   foreground       → titles, key data
- *   foreground-soft  → body copy, ledes
- *   muted-foreground → labels, captions, eyebrows
- */
-:root {
-  --radius: 0.625rem;
+/* ─── Swiss industrial (light) — default & explicit `.light` ───────────── */
+html,
+html.light {
+  /* Newsprint + carbon; primary / accent = violet (destructive stays red) */
+  --background: #f4f4f0;
+  --surface: #eae8e3;
+  --card: #f0efe9;
+  --elevated: #f7f6f1;
+  --foreground: #0d0d0d;
+  --foreground-soft: #3d3d3d;
+  --card-foreground: #0d0d0d;
+  --popover: #f7f6f1;
+  --popover-foreground: #0d0d0d;
 
-  --background: oklch(0.992 0.002 270);
-  --surface: oklch(0.965 0.003 260);
-  --card: oklch(1 0 0);
-  --elevated: oklch(1 0 0);
-  --foreground: oklch(0.13 0.014 260);
-  --foreground-soft: oklch(0.34 0.012 260);
-  --card-foreground: oklch(0.13 0.014 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.13 0.014 260);
+  --primary: #5b21b6;
+  --primary-foreground: #f4f4f0;
 
-  --primary: oklch(0.16 0.014 260);
-  --primary-foreground: oklch(0.99 0.002 270);
+  --secondary: #e0ded8;
+  --secondary-foreground: #0d0d0d;
 
-  --secondary: oklch(0.96 0.003 260);
-  --secondary-foreground: oklch(0.18 0.012 260);
+  --muted: #e5e2dc;
+  --muted-foreground: #5c5a55;
 
-  --muted: oklch(0.96 0.003 260);
-  --muted-foreground: oklch(0.5 0.012 260);
+  --accent: #5b21b6;
+  --accent-foreground: #f4f4f0;
 
-  /* Single accent — muted registry red (npm-adjacent, not neon). */
-  --accent: oklch(0.54 0.11 26);
-  --accent-foreground: oklch(0.99 0.002 270);
+  --destructive: #b91c1c;
+  --destructive-foreground: #f4f4f0;
 
-  --destructive: oklch(0.55 0.2 26);
-  --destructive-foreground: oklch(0.99 0.002 270);
+  --border: #c9c5bc;
+  --border-strong: #8a857a;
+  --input: #c9c5bc;
+  --ring: #5b21b6;
 
-  --border: oklch(0.92 0.004 260);
-  --border-strong: oklch(0.84 0.005 260);
-  --input: oklch(0.92 0.004 260);
-  --ring: oklch(0.54 0.11 26 / 50%);
+  --selection-bg: #5b21b6;
+  --selection-fg: #f4f4f0;
+  /* “Live” / ok — dark green on paper; dark theme uses phosphor */
+  --telemetry-green: #15803d;
+  --command-shell-inset: inset 0 1px 0 rgba(0, 0, 0, 0.05);
+  /*
+   * FilmGrain: multiply + ~5% opacity disappears on cream paper (multiply × near-white ≈ washout).
+   * Light uses overlay + slightly higher opacity so specks actually read.
+   */
+  --grain-opacity: 0.11;
+  --grain-blend-mode: overlay;
 }
 
-/* ─── Dark (system or explicit) ──────────────────────────────────────────── */
-:root.dark,
-.dark {
-  --background: oklch(0.135 0.008 260);
-  --surface: oklch(0.175 0.008 260);
-  --card: oklch(0.205 0.008 260);
-  --elevated: oklch(0.235 0.008 260);
-  --foreground: oklch(0.985 0.003 270);
-  --foreground-soft: oklch(0.78 0.008 260);
-  --card-foreground: oklch(0.985 0.003 270);
-  --popover: oklch(0.215 0.008 260);
-  --popover-foreground: oklch(0.985 0.003 270);
+/* ─── Tactical telemetry (dark) — explicit class ─────────────────────────── */
+html.dark {
+  --background: #0a0a0a;
+  --surface: #101010;
+  --card: #121212;
+  --elevated: #161616;
+  --foreground: #eaeaea;
+  --foreground-soft: #9a9a9a;
+  --card-foreground: #eaeaea;
+  --popover: #121212;
+  --popover-foreground: #eaeaea;
 
-  --primary: oklch(0.985 0.003 270);
-  --primary-foreground: oklch(0.135 0.008 260);
+  --primary: #a78bfa;
+  --primary-foreground: #0a0a0a;
 
-  --secondary: oklch(0.225 0.008 260);
-  --secondary-foreground: oklch(0.985 0.003 270);
+  --secondary: #1a1a1a;
+  --secondary-foreground: #eaeaea;
 
-  --muted: oklch(0.225 0.008 260);
-  --muted-foreground: oklch(0.6 0.012 260);
+  --muted: #1a1a1a;
+  --muted-foreground: #6b6b6b;
 
-  --accent: oklch(0.7 0.1 26);
-  --accent-foreground: oklch(0.135 0.008 260);
+  --accent: #a78bfa;
+  --accent-foreground: #0a0a0a;
 
-  --destructive: oklch(0.7 0.2 22);
-  --destructive-foreground: oklch(0.135 0.008 260);
+  --destructive: #c42d2d;
+  --destructive-foreground: #eaeaea;
 
-  --border: oklch(1 0 0 / 9%);
-  --border-strong: oklch(1 0 0 / 14%);
-  --input: oklch(1 0 0 / 11%);
-  --ring: oklch(0.7 0.1 26 / 45%);
+  --border: #2a2a2a;
+  --border-strong: #3a3a3a;
+  --input: #2a2a2a;
+  --ring: #a78bfa;
+
+  --selection-bg: #8b5cf6;
+  --selection-fg: #f4f4f0;
+  --telemetry-green: #4af626;
+  --command-shell-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --grain-opacity: 0.07;
+  --grain-blend-mode: overlay;
 }
 
+/* ─── System dark when the user has not pinned light or dark —────────────── */
 @media (prefers-color-scheme: dark) {
-  :root:not(.light) {
-    --background: oklch(0.135 0.008 260);
-    --surface: oklch(0.175 0.008 260);
-    --card: oklch(0.205 0.008 260);
-    --elevated: oklch(0.235 0.008 260);
-    --foreground: oklch(0.985 0.003 270);
-    --foreground-soft: oklch(0.78 0.008 260);
-    --card-foreground: oklch(0.985 0.003 270);
-    --popover: oklch(0.215 0.008 260);
-    --popover-foreground: oklch(0.985 0.003 270);
-
-    --primary: oklch(0.985 0.003 270);
-    --primary-foreground: oklch(0.135 0.008 260);
-
-    --secondary: oklch(0.225 0.008 260);
-    --secondary-foreground: oklch(0.985 0.003 270);
-
-    --muted: oklch(0.225 0.008 260);
-    --muted-foreground: oklch(0.6 0.012 260);
-
-    --accent: oklch(0.7 0.1 26);
-    --accent-foreground: oklch(0.135 0.008 260);
-
-    --destructive: oklch(0.7 0.2 22);
-    --destructive-foreground: oklch(0.135 0.008 260);
-
-    --border: oklch(1 0 0 / 9%);
-    --border-strong: oklch(1 0 0 / 14%);
-    --input: oklch(1 0 0 / 11%);
-    --ring: oklch(0.7 0.1 26 / 45%);
+  html:not(.light):not(.dark) {
+    --background: #0a0a0a;
+    --surface: #101010;
+    --card: #121212;
+    --elevated: #161616;
+    --foreground: #eaeaea;
+    --foreground-soft: #9a9a9a;
+    --card-foreground: #eaeaea;
+    --popover: #121212;
+    --popover-foreground: #eaeaea;
+    --primary: #a78bfa;
+    --primary-foreground: #0a0a0a;
+    --secondary: #1a1a1a;
+    --secondary-foreground: #eaeaea;
+    --muted: #1a1a1a;
+    --muted-foreground: #6b6b6b;
+    --accent: #a78bfa;
+    --accent-foreground: #0a0a0a;
+    --destructive: #c42d2d;
+    --destructive-foreground: #eaeaea;
+    --border: #2a2a2a;
+    --border-strong: #3a3a3a;
+    --input: #2a2a2a;
+    --ring: #a78bfa;
+    --selection-bg: #8b5cf6;
+    --selection-fg: #f4f4f0;
+    --telemetry-green: #4af626;
+    --command-shell-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    --grain-opacity: 0.07;
+    --grain-blend-mode: overlay;
   }
 }
 
@@ -180,19 +187,49 @@
     @apply min-h-dvh;
   }
   html {
+    @apply bg-background;
     color-scheme: light dark;
     scroll-behavior: smooth;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings:
-      'ss01' 1,
-      'cv11' 1;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    font-feature-settings: 'ss01' 1, 'calt' 0;
+  }
+  h1,
+  h2,
+  h3 {
     font-family: var(--font-sans);
-    font-feature-settings: 'ss01' 1, 'cv11' 1;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.35;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  .prose :where(h1, h2, h3) {
+    text-transform: none;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.32;
+  }
+  .prose :where(p, li) {
+    line-height: 1.65;
   }
   code,
   pre,
@@ -201,71 +238,85 @@
   .tabular {
     font-variant-numeric: tabular-nums;
   }
-  h1,
-  h2,
-  h3,
-  h4 {
-    letter-spacing: -0.02em;
-  }
-  h1 {
-    text-wrap: balance;
-    letter-spacing: -0.034em;
-  }
-  p {
-    text-wrap: pretty;
-  }
   ::selection {
-    background-color: var(--accent);
-    color: var(--accent-foreground);
+    background-color: var(--selection-bg, #5b21b6);
+    color: var(--selection-fg, #f4f4f0);
   }
   *:focus-visible {
     outline: none;
   }
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-thumb {
     background: var(--border-strong);
-    border: 3px solid var(--background);
-    border-radius: 999px;
+    border: 2px solid var(--background);
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--background);
   }
+}
+
+/*
+ * Textural treatment:
+ * - CRT on #root::before — under the React tree (isolation keeps order predictable).
+ * - Grain: FilmGrain canvas (fixed z 45) redraws random pixels each frame — not a panned tile.
+ * - Modals use z-index above 45 so they sit above grain.
+ */
+#root {
+  position: relative;
+  isolation: isolate;
+  z-index: 0;
+  width: 100%;
+  background-color: var(--background);
+}
+#root::before {
+  /* Dark-mode CRT scanlines only */
+  content: none;
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.2) 2px,
+    rgba(0, 0, 0, 0.2) 4px
+  );
+  mix-blend-mode: multiply;
+}
+html.dark #root::before {
+  content: '';
+  opacity: 0.1;
+}
+@media (prefers-color-scheme: dark) {
+  html:not(.light):not(.dark) #root::before {
+    content: '';
+    opacity: 0.1;
+  }
+}
+#root > * {
+  position: relative;
+  z-index: 2;
 }
 
 @layer utilities {
   .font-serif {
     font-family: var(--font-serif);
   }
-  /* Hairline ring for cards. No paper-tinted shadow, no glow. */
   .ring-hairline {
     box-shadow: 0 0 0 1px var(--border);
   }
-  /* Quiet lift used on focused or primary surfaces. */
   .lift {
-    box-shadow:
-      0 0 0 1px var(--border),
-      0 8px 28px -20px oklch(0 0 0 / 0.25);
+    box-shadow: 0 0 0 1px var(--border);
   }
-  .dark .lift {
-    box-shadow:
-      0 0 0 1px var(--border),
-      0 12px 36px -20px oklch(0 0 0 / 0.7);
-  }
-  /* Inline keyboard hint chip. */
-  /* npm-style command row: neutral shell, inner highlight. */
   .registry-command-shell {
-    border-radius: 0.5rem;
     border: 1px solid var(--border-strong);
     background: var(--surface);
-    box-shadow: inset 0 1px 0 oklch(1 0 0 / 6%);
-  }
-  .dark .registry-command-shell {
-    box-shadow:
-      inset 0 1px 0 oklch(1 0 0 / 8%),
-      0 1px 0 oklch(0 0 0 / 25%);
+    box-shadow: var(--command-shell-inset);
   }
   .kbd {
     display: inline-flex;
@@ -274,19 +325,18 @@
     min-width: 1.4rem;
     height: 1.4rem;
     padding: 0 0.4rem;
-    border-radius: 0.4rem;
     border: 1px solid var(--border);
     background: var(--surface);
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 10px;
     line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: var(--muted-foreground);
   }
-  /* Editorial reading column for verified release markdown. */
   .prose-editorial {
-    font-family: var(--font-serif);
-    font-size: 1.0625rem;
-    line-height: 1.72;
+    font-size: 0.9375rem;
+    line-height: 1.75;
   }
   .prose-editorial h1,
   .prose-editorial h2,
@@ -299,7 +349,6 @@
   .prose-editorial kbd {
     font-family: var(--font-mono);
   }
-  /* Soft pulse used by VerifyStatus's running step. */
   @keyframes pulse-soft {
     0%,
     100% {
@@ -308,5 +357,18 @@
     50% {
       opacity: 1;
     }
+  }
+  .tactical-display {
+    font-family: var(--font-sans);
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 1.06;
+    text-transform: uppercase;
+  }
+  .wallet-adapter-button,
+  .wallet-adapter-button-trigger,
+  .wallet-adapter-modal-wrapper,
+  .wallet-adapter-modal {
+    border-radius: 0 !important;
   }
 }

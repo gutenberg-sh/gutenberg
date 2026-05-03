@@ -9,8 +9,10 @@ import {
   Check,
   ChevronDown,
   Loader2,
+  X,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { ErrorView } from '@/components/ErrorView';
@@ -102,8 +104,8 @@ export function PublishRoute() {
           Loading your publish session
         </p>
         <div className="grid gap-3" aria-busy>
-          <div className="h-9 w-72 max-w-full animate-pulse rounded-md bg-muted" />
-          <div className="h-3.5 w-2/3 max-w-md animate-pulse rounded-md bg-muted/70" />
+          <div className="h-9 w-72 max-w-full animate-pulse rounded-none bg-muted" />
+          <div className="h-3.5 w-2/3 max-w-md animate-pulse rounded-none bg-muted/70" />
         </div>
       </Container>
     );
@@ -117,7 +119,35 @@ export function PublishRoute() {
     );
   }
 
+  return (
+    <PublishSessionContent
+      load={load}
+      wallet={wallet}
+      run={run}
+      set_run={set_run}
+      on_publish_core={fired_run_ref}
+    />
+  );
+}
+
+type PublishContentProps = {
+  load: Extract<LoadState, { kind: 'ready' }>;
+} & {
+  wallet: ReturnType<typeof useWallet>;
+  run: RunState;
+  set_run: React.Dispatch<React.SetStateAction<RunState>>;
+  on_publish_core: React.MutableRefObject<boolean>;
+};
+
+function PublishSessionContent({
+  load,
+  wallet,
+  run,
+  set_run,
+  on_publish_core: fired_run_ref,
+}: PublishContentProps) {
   const { session, cfg: session_cfg } = load;
+  const cost_state = usePublishCostEstimates(session);
 
   async function on_publish() {
     if (fired_run_ref.current) return;
@@ -183,27 +213,25 @@ export function PublishRoute() {
   }
 
   return (
-    <Container className="grid gap-12 pb-24 pt-12 lg:gap-14 lg:pb-32 lg:pt-16">
-      <header className="grid gap-3">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          Publish · npm-style permanence
+    <Container className="grid gap-6 pb-20 pt-8 sm:pt-10 lg:gap-8 lg:pb-24 lg:pt-12">
+      <header className="grid max-w-[52ch] gap-2">
+        <p className="font-mono text-[10.5px] uppercase tracking-[0.24em] text-muted-foreground">
+          Publish
         </p>
-        <h1 className="text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
+        <h1 className="text-[1.5rem] font-semibold leading-[1.1] tracking-[-0.03em] text-foreground sm:text-[1.9rem]">
           Ship a version that never unpublishes.
         </h1>
-        <p className="max-w-[62ch] text-[15px] leading-relaxed text-foreground-soft">
-          The CLI hands off to this page the same way publish flows feel on a
-          registry: review the manifest, connect the wallet that owns the name,
-          pay storage once, and the package becomes independently verifiable.
+        <p className="text-[13.5px] leading-[1.5] text-foreground-soft">
+          Connect your wallet, then use <strong className="font-medium text-foreground/90">Publish release</strong> to open
+          a confirmation with the full cost breakdown before you sign.
         </p>
       </header>
 
       <Identity session={session} />
 
-      <Cost session={session} />
-
       <Action
         session={session}
+        cost={cost_state}
         wallet_pubkey={wallet.publicKey?.toBase58() ?? null}
         wallet_connected={Boolean(wallet.connected && wallet.signMessage)}
         run={run}
@@ -221,19 +249,18 @@ function Identity({ session }: { session: PublishSessionInput }) {
 
   return (
     <section
-      aria-label="Release identity"
-      className="grid gap-4 border-y border-border py-7"
+      aria-label="Release you are about to ship"
+      className="grid gap-2.5 border border-dashed border-border/80 bg-surface/35 px-3.5 py-3 sm:gap-2 sm:px-4 sm:py-3.5"
     >
-      <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
+      <p className="font-mono text-[9.5px] uppercase tracking-[0.26em] text-muted-foreground/90">
         About to publish
       </p>
-      <h2 className="text-[1.625rem] font-semibold tracking-[-0.02em] text-foreground sm:text-[2rem]">
-        <span>{session.name}</span>
-        <span className="ml-2.5 align-baseline font-mono text-[0.78em] font-normal tabular text-foreground-soft">
-          {session.version}
-        </span>
-      </h2>
-      <dl className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[12px] tabular text-muted-foreground">
+      <p className="min-w-0 break-words font-mono text-[14px] leading-snug text-foreground/90 tabular sm:text-[15px]">
+        {session.name}
+        <span className="text-muted-foreground/90">@</span>
+        {session.version}
+      </p>
+      <dl className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[11.5px] leading-relaxed text-muted-foreground sm:text-[12px]">
         <DT>{session.files.length} files</DT>
         <Sep />
         <DT>{format_bytes(total_bytes)}</DT>
@@ -241,11 +268,11 @@ function Identity({ session }: { session: PublishSessionInput }) {
         <DT>{session.chain.chain_id}</DT>
       </dl>
       {session.tags && session.tags.length > 0 ? (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5 border-t border-border/50 pt-2.5">
           {session.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full border border-border px-2 py-0.5 font-mono text-[10.5px] tabular text-foreground-soft"
+              className="border border-border/60 bg-background/20 px-1.5 py-0.5 font-mono text-[10px] tabular text-foreground/75"
             >
               #{tag}
             </span>
@@ -278,7 +305,18 @@ type IrysCostState =
   | { kind: 'success'; data: IrysCostEstimate }
   | { kind: 'error'; message: string };
 
-function Cost({ session }: { session: PublishSessionInput }) {
+type PublishCostEstimates = {
+  solana: SolanaCostState;
+  irys: IrysCostState;
+  both_ready: boolean;
+  total_lamports: bigint | undefined;
+  has_error: boolean;
+  total_s: string;
+};
+
+function usePublishCostEstimates(
+  session: PublishSessionInput,
+): PublishCostEstimates {
   const [solana, set_solana] = useState<SolanaCostState>({ kind: 'pending' });
   const [irys, set_irys] = useState<IrysCostState>({ kind: 'pending' });
 
@@ -328,72 +366,155 @@ function Cost({ session }: { session: PublishSessionInput }) {
     ? BigInt(solana.data.total_lamports) + BigInt(irys.data.price_atomic)
     : undefined;
   const has_error = solana.kind === 'error' || irys.kind === 'error';
+  const total_s =
+    total_lamports !== undefined
+      ? `~${format_lamports_as_sol(total_lamports)}`
+      : has_error
+        ? '—'
+        : '···';
+
+  return { solana, irys, both_ready, total_lamports, has_error, total_s };
+}
+
+/** Full cost copy + Irys / Solana lines (used in the confirm dialog). */
+function CostBreakdown({ precomputed }: { precomputed: PublishCostEstimates }) {
+  const { solana, irys, total_s } = precomputed;
 
   return (
-    <section aria-label="Estimated cost" className="grid gap-5">
-      <div className="grid gap-1.5">
-        <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
-          Estimated cost
+    <div className="grid gap-3">
+      <p className="text-[12.5px] leading-[1.55] text-muted-foreground">
+        Charged to your connected wallet. Covers Irys, Solana rent, and
+        5,000-lamport base
+        {solana.kind === 'success' && solana.data.creates_name
+          ? ' · first release for this name'
+          : ''}
+        .
+      </p>
+      <div>
+        <p className="font-mono text-[10.5px] uppercase tracking-[0.2em] text-muted-foreground">
+          Total (estimate)
         </p>
-        <div className="flex flex-wrap items-baseline gap-3">
-          <span
-            className={cn(
-              'font-mono text-[2.25rem] font-medium leading-none tabular tracking-[-0.02em] sm:text-[2.75rem]',
-              total_lamports !== undefined
-                ? 'text-foreground'
-                : 'text-muted-foreground/50',
-            )}
-          >
-            {total_lamports !== undefined
-              ? `~${format_lamports_as_sol(total_lamports)}`
-              : has_error
-                ? '—'
-                : '···'}
-          </span>
-          <span className="font-mono text-[14px] tabular text-foreground-soft">
-            SOL
-          </span>
-        </div>
-        <p className="text-[12.5px] text-muted-foreground">
-          Charged to your connected wallet. Covers permanent Irys storage,
-          Solana rent, and a 5,000-lamport base fee
-          {solana.kind === 'success' && solana.data.creates_name
-            ? ' · first release for this name'
-            : ''}
-          .
+        <p className="mt-0.5 font-mono text-[1.4rem] font-medium tabular leading-none sm:text-[1.55rem] text-foreground">
+          {total_s} <span className="text-[0.6em] text-foreground-soft">SOL</span>
         </p>
       </div>
+      <div className="grid divide-y divide-border">
+        <CostLine
+          label="Irys upload"
+          state={irys}
+          primary={(d) => `${format_lamports_as_sol(BigInt(d.price_atomic))} SOL`}
+          secondary={(d) =>
+            `${format_bytes(d.bytes)} · ${format_bytes(d.files_bytes)} files + ${format_bytes(d.manifest_bytes)} manifest`
+          }
+        />
+        <CostLine
+          label="Solana transaction"
+          state={solana}
+          primary={(d) => `${format_lamports_as_sol(d.total_lamports)} SOL`}
+          secondary={(d) =>
+            `rent ${format_lamports_as_sol(d.release_rent_lamports + d.name_rent_lamports)} + fee ${format_lamports_as_sol(d.base_fee_lamports)}`
+          }
+        />
+      </div>
+    </div>
+  );
+}
 
-      <details className="border-t border-border">
-        <summary className="group flex cursor-pointer list-none items-center gap-2 py-3 text-[11.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground-soft [&::-webkit-details-marker]:hidden">
-          <ChevronDown
-            className="size-3.5 transition-transform duration-200 group-open:rotate-180"
-            strokeWidth={2}
-            aria-hidden
-          />
-          <span>Breakdown</span>
-        </summary>
+function PublishConfirmDialog({
+  open,
+  on_open_change,
+  session,
+  precomputed,
+  on_confirm,
+}: {
+  open: boolean;
+  on_open_change: (open: boolean) => void;
+  session: PublishSessionInput;
+  precomputed: PublishCostEstimates;
+  on_confirm: () => void;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    function on_key(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        on_open_change(false);
+      }
+    }
+    window.addEventListener('keydown', on_key);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', on_key);
+    };
+  }, [open, on_open_change]);
 
-        <dl className="grid divide-y divide-border">
-          <CostLine
-            label="Irys upload"
-            state={irys}
-            primary={(d) => `${format_lamports_as_sol(BigInt(d.price_atomic))} SOL`}
-            secondary={(d) =>
-              `${format_bytes(d.bytes)} · ${format_bytes(d.files_bytes)} files + ${format_bytes(d.manifest_bytes)} manifest`
-            }
-          />
-          <CostLine
-            label="Solana transaction"
-            state={solana}
-            primary={(d) => `${format_lamports_as_sol(d.total_lamports)} SOL`}
-            secondary={(d) =>
-              `rent ${format_lamports_as_sol(d.release_rent_lamports + d.name_rent_lamports)} + fee ${format_lamports_as_sol(d.base_fee_lamports)}`
-            }
-          />
-        </dl>
-      </details>
-    </section>
+  if (!open) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-background/92 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="publish-confirm-title"
+      onClick={() => on_open_change(false)}
+    >
+      <div
+        className="max-h-[min(90dvh,640px)] w-full max-w-lg overflow-y-auto overscroll-contain border-2 border-border bg-card p-5 shadow-sm sm:p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-border pb-3">
+          <div>
+            <p
+              className="font-mono text-[9.5px] uppercase tracking-[0.26em] text-muted-foreground"
+              id="publish-confirm-eyebrow"
+            >
+              Review &amp; pay
+            </p>
+            <h2
+              className="mt-1.5 text-[1.1rem] font-semibold text-foreground sm:text-[1.2rem]"
+              id="publish-confirm-title"
+            >
+              Confirm publish
+            </h2>
+            <p className="mt-0.5 truncate font-mono text-[12.5px] text-foreground-soft" title={`${session.name}@${session.version}`}>
+              {session.name}
+              <span className="text-muted-foreground">@</span>
+              {session.version}
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-label="Close"
+            className="inline-flex size-8 shrink-0 items-center justify-center border-2 border-border text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+            onClick={() => on_open_change(false)}
+          >
+            <X className="size-3.5" strokeWidth={1.9} />
+          </button>
+        </div>
+        <div className="mt-4">
+          <CostBreakdown precomputed={precomputed} />
+        </div>
+        <div className="mt-6 flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:justify-end">
+          <Button type="button" variant="ghost" onClick={() => on_open_change(false)} className="w-full sm:w-auto">
+            Back
+          </Button>
+          <Button
+            type="button"
+            size="lg"
+            onClick={() => {
+              on_confirm();
+              on_open_change(false);
+            }}
+            className="w-full sm:w-auto"
+          >
+            Confirm and publish
+          </Button>
+        </div>
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -445,6 +566,7 @@ function CostLine<T>({
 
 function Action({
   session,
+  cost,
   wallet_pubkey,
   wallet_connected,
   run,
@@ -452,12 +574,20 @@ function Action({
   on_cancel,
 }: {
   session: PublishSessionInput;
+  cost: PublishCostEstimates;
   wallet_pubkey: string | null;
   wallet_connected: boolean;
   run: RunState;
   on_publish: () => void;
   on_cancel: () => void;
 }) {
+  const [confirm_open, set_confirm_open] = useState(false);
+  const running = run.kind === 'running';
+
+  useEffect(() => {
+    if (running) set_confirm_open(false);
+  }, [running]);
+
   if (run.kind === 'success') {
     return (
       <Success
@@ -467,16 +597,30 @@ function Action({
       />
     );
   }
-
-  const running = run.kind === 'running';
   const failed = run.kind === 'failed';
   const events = run.kind === 'idle' ? [] : run.events;
 
   return (
     <section
       aria-label="Publish action"
-      className="grid gap-5 rounded-2xl border border-border bg-card p-6 sm:p-7"
+      className="grid gap-5 rounded-none border border-border bg-card p-5 sm:p-6"
     >
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b border-border/80 pb-4">
+        <span className="text-[10.5px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          Est. cost
+        </span>
+        <span
+          className={cn(
+            'font-mono text-[1.15rem] font-medium tabular sm:text-[1.2rem]',
+            cost.total_lamports !== undefined
+              ? 'text-foreground'
+              : 'text-muted-foreground/45',
+          )}
+        >
+          {cost.total_s}{' '}
+          <span className="text-[0.7em] text-foreground-soft">SOL</span>
+        </span>
+      </div>
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <div className="grid min-w-0 gap-1">
           <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
@@ -500,7 +644,7 @@ function Action({
       ) : null}
 
       {failed ? (
-        <p className="rounded-xl border border-destructive/40 bg-destructive/5 px-3.5 py-2.5 text-[13px] text-destructive">
+        <p className="rounded-none border border-destructive/40 bg-destructive/5 px-3.5 py-2.5 text-[13px] text-destructive">
           {run.message}
         </p>
       ) : null}
@@ -513,7 +657,7 @@ function Action({
         ) : null}
         <Button
           size="lg"
-          onClick={on_publish}
+          onClick={() => set_confirm_open(true)}
           disabled={!wallet_connected || running}
         >
           {running ? (
@@ -526,6 +670,14 @@ function Action({
           )}
         </Button>
       </div>
+
+      <PublishConfirmDialog
+        open={confirm_open}
+        on_open_change={set_confirm_open}
+        session={session}
+        precomputed={cost}
+        on_confirm={on_publish}
+      />
     </section>
   );
 }
@@ -547,14 +699,14 @@ function CurrentStep({
           <span
             aria-hidden
             className={cn(
-              'absolute inline-flex size-2 rounded-full opacity-60',
+              'absolute inline-flex size-2 rounded-none opacity-60',
               active ? 'animate-ping bg-accent/60' : '',
             )}
           />
           <span
             aria-hidden
             className={cn(
-              'relative inline-flex size-1.5 rounded-full',
+              'relative inline-flex size-1.5 rounded-none',
               active ? 'bg-accent' : 'bg-muted-foreground/60',
             )}
           />
@@ -572,7 +724,7 @@ function CurrentStep({
         </span>
       </summary>
 
-      <ol className="grid gap-1 rounded-lg border border-border bg-background px-3 py-2.5">
+      <ol className="grid gap-1 rounded-none border border-border bg-background px-3 py-2.5">
         {events.map((event, idx) => (
           <li
             key={`${event.kind}-${idx}`}
@@ -619,10 +771,10 @@ function Success({
   return (
     <section
       aria-label="Published"
-      className="grid gap-5 rounded-2xl border border-accent/30 bg-accent/5 p-6 sm:p-7"
+      className="grid gap-5 rounded-none border border-accent/30 bg-accent/5 p-6 sm:p-7"
     >
       <div className="flex items-center gap-3">
-        <span className="inline-flex size-8 items-center justify-center rounded-full bg-accent text-accent-foreground">
+        <span className="inline-flex size-8 items-center justify-center rounded-none bg-accent text-accent-foreground">
           <Check className="size-4" strokeWidth={2.4} aria-hidden />
         </span>
         <div className="grid gap-0.5">
@@ -656,7 +808,7 @@ function Success({
         </p>
         <Link
           to={target}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-[12.5px] font-medium text-background transition-colors hover:bg-foreground/92 active:translate-y-px"
+          className="inline-flex items-center gap-1.5 rounded-none bg-primary px-3 py-1.5 text-[12.5px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px"
         >
           Open now
           <ArrowUpRight className="size-3.5" strokeWidth={2} aria-hidden />

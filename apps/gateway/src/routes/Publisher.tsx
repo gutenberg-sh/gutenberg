@@ -66,7 +66,7 @@ export function PublisherRoute() {
           <PublisherHeaderSkeleton />
         ) : (
           <>
-            <h1 className="break-all font-mono text-[18px] font-medium tabular leading-tight text-foreground sm:text-[22px]">
+            <h1 className="break-all font-mono text-[18px] font-medium tabular leading-[1.38] text-foreground sm:text-[22px] sm:leading-[1.4]">
               {address}
             </h1>
             <div className="flex flex-wrap items-center gap-2 text-[12px] text-muted-foreground">
@@ -75,7 +75,7 @@ export function PublisherRoute() {
                 href={explorer_address_url(address)}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[11.5px] font-medium text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
+                className="inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1 text-[11.5px] font-medium text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
               >
                 <ExternalLink className="size-3" strokeWidth={1.85} aria-hidden />
                 Explorer
@@ -141,10 +141,10 @@ export function PublisherRoute() {
 function PublisherHeaderSkeleton() {
   return (
     <div className="grid gap-3">
-      <div className="h-7 w-2/3 animate-pulse rounded-md bg-muted" />
+      <div className="h-7 w-2/3 animate-pulse rounded-none bg-muted" />
       <div className="flex gap-2">
-        <div className="h-6 w-24 animate-pulse rounded-full bg-muted/70" />
-        <div className="h-6 w-24 animate-pulse rounded-full bg-muted/70" />
+        <div className="h-6 w-24 animate-pulse rounded-none bg-muted/70" />
+        <div className="h-6 w-24 animate-pulse rounded-none bg-muted/70" />
       </div>
     </div>
   );
@@ -166,7 +166,7 @@ function PublisherStats({ data }: { data: NonNullable<ReturnType<typeof usePubli
             {names.slice(0, 8).map((n) => (
               <li
                 key={n.id}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5 font-mono text-[11px] tabular text-foreground-soft"
+                className="inline-flex items-center gap-1.5 rounded-none border border-border px-2 py-0.5 font-mono text-[11px] tabular text-foreground-soft"
               >
                 <Hash className="size-2.5" strokeWidth={1.85} aria-hidden />
                 {n.name}
@@ -187,7 +187,7 @@ function PublisherStats({ data }: { data: NonNullable<ReturnType<typeof usePubli
         <p className="font-mono text-[12px] tabular text-foreground-soft">
           {shorten(data.address, 8, 8)}
         </p>
-        <p className="text-[12px] leading-snug text-muted-foreground">
+        <p className="text-[12px] leading-[1.65] text-muted-foreground">
           On Gutenberg, an author is a key — not a profile, not a display
           name, just a signature. This is what they&rsquo;ve published.
         </p>
@@ -203,9 +203,9 @@ function PublisherStats({ data }: { data: NonNullable<ReturnType<typeof usePubli
 
 function EmptyReleases() {
   return (
-    <div className="grid place-items-center gap-2 rounded-xl border border-dashed border-border px-6 py-12 text-center">
+    <div className="grid place-items-center gap-2 rounded-none border border-dashed border-border px-6 py-12 text-center">
       <p className="text-[13.5px] text-foreground">No releases yet.</p>
-      <p className="max-w-[40ch] text-[12px] leading-relaxed text-muted-foreground">
+      <p className="max-w-[40ch] text-[12px] leading-[1.65] text-muted-foreground">
         This key is registered but hasn't signed anything yet.
       </p>
     </div>
@@ -232,7 +232,7 @@ function CopyChip({ value, label }: { value: string; label: string }) {
           .catch(() => set_copied(false));
       }}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[11.5px] font-medium text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground active:translate-y-px',
+        'inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1 text-[11.5px] font-medium text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground active:translate-y-px',
       )}
     >
       {copied ? (

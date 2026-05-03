@@ -40,7 +40,7 @@ export function LookupDialog({
       aria-modal="true"
       aria-label="Open a release"
       onClick={() => on_open_change(false)}
-      className="fixed inset-0 z-50 flex items-start justify-center bg-background/70 p-4 pt-[18vh] backdrop-blur-md"
+      className="fixed inset-0 z-[60] flex items-start justify-center bg-background/92 p-4 pt-[18vh]"
     >
       <div
         onClick={(event) => event.stopPropagation()}
@@ -50,7 +50,7 @@ export function LookupDialog({
           type="button"
           aria-label="Close"
           onClick={() => on_open_change(false)}
-          className="absolute -right-2 -top-2 z-10 inline-flex size-7 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-colors hover:border-border-strong hover:text-foreground"
+          className="absolute -right-2 -top-2 z-10 inline-flex size-7 items-center justify-center rounded-none border-2 border-border bg-card text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
         >
           <X className="size-3.5" strokeWidth={1.85} aria-hidden />
         </button>

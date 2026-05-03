@@ -62,7 +62,7 @@ function PageButton({
       onClick={on_click}
       disabled={disabled}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[12px] font-medium text-foreground-soft transition-colors',
+        'inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] font-medium text-foreground-soft transition-colors',
         disabled
           ? 'cursor-not-allowed opacity-40'
           : 'hover:border-border-strong hover:text-foreground active:translate-y-px',

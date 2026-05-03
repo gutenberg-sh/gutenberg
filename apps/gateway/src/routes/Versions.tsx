@@ -40,18 +40,18 @@ function VersionsView({ name }: { name: string }) {
           Version history
         </p>
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
+          <h1 className="text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
             {name}
           </h1>
           <Link
             to={`/r/${encodeURIComponent(name)}`}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
+            className="inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
           >
             Open latest
             <ArrowUpRight className="size-3.5" strokeWidth={1.85} aria-hidden />
           </Link>
         </div>
-        <p className="max-w-[60ch] text-[14.5px] leading-[1.6] text-foreground-soft">
+        <p className="max-w-[60ch] text-[14.5px] leading-[1.7] text-foreground-soft">
           Every version this author has ever published under this name,
           newest first. Each one is permanent — once it&rsquo;s up, it stays
           up exactly as it was signed.
@@ -89,8 +89,8 @@ function Timeline({ name, versions }: { name: string; versions: ReleaseDto[] }) 
               aria-hidden
               className={
                 is_latest
-                  ? 'absolute left-0 top-6 inline-flex size-2.5 items-center justify-center rounded-full bg-accent ring-4 ring-background'
-                  : 'absolute left-0 top-6 inline-flex size-2.5 items-center justify-center rounded-full bg-border ring-4 ring-background'
+                  ? 'absolute left-0 top-6 inline-flex size-2.5 items-center justify-center rounded-none bg-accent ring-4 ring-background'
+                  : 'absolute left-0 top-6 inline-flex size-2.5 items-center justify-center rounded-none bg-border ring-4 ring-background'
               }
             />
             <Link
@@ -103,7 +103,7 @@ function Timeline({ name, versions }: { name: string; versions: ReleaseDto[] }) 
                     {release.version}
                   </span>
                   {is_latest ? (
-                    <span className="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.18em] text-accent">
+                    <span className="rounded-none border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.18em] text-accent">
                       Latest
                     </span>
                   ) : null}
@@ -138,8 +138,8 @@ function Skeleton() {
     <div aria-busy aria-live="polite" className="grid gap-3 pl-7">
       {Array.from({ length: 5 }).map((_, idx) => (
         <div key={idx} className="grid gap-1 border-b border-border py-4">
-          <div className="h-4 w-24 animate-pulse rounded-md bg-muted" />
-          <div className="h-3 w-1/3 max-w-[14rem] animate-pulse rounded-md bg-muted/70" />
+          <div className="h-4 w-24 animate-pulse rounded-none bg-muted" />
+          <div className="h-3 w-1/3 max-w-[14rem] animate-pulse rounded-none bg-muted/70" />
         </div>
       ))}
     </div>
@@ -148,10 +148,10 @@ function Skeleton() {
 
 function EmptyVersions() {
   return (
-    <div className="grid place-items-center gap-3 rounded-xl border border-dashed border-border px-6 py-14 text-center">
+    <div className="grid place-items-center gap-3 rounded-none border border-dashed border-border px-6 py-14 text-center">
       <GitBranch className="size-5 text-muted-foreground" strokeWidth={1.6} aria-hidden />
       <p className="text-[14px] text-foreground">No versions yet.</p>
-      <p className="max-w-[40ch] text-[12.5px] leading-relaxed text-muted-foreground">
+      <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
         Either this name doesn't exist, or it just shipped and we're still
         catching up. Refresh in a moment.
       </p>

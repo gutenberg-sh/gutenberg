@@ -64,10 +64,10 @@ export function SearchRoute() {
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
           Registry search
         </p>
-        <h1 className="text-[1.875rem] font-semibold leading-[1.07] tracking-[-0.03em] text-foreground sm:text-[2.25rem]">
+        <h1 className="text-[1.875rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.25rem]">
           Search packages by name.
         </h1>
-        <p className="text-[15px] leading-relaxed text-foreground-soft">
+        <p className="text-[15px] leading-[1.68] text-foreground-soft">
           Same idea as a package registry: type part of a name, pick a match,
           then open the latest or pin an exact version with{' '}
           <span className="font-mono text-[0.95em] tabular text-foreground">
@@ -135,7 +135,7 @@ export function SearchRoute() {
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             Search tips
           </p>
-          <ul className="grid gap-3 text-[12.5px] leading-relaxed text-foreground-soft">
+          <ul className="grid gap-3 text-[12.5px] leading-[1.62] text-foreground-soft">
             <li>
               Prefer short fragments — the indexer fuzzy-matches names the way
               readers hunt for packages.
@@ -177,7 +177,7 @@ function SearchInput({
     <div
       role="search"
       aria-label="Search the registry"
-      className="flex items-stretch overflow-hidden rounded-2xl border border-border-strong/70 bg-card shadow-[inset_0_1px_0_oklch(1_0_0/6%)] transition-colors focus-within:border-foreground/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/8%)]"
+      className="flex items-stretch overflow-hidden rounded-none border-2 border-border-strong/80 bg-card transition-colors focus-within:border-foreground/50"
     >
       <span
         aria-hidden
@@ -204,7 +204,7 @@ function SearchInput({
             type="button"
             aria-label="Clear search"
             onClick={() => on_change('')}
-            className="inline-flex size-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-surface hover:text-foreground active:translate-y-px"
+            className="inline-flex size-9 items-center justify-center rounded-none text-muted-foreground transition-colors hover:bg-surface hover:text-foreground active:translate-y-px"
           >
             <X className="size-3.5" strokeWidth={1.85} aria-hidden />
           </button>
@@ -300,8 +300,8 @@ function ResultsSkeleton() {
     >
       {Array.from({ length: 5 }).map((_, idx) => (
         <div key={idx} className="grid gap-2 py-5 px-2">
-          <div className="h-4 w-2/5 max-w-[14rem] animate-pulse rounded-md bg-muted" />
-          <div className="h-3 w-1/3 max-w-[10rem] animate-pulse rounded-md bg-muted/70" />
+          <div className="h-4 w-2/5 max-w-[14rem] animate-pulse rounded-none bg-muted" />
+          <div className="h-3 w-1/3 max-w-[10rem] animate-pulse rounded-none bg-muted/70" />
         </div>
       ))}
     </div>
@@ -313,7 +313,7 @@ function EmptyQuery() {
     <div className="registry-command-shell grid place-items-center gap-3 px-6 py-14 text-center">
       <PackageSearch className="size-5 text-muted-foreground" strokeWidth={1.6} aria-hidden />
       <p className="text-[14px] text-foreground">Start typing to search the registry.</p>
-      <p className="max-w-[42ch] text-[12.5px] leading-relaxed text-muted-foreground">
+      <p className="max-w-[42ch] text-[12.5px] leading-[1.65] text-muted-foreground">
         Names behave like packages: the first publisher to claim a string keeps
         it. Partial matches work — you don&rsquo;t need the full slug.
       </p>
@@ -323,12 +323,12 @@ function EmptyQuery() {
 
 function NoResults({ q }: { q: string }) {
   return (
-    <div className="grid place-items-center gap-3 rounded-xl border border-dashed border-border px-6 py-14 text-center">
+    <div className="grid place-items-center gap-3 rounded-none border border-dashed border-border px-6 py-14 text-center">
       <p className="text-[14px] text-foreground">
         Nothing matches{' '}
         <span className="font-mono tabular">{q}</span>.
       </p>
-      <p className="max-w-[40ch] text-[12.5px] leading-relaxed text-muted-foreground">
+      <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
         Check the spelling, or browse what's been shipped recently — the
         author may not have published yet.
       </p>

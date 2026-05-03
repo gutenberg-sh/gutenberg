@@ -99,11 +99,11 @@ function Skeleton({ rows }: { rows: number }) {
           className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto] items-center gap-x-6 px-1 py-4"
         >
           <div className="grid gap-1.5">
-            <div className="h-3.5 w-1/2 max-w-[14rem] animate-pulse rounded-md bg-muted" />
-            <div className="h-3 w-1/3 max-w-[10rem] animate-pulse rounded-md bg-muted/70" />
+            <div className="h-3.5 w-1/2 max-w-[14rem] animate-pulse rounded-none bg-muted" />
+            <div className="h-3 w-1/3 max-w-[10rem] animate-pulse rounded-none bg-muted/70" />
           </div>
-          <div className="h-3 w-20 animate-pulse rounded-md bg-muted/70" />
-          <div className="h-3 w-3 animate-pulse rounded-md bg-muted/70" />
+          <div className="h-3 w-20 animate-pulse rounded-none bg-muted/70" />
+          <div className="h-3 w-3 animate-pulse rounded-none bg-muted/70" />
         </li>
       ))}
     </ol>

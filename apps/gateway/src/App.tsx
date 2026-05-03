@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 
+import { FilmGrain } from '@/components/FilmGrain';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { BrowseRoute } from '@/routes/Browse';
@@ -14,9 +15,13 @@ import { VersionsRoute } from '@/routes/Versions';
 
 export function App() {
   return (
-    <div className="relative flex min-h-dvh flex-col bg-background">
+    <div
+      className="relative flex min-h-dvh w-full min-w-0 flex-col bg-transparent"
+      data-surface="tactical-telemetry"
+    >
+      <FilmGrain />
       <SiteHeader />
-      <main className="relative flex flex-1 flex-col">
+      <main className="relative flex flex-1 flex-col bg-transparent">
         <Routes>
           <Route path="/" element={<LandingRoute />} />
           <Route path="/browse" element={<BrowseRoute />} />

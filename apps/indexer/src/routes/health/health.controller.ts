@@ -1,6 +1,7 @@
-import { Controller, Get, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Inject, UseInterceptors } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 
+import { PROGRAM_ID } from '../../common/config/config.tokens';
 import { cursorsTable } from '../../common/database/tables';
 import { SerializeWith } from '../../common/decorators/serialize-with.decorator';
 import { SerializationInterceptor } from '../../common/interceptors/serialization.interceptor';
@@ -16,6 +17,7 @@ export class HealthController {
   constructor(
     private readonly cursor_service: CursorService,
     private readonly rpc: SolanaRpcClient,
+    @Inject(PROGRAM_ID) private readonly program_id: string,
   ) {}
 
   @Get()
@@ -26,12 +28,31 @@ export class HealthController {
     });
 
     let chain_slot: number | null = null;
+    /** Slot of the newest chain tx involving the registry program (not global chain tip). */
+    let program_tip_slot: number | null = null;
     let lag_slots: number | null = null;
 
     try {
       chain_slot = await this.rpc.get_slot();
-      if (chain_slot !== null && cursor?.last_slot != null) {
-        lag_slots = Math.max(0, chain_slot - cursor.last_slot);
+
+      const tip_sigs = await this.rpc.get_signatures_for_address({
+        address: this.program_id,
+        limit: 1,
+      });
+      program_tip_slot = tip_sigs[0]?.slot ?? null;
+
+      /*
+       * Lag vs newest *program* tx (not global chain tip — empty slots used to inflate lag).
+       * - No signatures: vacuously caught up (lag 0).
+       * - Cursor without last_slot (e.g. row created only with backfill_completed_at):
+       *   still compute lag vs tip so the UI is not stuck on "syncing".
+       */
+      if (program_tip_slot == null) {
+        lag_slots = 0;
+      } else if (cursor?.last_slot == null) {
+        lag_slots = program_tip_slot;
+      } else {
+        lag_slots = Math.max(0, program_tip_slot - cursor.last_slot);
       }
     } catch {
       /* tolerate RPC failures in health check */
@@ -43,6 +64,7 @@ export class HealthController {
       cursor_slot: cursor?.last_slot ?? null,
       cursor_signature: cursor?.last_signature ?? null,
       chain_slot,
+      program_tip_slot,
       lag_slots,
     };
   }

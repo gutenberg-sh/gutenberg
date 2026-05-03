@@ -65,7 +65,7 @@ export function FileNav({
                 <span
                   aria-hidden
                   className={cn(
-                    'inline-block h-3 w-[2px] rounded-full transition-colors',
+                    'inline-block h-3 w-[2px] rounded-none transition-colors',
                     active
                       ? 'bg-accent'
                       : 'bg-transparent group-hover:bg-foreground/30',

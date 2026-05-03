@@ -34,13 +34,13 @@ export function BrowseRoute() {
           New releases
         </p>
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="text-[2rem] font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
+          <h1 className="text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
             Everything publishing right now.
           </h1>
           <button
             type="button"
             onClick={() => void feed.refetch()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
+            className="inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
             disabled={feed.isFetching}
           >
             <RefreshCw
@@ -51,7 +51,7 @@ export function BrowseRoute() {
             Refresh
           </button>
         </div>
-        <p className="max-w-[62ch] text-[15px] leading-relaxed text-foreground-soft">
+        <p className="max-w-[62ch] text-[15px] leading-[1.68] text-foreground-soft">
           Like npm&rsquo;s recent publishes feed — every ship is immutable.
           Open any row and verification runs locally before you read a byte.
         </p>
@@ -92,14 +92,14 @@ export function BrowseRoute() {
 
 function EmptyFeed() {
   return (
-    <div className="grid place-items-center gap-3 rounded-xl border border-dashed border-border px-6 py-16 text-center">
+    <div className="grid place-items-center gap-3 rounded-none border border-dashed border-border px-6 py-16 text-center">
       <Compass
         className="size-5 text-muted-foreground"
         strokeWidth={1.6}
         aria-hidden
       />
       <p className="text-[14px] text-foreground">Nothing here yet.</p>
-      <p className="max-w-[40ch] text-[12.5px] leading-relaxed text-muted-foreground">
+      <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
         Releases show up here the moment they&rsquo;re published. You could
         be the first.
       </p>

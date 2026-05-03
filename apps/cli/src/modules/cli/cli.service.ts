@@ -15,7 +15,7 @@ export class CliService {
   ) {}
 
   async run(): Promise<void> {
-    ui.header('publish freely. read what\u2019s real.');
+    ui.header();
 
     await run(
       [

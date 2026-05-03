@@ -40,5 +40,11 @@ export class HealthDto {
   @IsOptional()
   @IsInt()
   @Min(0)
+  program_tip_slot: number | null;
+
+  @Expose()
+  @IsOptional()
+  @IsInt()
+  @Min(0)
   lag_slots: number | null;
 }

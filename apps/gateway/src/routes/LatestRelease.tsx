@@ -110,10 +110,10 @@ export function LatestReleaseRoute() {
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
             Finding the latest version
           </p>
-          <h2 className="text-[26px] font-semibold leading-[1.1] tracking-tight text-foreground sm:text-[32px]">
+          <h2 className="text-[26px] font-semibold leading-[1.16] tracking-tight text-foreground sm:text-[32px]">
             {name}
           </h2>
-          <p className="max-w-[60ch] text-[15px] leading-[1.6] text-foreground-soft">
+          <p className="max-w-[60ch] text-[15px] leading-[1.68] text-foreground-soft">
             Asking Solana for the most recent release of this name.
           </p>
         </div>

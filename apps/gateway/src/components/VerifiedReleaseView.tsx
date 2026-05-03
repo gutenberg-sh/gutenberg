@@ -44,8 +44,8 @@ export function VerifiedReleaseView({
             <VerifyStatus steps={state.steps} />
           </div>
           <div className="grid content-start gap-3">
-            <Skeleton className="h-24 w-full rounded-xl" />
-            <Skeleton className="h-40 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-none" />
+            <Skeleton className="h-40 w-full rounded-none" />
           </div>
         </div>
       </Container>
@@ -88,13 +88,12 @@ function ReleaseHeaderSkeleton() {
   return (
     <section className="grid gap-5">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <Skeleton className="h-6 w-20 rounded-full" />
-        <Skeleton className="h-5 w-36 rounded-md" />
+        <Skeleton className="h-6 w-20 rounded-none" />
+        <Skeleton className="h-5 w-36 rounded-none" />
         <Skeleton className="h-3.5 w-28" />
       </div>
       <div className="grid gap-2.5">
         <Skeleton className="h-9 w-72 max-w-full" />
-        <Skeleton className="h-3.5 w-44" />
       </div>
       <div className="border-t border-border pt-3">
         <Skeleton className="h-3 w-44" />
@@ -139,11 +138,6 @@ function VerifiedReleaseRendered({
     return () => cancel_idle(handle);
   }, [all_paths, release.files, target_path]);
 
-  const canonical_url = useMemo(
-    () => `${window.location.origin}${base_path}`,
-    [base_path],
-  );
-
   if (!target_file) {
     return (
       <Container className="py-20 lg:py-28">
@@ -158,7 +152,7 @@ function VerifiedReleaseRendered({
 
   return (
     <Container className="grid gap-8 pb-20 pt-8 lg:gap-10 lg:pb-28 lg:pt-10">
-      <ReleaseHeader release={release} canonical_url={canonical_url} />
+      <ReleaseHeader release={release} />
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_18.5rem] xl:gap-14">
         <div className="min-w-0">
@@ -232,7 +226,7 @@ function ReleasePackageAside({
   const publisher = m.publisher;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-[inset_0_1px_0_oklch(1_0_0/6%)] dark:shadow-[inset_0_1px_0_oklch(1_0_0/8%)]">
+    <div className="rounded-none border border-border bg-card p-4 shadow-[inset_0_1px_0_oklch(1_0_0/6%)] dark:shadow-[inset_0_1px_0_oklch(1_0_0/8%)]">
       <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
         Package details
       </p>

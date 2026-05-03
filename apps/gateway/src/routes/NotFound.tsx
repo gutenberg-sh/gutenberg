@@ -12,12 +12,12 @@ export function NotFoundRoute() {
       <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
         404 / Not found
       </p>
-      <h1 className="text-[2.25rem] font-semibold leading-[1.05] tracking-[-0.034em] text-foreground sm:text-[3rem] lg:text-[3.5rem]">
+      <h1 className="text-[2.25rem] font-semibold leading-[1.12] tracking-[-0.034em] text-foreground sm:text-[3rem] lg:text-[3.5rem]">
         That URL doesn&apos;t resolve.
       </h1>
-      <p className="max-w-[58ch] text-[16px] leading-[1.6] text-foreground-soft sm:text-[17px]">
+      <p className="max-w-[58ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
         Releases live at{' '}
-        <code className="rounded-md border border-border bg-card px-1.5 py-0.5 font-mono text-[13px] tabular text-foreground">
+        <code className="rounded-none border border-border bg-card px-1.5 py-0.5 font-mono text-[13px] tabular text-foreground">
           /r/&lt;name&gt;/&lt;version&gt;
         </code>
         . Double-check both, then try again from search.
@@ -25,7 +25,7 @@ export function NotFoundRoute() {
       <div className="mt-2 flex items-center gap-3">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 rounded-lg bg-foreground px-3.5 py-2 text-[13px] font-medium text-background transition-colors hover:bg-foreground/92 active:translate-y-px"
+          className="inline-flex items-center gap-2 rounded-none bg-primary px-3.5 py-2 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px"
         >
           <ArrowLeft className="size-3.5" strokeWidth={2} aria-hidden />
           Back to search
