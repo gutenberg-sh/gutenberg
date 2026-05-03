@@ -5,7 +5,7 @@ import {
   strip_utf8_bom,
   verify_manifest_signature,
 } from './manifest.js';
-import { fetch_release_by_name_at_version } from './registry-read.js';
+import { fetch_release_by_registry_id_and_version } from './registry-read.js';
 import { fetch_blob } from './storage.js';
 import type {
   ContentUri,
@@ -23,18 +23,20 @@ export type VerifyContext = {
 };
 
 export async function resolve_release(
-  input: { name: string; version: string },
+  input: { registry_id: string; version: string },
   ctx: VerifyContext,
 ): Promise<{ release: GutenbergReleaseEvent; release_address: string }> {
-  const found = await fetch_release_by_name_at_version({
+  const found = await fetch_release_by_registry_id_and_version({
     rpc_url: ctx.rpc_url,
     program_id: ctx.program_id,
-    name: input.name,
+    registry_id: input.registry_id,
     version: input.version,
   });
 
   if (!found) {
-    throw new Error(`No release found for ${input.name}@${input.version}`);
+    throw new Error(
+      `No release found for ${input.registry_id}@${input.version}`,
+    );
   }
 
   return found;
@@ -88,7 +90,7 @@ export async function verify_manifest_uri(input: {
 
   if (
     parsed.publisher !== input.expected_release.publisher ||
-    parsed.name !== input.expected_release.name ||
+    parsed.registry_id !== input.expected_release.registry_id ||
     parsed.version !== input.expected_release.version
   ) {
     throw new Error('Manifest does not match the registered release');

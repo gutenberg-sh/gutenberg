@@ -15,8 +15,6 @@ import {
   DATABASE_URL,
   NODE_ENV,
   PORT,
-  PROGRAM_ID,
-  RECONCILE_LOOKBACK_SLOTS,
   SOLANA_RPC_URL,
   SOLANA_WS_URL,
 } from './config.tokens';
@@ -78,12 +76,6 @@ load_dotenv({ path: env_file_path, quiet: true });
         config.getOrThrow<string>('GUTENBERG_INDEXER_SOLANA_WS_URL'),
     },
     {
-      provide: PROGRAM_ID,
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) =>
-        config.getOrThrow<string>('GUTENBERG_INDEXER_PROGRAM_ID'),
-    },
-    {
       provide: BACKFILL_BATCH_SIZE,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
@@ -95,12 +87,6 @@ load_dotenv({ path: env_file_path, quiet: true });
       useFactory: (config: ConfigService) =>
         config.getOrThrow<number>('GUTENBERG_INDEXER_BACKFILL_TX_CONCURRENCY'),
     },
-    {
-      provide: RECONCILE_LOOKBACK_SLOTS,
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) =>
-        config.getOrThrow<number>('GUTENBERG_INDEXER_RECONCILE_LOOKBACK_SLOTS'),
-    },
   ],
   exports: [
     NestConfigModule,
@@ -109,10 +95,8 @@ load_dotenv({ path: env_file_path, quiet: true });
     DATABASE_URL,
     SOLANA_RPC_URL,
     SOLANA_WS_URL,
-    PROGRAM_ID,
     BACKFILL_BATCH_SIZE,
     BACKFILL_TX_CONCURRENCY,
-    RECONCILE_LOOKBACK_SLOTS,
   ],
 })
 export class ConfigModule {}

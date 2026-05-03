@@ -39,7 +39,7 @@ export function LookupDialog({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Open a publication"
+      aria-label="Open a release"
       onClick={() => on_open_change(false)}
       className="fixed inset-0 z-[60] flex items-start justify-center bg-background/92 p-4 pt-[18vh]"
     >
@@ -63,8 +63,10 @@ export function LookupDialog({
           </p>
           <p className="mt-1 text-[13px] text-foreground-soft">
             Search the registry — or paste{' '}
-            <span className="font-mono tabular text-foreground">name@version</span>{' '}
-            to jump straight to a version.
+            <span className="font-mono tabular text-foreground">
+              registry_id@version
+            </span>{' '}
+            to jump straight to a release.
           </p>
         </div>
         <LookupForm

@@ -6,10 +6,11 @@ import {
 } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 
+import { GUTENBERG_REGISTRY_PROGRAM_ID } from '@gutenberg/core';
+
 import {
   BACKFILL_BATCH_SIZE,
   BACKFILL_TX_CONCURRENCY,
-  PROGRAM_ID,
 } from '../../common/config/config.tokens';
 import { cursorsTable } from '../../common/database/tables';
 
@@ -24,7 +25,6 @@ export class BackfillService implements OnApplicationBootstrap {
   private running = false;
 
   constructor(
-    @Inject(PROGRAM_ID) private readonly program_id: string,
     @Inject(BACKFILL_BATCH_SIZE) private readonly batch_size: number,
     @Inject(BACKFILL_TX_CONCURRENCY)
     private readonly tx_concurrency: number,
@@ -74,7 +74,7 @@ export class BackfillService implements OnApplicationBootstrap {
 
     while (true) {
       const signatures = await this.rpc.get_signatures_for_address({
-        address: this.program_id,
+        address: GUTENBERG_REGISTRY_PROGRAM_ID,
         limit: this.batch_size,
         ...(before ? { before } : {}),
       });
@@ -122,7 +122,7 @@ export class BackfillService implements OnApplicationBootstrap {
 
     while (true) {
       const signatures = await this.rpc.get_signatures_for_address({
-        address: this.program_id,
+        address: GUTENBERG_REGISTRY_PROGRAM_ID,
         limit: this.batch_size,
         ...(before ? { before } : {}),
         ...(input.until_signature ? { until: input.until_signature } : {}),

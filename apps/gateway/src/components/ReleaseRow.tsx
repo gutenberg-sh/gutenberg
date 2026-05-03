@@ -13,9 +13,10 @@ export function PublicationList({ children }: { children: ReactNode }) {
 }
 
 export function ReleaseRow({ release }: { release: ReleaseDto }) {
-  const name = release.name?.name ?? release.name_id;
+  const registry_id =
+    release.publication?.registry_id ?? release.publication_id;
   const publisher_address = release.publisher?.address;
-  const target = `/publication/${encodeURIComponent(name)}/${encodeURIComponent(release.version)}`;
+  const target = `/publication/${encodeURIComponent(registry_id)}/${encodeURIComponent(release.version)}`;
 
   return (
     <Link
@@ -29,7 +30,7 @@ export function ReleaseRow({ release }: { release: ReleaseDto }) {
       <div className="grid min-w-0 gap-1.5 px-1 sm:px-2">
         <div className="flex min-w-0 items-baseline gap-2">
           <span className="truncate text-[15px] font-medium tracking-[-0.005em] text-foreground group-hover:underline">
-            {name}
+            {registry_id}
           </span>
           <span className="font-mono text-[12px] tabular text-foreground-soft">
             {release.version}
@@ -87,7 +88,7 @@ function Dot() {
 export function ReleaseListHeader() {
   return (
     <div className="hidden grid-cols-[minmax(0,1fr)_auto] gap-x-6 border-b border-border pb-2 text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground sm:grid">
-      <div className="px-2">Publication</div>
+      <div className="px-2">Registry ID</div>
       <div className="px-2 text-right tabular-nums">Published</div>
     </div>
   );

@@ -16,8 +16,7 @@ function parse_hex(hex: string): { r: number; g: number; b: number } | null {
 }
 
 function rgb_to_hex(r: number, g: number, b: number): string {
-  const clamp = (n: number) =>
-    Math.max(0, Math.min(255, Math.round(n)));
+  const clamp = (n: number) => Math.max(0, Math.min(255, Math.round(n)));
   return `#${[clamp(r), clamp(g), clamp(b)]
     .map((x) => x.toString(16).padStart(2, '0'))
     .join('')}`;

@@ -24,10 +24,7 @@ import {
 } from '@/lib/pack-files-for-publish';
 import { cn } from '@/lib/utils';
 
-const MODE_COPY: Record<
-  BrowserPackMode,
-  { label: string; hint: string }
-> = {
+const MODE_COPY: Record<BrowserPackMode, { label: string; hint: string }> = {
   folder: {
     label: 'Folder',
     hint: 'Uses your browser folder picker so relative paths match your project.',
@@ -47,9 +44,9 @@ export function PublishWorkspace() {
   const [mode, set_mode] = useState<BrowserPackMode>('folder');
   const [raw_files, set_raw_files] = useState<File[]>([]);
   const [zip_file, set_zip_file] = useState<File | null>(null);
-  const [packed_files, set_packed_files] = useState<PublishSessionFile[] | null>(
-    null,
-  );
+  const [packed_files, set_packed_files] = useState<
+    PublishSessionFile[] | null
+  >(null);
   const [pack_error, set_pack_error] = useState<string | null>(null);
   const [unpack_busy, set_unpack_busy] = useState(false);
   const [drag_active, set_drag_active] = useState(false);
@@ -58,7 +55,9 @@ export function PublishWorkspace() {
   const files_input_ref = useRef<HTMLInputElement>(null);
   const zip_input_ref = useRef<HTMLInputElement>(null);
 
-  const [name, set_name] = useState(() => search_params.get('name') ?? '');
+  const [registry_id, set_registry_id] = useState(
+    () => search_params.get('registry_id') ?? '',
+  );
   const [version, set_version] = useState(
     () => search_params.get('version') ?? '',
   );
@@ -301,8 +300,8 @@ export function PublishWorkspace() {
           </h1>
         </div>
         <p className="max-w-[62ch] text-[15px] leading-[1.68] text-foreground-soft">
-          Add a folder, loose files, or a zip, set name and version, then connect
-          your wallet. Entry is{' '}
+          Add a folder, loose files, or a zip, set registry id and version, then
+          connect your wallet. Entry is{' '}
           <span className="font-mono text-[0.95em] tabular text-foreground">
             /index.md
           </span>{' '}
@@ -353,7 +352,11 @@ export function PublishWorkspace() {
                       : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground-soft',
                   )}
                 >
-                  <Icon className="size-3 shrink-0" strokeWidth={1.85} aria-hidden />
+                  <Icon
+                    className="size-3 shrink-0"
+                    strokeWidth={1.85}
+                    aria-hidden
+                  />
                   {MODE_COPY[key].label}
                 </button>
               ))}
@@ -364,7 +367,9 @@ export function PublishWorkspace() {
               type="file"
               className="sr-only"
               multiple
-              {...({ webkitdirectory: '' } as InputHTMLAttributes<HTMLInputElement>)}
+              {...({
+                webkitdirectory: '',
+              } as InputHTMLAttributes<HTMLInputElement>)}
               onChange={on_folder_change}
             />
             <input
@@ -392,12 +397,16 @@ export function PublishWorkspace() {
                     className="h-auto w-full justify-center gap-2 rounded-none border-2 border-dashed border-border py-5 text-[13px] font-medium active:translate-y-px"
                     onClick={on_pick_folder}
                   >
-                    <FolderOpen className="size-4" strokeWidth={1.85} aria-hidden />
+                    <FolderOpen
+                      className="size-4"
+                      strokeWidth={1.85}
+                      aria-hidden
+                    />
                     Choose project folder
                   </Button>
                   <p className="text-center font-mono text-[10.5px] leading-snug text-muted-foreground">
-                    Drag and drop cannot preserve folder paths reliably; the picker
-                    keeps your tree intact.
+                    Drag and drop cannot preserve folder paths reliably; the
+                    picker keeps your tree intact.
                   </p>
                 </div>
               ) : (
@@ -521,15 +530,15 @@ export function PublishWorkspace() {
         <aside className="grid gap-4 lg:sticky lg:top-20">
           <section className="border border-border bg-card/50 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:p-4">
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-              Publication details
+              Release details
             </p>
             <div className="mt-3 grid gap-3">
               <div className="grid gap-1.5">
-                <Label htmlFor="pub-name">Name</Label>
+                <Label htmlFor="pub-registry-id">Registry ID</Label>
                 <Input
-                  id="pub-name"
-                  value={name}
-                  onChange={(e) => set_name(e.target.value)}
+                  id="pub-registry-id"
+                  value={registry_id}
+                  onChange={(e) => set_registry_id(e.target.value)}
                   placeholder="river-notes"
                   autoComplete="off"
                   spellCheck={false}
@@ -562,7 +571,7 @@ export function PublishWorkspace() {
       <PublishComposerFooter
         bundle_fingerprint={bundle_fingerprint}
         packed_files={packed_files}
-        name={name}
+        registry_id={registry_id}
         version={version}
       />
     </Container>
@@ -572,12 +581,12 @@ export function PublishWorkspace() {
 function PublishComposerFooter({
   bundle_fingerprint,
   packed_files,
-  name,
+  registry_id,
   version,
 }: {
   bundle_fingerprint: string;
   packed_files: PublishSessionFile[] | null;
-  name: string;
+  registry_id: string;
   version: string;
 }) {
   const composed = useMemo(() => {
@@ -587,7 +596,7 @@ function PublishComposerFooter({
 
     try {
       const session = build_standalone_publish_session({
-        metadata: { name, version },
+        metadata: { registry_id, version },
         files: packed_files,
       });
       return { kind: 'ready' as const, session };
@@ -597,11 +606,7 @@ function PublishComposerFooter({
         message: error instanceof Error ? error.message : String(error),
       };
     }
-  }, [
-    packed_files,
-    name,
-    version,
-  ]);
+  }, [packed_files, registry_id, version]);
 
   return (
     <div className="mt-6 grid gap-3 lg:mt-8">
@@ -615,7 +620,7 @@ function PublishComposerFooter({
       ) : null}
       {composed.kind === 'ready' ? (
         <PublishFlowPanel
-          key={`${name.trim()}\0${version.trim()}\0${bundle_fingerprint}`}
+          key={`${registry_id.trim()}\0${version.trim()}\0${bundle_fingerprint}`}
           session={composed.session}
         />
       ) : null}

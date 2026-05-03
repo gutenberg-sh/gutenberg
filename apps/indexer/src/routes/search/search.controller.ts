@@ -2,40 +2,42 @@ import { Controller, Get, Query, UseInterceptors } from '@nestjs/common';
 import { desc, ilike, or, sql } from 'drizzle-orm';
 
 import type { QueryConfig } from '../../common/database/db.types';
-import { namesTable } from '../../common/database/tables';
+import { publicationsTable } from '../../common/database/tables';
 import { SerializeWith } from '../../common/decorators/serialize-with.decorator';
 import { SerializationInterceptor } from '../../common/interceptors/serialization.interceptor';
 import { IncludesPipe } from '../../common/pipes/includes.pipe';
 import {
-  NAME_RELATIONS,
-  NameWithRelationsDto,
-} from '../../modules/names/names.dto';
-import { NamesService } from '../../modules/names/names.service';
+  PUBLICATION_RELATIONS,
+  PublicationWithRelationsDto,
+} from '../../modules/publications/publications.dto';
+import { PublicationsService } from '../../modules/publications/publications.service';
 
-import { SearchNamesRequestDto } from './search.dtos';
+import { SearchPublicationsRequestDto } from './search.dtos';
 
 @Controller('search')
 @UseInterceptors(SerializationInterceptor)
 export class SearchController {
-  constructor(private readonly names_service: NamesService) {}
+  constructor(private readonly publications_service: PublicationsService) {}
 
   @Get()
-  @SerializeWith(NameWithRelationsDto)
+  @SerializeWith(PublicationWithRelationsDto)
   async search(
-    @Query() query: SearchNamesRequestDto,
-    @Query('includes', new IncludesPipe({ allowed: NAME_RELATIONS }))
-    includes: QueryConfig<'namesTable'>['with'] = {},
-  ): Promise<NameWithRelationsDto[]> {
+    @Query() query: SearchPublicationsRequestDto,
+    @Query('includes', new IncludesPipe({ allowed: PUBLICATION_RELATIONS }))
+    includes: QueryConfig<'publicationsTable'>['with'] = {},
+  ): Promise<PublicationWithRelationsDto[]> {
     const trimmed = query.q.trim();
     const like_pattern = `%${trimmed.replace(/[%_]/g, '\\$&')}%`;
 
-    return this.names_service.find_many({
+    return this.publications_service.find_many({
       where: or(
-        ilike(namesTable.name, like_pattern),
-        sql`${namesTable.name} % ${trimmed}`,
+        ilike(publicationsTable.registry_id, like_pattern),
+        sql`${publicationsTable.registry_id} % ${trimmed}`,
       ),
       with: includes,
-      orderBy: [desc(sql`similarity(${namesTable.name}, ${trimmed})`)],
+      orderBy: [
+        desc(sql`similarity(${publicationsTable.registry_id}, ${trimmed})`),
+      ],
       limit: query.limit,
       offset: query.offset,
     });

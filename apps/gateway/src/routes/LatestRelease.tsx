@@ -1,3 +1,8 @@
+import {
+  GUTENBERG_REGISTRY_PROGRAM_ID,
+  REGISTRY_ID_RE,
+  find_latest_release_by_registry_id,
+} from '@gutenberg/core';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
@@ -5,9 +10,6 @@ import { Navigate, useParams } from 'react-router-dom';
 import { ErrorView } from '@/components/ErrorView';
 import { Container } from '@/components/Layout';
 import { env } from '@/env';
-import { find_latest_release_by_name } from '@/lib/registry';
-
-const NAME_RE = /^[a-z0-9][a-z0-9._-]*$/;
 
 type State =
   | { status: 'loading' }
@@ -16,35 +18,36 @@ type State =
 
 export function LatestReleaseRoute() {
   const params = useParams();
-  const name = params.name;
+  const registry_id = params.registry_id;
   const [state, set_state] = useState<State>({ status: 'loading' });
 
-  const valid_name = name && NAME_RE.test(name) ? name : undefined;
+  const valid_registry_id =
+    registry_id && REGISTRY_ID_RE.test(registry_id) ? registry_id : undefined;
 
-  const [last_valid_name, set_last_valid_name] = useState(valid_name);
-  if (last_valid_name !== valid_name) {
-    set_last_valid_name(valid_name);
+  const [last_valid, set_last_valid] = useState(valid_registry_id);
+  if (last_valid !== valid_registry_id) {
+    set_last_valid(valid_registry_id);
     set_state({ status: 'loading' });
   }
 
   useEffect(() => {
-    if (!valid_name) return;
+    if (!valid_registry_id) return;
 
     let cancelled = false;
 
     void (async () => {
       try {
-        const release = await find_latest_release_by_name({
+        const release = await find_latest_release_by_registry_id({
           rpc_url: env.VITE_GUTENBERG_SOLANA_RPC_URL,
-          program_id: env.VITE_GUTENBERG_REGISTRY_PROGRAM_ID,
-          name: valid_name,
+          program_id: GUTENBERG_REGISTRY_PROGRAM_ID,
+          registry_id: valid_registry_id,
         });
         if (cancelled) return;
 
         if (!release) {
           set_state({
             status: 'error',
-            message: `No publications found for "${valid_name}".`,
+            message: `No releases found for registry id "${valid_registry_id}".`,
           });
           return;
         }
@@ -62,14 +65,14 @@ export function LatestReleaseRoute() {
     return () => {
       cancelled = true;
     };
-  }, [valid_name]);
+  }, [valid_registry_id]);
 
-  if (!name || !NAME_RE.test(name)) {
+  if (!registry_id || !REGISTRY_ID_RE.test(registry_id)) {
     return (
       <Container className="py-20 lg:py-28">
         <ErrorView
-          title="That name doesn't look right"
-          message={`"${name ?? ''}" isn't a valid publication name. Names use lowercase letters, numbers, dots, underscores, or hyphens.`}
+          title="That registry id doesn't look right"
+          message={`"${registry_id ?? ''}" isn't a valid registry id. Use lowercase letters, numbers, dots, underscores, or hyphens.`}
         />
       </Container>
     );
@@ -79,7 +82,7 @@ export function LatestReleaseRoute() {
     return (
       <Navigate
         replace
-        to={`/publication/${encodeURIComponent(name)}/${encodeURIComponent(state.version)}`}
+        to={`/publication/${encodeURIComponent(registry_id)}/${encodeURIComponent(state.version)}`}
       />
     );
   }
@@ -88,7 +91,7 @@ export function LatestReleaseRoute() {
     return (
       <Container className="py-20 lg:py-28">
         <ErrorView
-          title="Couldn't find the latest version"
+          title="Couldn't find the latest release"
           message={state.message}
         />
       </Container>
@@ -108,13 +111,14 @@ export function LatestReleaseRoute() {
         />
         <div className="grid gap-3">
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-            Finding the latest version
+            Finding the latest release
           </p>
           <h2 className="text-[26px] font-semibold leading-[1.16] tracking-tight text-foreground sm:text-[32px]">
-            {name}
+            {registry_id}
           </h2>
           <p className="max-w-[60ch] text-[15px] leading-[1.68] text-foreground-soft">
-            Asking Solana for the most recent publication of this name.
+            Asking Solana for the most recent release for this publication
+            (registry id).
           </p>
         </div>
       </div>

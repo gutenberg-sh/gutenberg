@@ -1,3 +1,4 @@
+import { REGISTRY_ID_RE } from '@gutenberg/core';
 import { ArrowRight, ArrowUpRight, CornerDownLeft, Search } from 'lucide-react';
 import {
   useEffect,
@@ -14,10 +15,8 @@ import { PublisherAddressLink } from '@/components/PublisherAddressLink';
 import { Button } from '@/components/ui/button';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { format_relative_time, shorten } from '@/lib/format';
-import { useNameSearch, type NameDto } from '@/lib/queries';
+import { usePublicationSearch, type PublicationDto } from '@/lib/queries';
 import { cn } from '@/lib/utils';
-
-const NAME_RE = /^[a-z0-9][a-z0-9._-]*$/;
 const SUGGESTION_LIMIT = 8;
 
 type Size = 'sm' | 'lg';
@@ -25,7 +24,7 @@ type Size = 'sm' | 'lg';
 export function LookupForm({
   auto_focus = false,
   size = 'lg',
-  placeholder = 'find a publication or publisher',
+  placeholder = 'find a publication (registry id) or publisher',
   on_navigate,
   className,
 }: {
@@ -51,7 +50,7 @@ export function LookupForm({
   const has_at = trimmed.includes('@');
   const debounced_query = useDebouncedValue(has_at ? '' : trimmed, 140);
 
-  const search = useNameSearch(
+  const search = usePublicationSearch(
     {
       q: debounced_query,
       limit: SUGGESTION_LIMIT,
@@ -60,7 +59,7 @@ export function LookupForm({
     { enabled: focused && debounced_query.length > 0 },
   );
 
-  const suggestions = useMemo<NameDto[]>(
+  const suggestions = useMemo<PublicationDto[]>(
     () => (focused && debounced_query.length > 0 ? (search.data ?? []) : []),
     [focused, debounced_query, search.data],
   );
@@ -81,16 +80,16 @@ export function LookupForm({
     return () => cancelAnimationFrame(frame);
   }, [auto_focus]);
 
-  function go_to_release(name: string, version: string) {
+  function go_to_release(registry_id: string, version: string) {
     on_navigate?.();
     void navigate(
-      `/publication/${encodeURIComponent(name)}/${encodeURIComponent(version)}`,
+      `/publication/${encodeURIComponent(registry_id)}/${encodeURIComponent(version)}`,
     );
   }
 
-  function go_to_name(name: string) {
+  function go_to_publication(registry_id: string) {
     on_navigate?.();
-    void navigate(`/publication/${encodeURIComponent(name)}`);
+    void navigate(`/publication/${encodeURIComponent(registry_id)}`);
   }
 
   function go_to_search(query: string) {
@@ -104,12 +103,12 @@ export function LookupForm({
 
     const highlighted = suggestions[highlight];
     if (highlighted) {
-      go_to_name(highlighted.name);
+      go_to_publication(highlighted.registry_id);
       return;
     }
 
     if (!trimmed) {
-      set_error('Type a name to start.');
+      set_error('Type a registry id or search query to start.');
       return;
     }
 
@@ -120,21 +119,21 @@ export function LookupForm({
 
     const at = trimmed.indexOf('@');
     if (at <= 0 || at === trimmed.length - 1) {
-      set_error('Publications use the form name@version (e.g. gutenberg-demo@1.0.0).');
+      set_error('Use registry_id@version (e.g. gutenberg-demo@1.0.0).');
       return;
     }
 
-    const name = trimmed.slice(0, at);
+    const registry_id = trimmed.slice(0, at);
     const version = trimmed.slice(at + 1);
 
-    if (!NAME_RE.test(name)) {
+    if (!REGISTRY_ID_RE.test(registry_id)) {
       set_error(
-        'Names use lowercase letters, numbers, dots, underscores, or hyphens.',
+        'Registry ids use lowercase letters, numbers, dots, underscores, or hyphens.',
       );
       return;
     }
 
-    go_to_release(name, version);
+    go_to_release(registry_id, version);
   }
 
   function on_key_down(event: ReactKeyboardEvent<HTMLInputElement>) {
@@ -194,10 +193,7 @@ export function LookupForm({
               lg ? 'pl-5 pr-2.5' : 'pl-3.5 pr-1.5',
             )}
           >
-            <Search
-              className={lg ? 'size-4' : 'size-3.5'}
-              strokeWidth={1.85}
-            />
+            <Search className={lg ? 'size-4' : 'size-3.5'} strokeWidth={1.85} />
           </span>
 
           <input
@@ -231,18 +227,18 @@ export function LookupForm({
             required
             className={cn(
               'min-w-0 flex-1 bg-transparent font-mono tabular text-foreground placeholder:text-muted-foreground/55 focus:outline-none',
-              lg
-                ? 'h-14 pr-2 text-[15px]'
-                : 'h-11 pr-2 text-[13.5px]',
+              lg ? 'h-14 pr-2 text-[15px]' : 'h-11 pr-2 text-[13.5px]',
             )}
           />
 
           <Button
             type="submit"
-            aria-label={has_at ? 'Open publication' : 'Search'}
+            aria-label={has_at ? 'Open release' : 'Search'}
             className={cn(
               'shrink-0 gap-1.5 font-medium active:translate-y-px',
-              lg ? 'mx-1.5 my-1.5 rounded-none px-4 text-[13.5px]' : 'mx-1 my-1 rounded-none px-3 text-[12.5px]',
+              lg
+                ? 'mx-1.5 my-1.5 rounded-none px-4 text-[13.5px]'
+                : 'mx-1 my-1 rounded-none px-3 text-[12.5px]',
             )}
           >
             <span className="inline-flex min-w-[4.25rem] justify-center">
@@ -268,18 +264,14 @@ export function LookupForm({
             error
           ) : (
             <>
-              <span className="font-mono tabular text-foreground-soft">
-                ↑↓
-              </span>{' '}
+              <span className="font-mono tabular text-foreground-soft">↑↓</span>{' '}
               to pick ·{' '}
-              <span className="font-mono tabular text-foreground-soft">
-                ↵
-              </span>{' '}
+              <span className="font-mono tabular text-foreground-soft">↵</span>{' '}
               to open ·{' '}
               <span className="font-mono tabular text-foreground-soft">
-                name@version
+                registry_id@version
               </span>{' '}
-              opens that exact publication
+              opens that exact release
             </>
           )}
         </p>
@@ -290,9 +282,9 @@ export function LookupForm({
               <SuggestionSkeleton />
             ) : search.isError ? (
               <div className="rounded-none border-2 border-border bg-elevated px-4 py-3 text-[12px] text-muted-foreground">
-                Search is offline. You can still open a publication by typing{' '}
+                Search is offline. You can still open a release by typing{' '}
                 <span className="font-mono tabular text-foreground">
-                  name@version
+                  registry_id@version
                 </span>
                 .
               </div>
@@ -330,7 +322,7 @@ export function LookupForm({
                     item={item}
                     active={highlight === idx}
                     on_hover={() => set_highlight(idx)}
-                    on_select={() => go_to_name(item.name)}
+                    on_select={() => go_to_publication(item.registry_id)}
                   />
                 ))}
                 <li>
@@ -367,7 +359,7 @@ function SuggestionItem({
   on_select,
 }: {
   id: string;
-  item: NameDto;
+  item: PublicationDto;
   active: boolean;
   on_hover: () => void;
   on_select: () => void;
@@ -391,7 +383,7 @@ function SuggestionItem({
       <div className="grid min-w-0 gap-0.5">
         <div className="flex min-w-0 items-baseline gap-2">
           <span className="truncate text-[14px] font-medium text-foreground">
-            {item.name}
+            {item.registry_id}
           </span>
           {latest ? (
             <span className="font-mono text-[11.5px] tabular text-foreground-soft">

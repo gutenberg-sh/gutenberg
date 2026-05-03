@@ -18,8 +18,10 @@ export function format_relative_time(iso: string): string {
   const formatter = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
 
   if (abs < 60) return formatter.format(diff_seconds, 'second');
-  if (abs < 3_600) return formatter.format(Math.round(diff_seconds / 60), 'minute');
-  if (abs < 86_400) return formatter.format(Math.round(diff_seconds / 3_600), 'hour');
+  if (abs < 3_600)
+    return formatter.format(Math.round(diff_seconds / 60), 'minute');
+  if (abs < 86_400)
+    return formatter.format(Math.round(diff_seconds / 3_600), 'hour');
   if (abs < 86_400 * 30)
     return formatter.format(Math.round(diff_seconds / 86_400), 'day');
   if (abs < 86_400 * 365)
@@ -49,6 +51,7 @@ export function format_count(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) return '—';
   if (value < 1_000) return value.toLocaleString();
   if (value < 10_000) return value.toLocaleString();
-  if (value < 1_000_000) return `${(value / 1_000).toFixed(value < 10_000 ? 2 : 1)}k`;
+  if (value < 1_000_000)
+    return `${(value / 1_000).toFixed(value < 10_000 ? 2 : 1)}k`;
   return `${(value / 1_000_000).toFixed(2)}M`;
 }

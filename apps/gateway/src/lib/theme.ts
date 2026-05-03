@@ -1,19 +1,17 @@
-export const THEME_STORAGE_KEY = 'gutenberg-theme';
+const THEME_STORAGE_KEY = 'gutenberg-theme';
 
-export type StoredTheme = 'light' | 'dark';
 export type ThemeMode = 'light' | 'dark' | 'system';
 
-/**
- * `light` / `dark` pin the UI; `null` follows `prefers-color-scheme` (no `light`/`dark` on `<html>`).
- */
-export function getStoredTheme(): StoredTheme | null {
+type StoredTheme = 'light' | 'dark';
+
+function get_stored_theme(): StoredTheme | null {
   const raw = localStorage.getItem(THEME_STORAGE_KEY);
   if (raw === 'light' || raw === 'dark') return raw;
   return null;
 }
 
 export function getThemeMode(): ThemeMode {
-  return getStoredTheme() ?? 'system';
+  return get_stored_theme() ?? 'system';
 }
 
 export function applyStoredTheme(
@@ -38,16 +36,4 @@ export function applyStoredTheme(
     return null;
   }
   return null;
-}
-
-export function isEffectiveDark(): boolean {
-  const r = document.documentElement;
-  if (r.classList.contains('light')) return false;
-  if (r.classList.contains('dark')) return true;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
-
-/** Toggle: pick the opposite of the *rendered* scheme and save it. */
-export function cycleLightDarkFromEffective(): void {
-  applyStoredTheme(isEffectiveDark() ? 'light' : 'dark');
 }

@@ -28,8 +28,7 @@ export abstract class BaseRepository<
     protected readonly db: NodePgDatabase<TSchemaType>,
     protected readonly table: TTable,
     protected readonly table_name: TTableName,
-  ) {
-  }
+  ) {}
 
   async create(
     data: InferCreateModel<TTable>,

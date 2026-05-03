@@ -4,9 +4,9 @@ use anchor_lang::prelude::*;
 pub struct ReleasePublished {
     pub publisher: Pubkey,
     pub release_address: Pubkey,
-    pub name_address: Pubkey,
+    pub publication_address: Pubkey,
     pub schema_version: u8,
-    pub name: String,
+    pub registry_id: String,
     pub version: String,
     pub manifest_uri: String,
     pub manifest_hash: [u8; 32],

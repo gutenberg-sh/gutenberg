@@ -13,7 +13,7 @@ import { useFeed } from '@/lib/queries';
 export function RecentReleases({ limit = 8 }: { limit?: number }) {
   const [page, set_page] = useState(0);
   const offset = page * limit;
-  const feed = useFeed({ limit, offset, includes: 'publisher,name' });
+  const feed = useFeed({ limit, offset, includes: 'publisher,publication' });
 
   if (feed.isError) {
     return null;
@@ -25,10 +25,7 @@ export function RecentReleases({ limit = 8 }: { limit?: number }) {
   const range_end = offset + releases.length;
 
   return (
-    <section
-      aria-label="Recently published"
-      className="grid gap-5"
-    >
+    <section aria-label="Recently published" className="grid gap-5">
       <header className="flex items-end justify-between gap-4">
         <div className="grid gap-1.5">
           <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
@@ -61,8 +58,7 @@ export function RecentReleases({ limit = 8 }: { limit?: number }) {
               ) : (
                 <>
                   Showing{' '}
-                  <span className="text-foreground-soft">{range_start}</span>
-                  –
+                  <span className="text-foreground-soft">{range_start}</span>–
                   <span className="text-foreground-soft">{range_end}</span>
                   {has_next
                     ? ' · more on the next page'

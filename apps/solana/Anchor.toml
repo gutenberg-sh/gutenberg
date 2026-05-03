@@ -5,13 +5,13 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-gutenberg_registry = "NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517"
+gutenberg_registry = "gut2vkAAtjGsxj3VDkFcRCB1HbwTd6VN2u6wZMno6Wt"
 
 [programs.devnet]
-gutenberg_registry = "NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517"
+gutenberg_registry = "gut2vkAAtjGsxj3VDkFcRCB1HbwTd6VN2u6wZMno6Wt"
 
 [programs.mainnet]
-gutenberg_registry = "NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517"
+gutenberg_registry = "gut2vkAAtjGsxj3VDkFcRCB1HbwTd6VN2u6wZMno6Wt"
 
 [registry]
 url = "https://api.apr.dev"

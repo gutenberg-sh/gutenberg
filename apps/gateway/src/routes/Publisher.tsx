@@ -36,7 +36,7 @@ export function PublisherRoute() {
   const releases = usePublisherReleases(address, {
     limit: PAGE_SIZE,
     offset: page * PAGE_SIZE,
-    includes: 'publisher,name',
+    includes: 'publisher,publication',
   });
 
   if (!address) {
@@ -105,7 +105,11 @@ export function PublisherRoute() {
                 chip_focus,
               )}
             >
-              <ExternalLink className="size-3.5" strokeWidth={1.85} aria-hidden />
+              <ExternalLink
+                className="size-3.5"
+                strokeWidth={1.85}
+                aria-hidden
+              />
               Explorer
             </a>
           </div>
@@ -113,7 +117,10 @@ export function PublisherRoute() {
 
         <div className="grid max-w-[62ch] gap-3 text-[15px] leading-[1.68] text-foreground-soft">
           {publisher.isLoading ? (
-            <div className="h-4 max-w-xs animate-pulse rounded-none bg-muted/70" aria-hidden />
+            <div
+              className="h-4 max-w-xs animate-pulse rounded-none bg-muted/70"
+              aria-hidden
+            />
           ) : publisher.data ? (
             <p>
               First seen{' '}
@@ -161,9 +168,7 @@ export function PublisherRoute() {
             <Pagination
               page={page + 1}
               has_prev={page > 0 && !releases.isLoading && !releases.isError}
-              has_next={
-                has_next && !releases.isLoading && !releases.isError
-              }
+              has_next={has_next && !releases.isLoading && !releases.isError}
               loading={releases.isFetching}
               on_prev={() => set_page((p) => Math.max(0, p - 1))}
               on_next={() => set_page((p) => p + 1)}
@@ -175,7 +180,10 @@ export function PublisherRoute() {
         {releases.isError ? (
           <ErrorView
             title="Couldn't load this publisher's publications"
-            message={api_error_message(releases.error, "We can't reach the indexer right now. Try again in a moment.")}
+            message={api_error_message(
+              releases.error,
+              "We can't reach the indexer right now. Try again in a moment.",
+            )}
             back_to="/browse"
           />
         ) : list.length === 0 ? (

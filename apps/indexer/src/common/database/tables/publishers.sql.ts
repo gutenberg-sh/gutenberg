@@ -3,7 +3,7 @@ import { pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 
 import { create_prefixed_id } from '../id';
 
-import { namesTable } from './names.sql';
+import { publicationsTable } from './publications.sql';
 import { releasesTable } from './releases.sql';
 
 export const publishersTable = pgTable(
@@ -26,6 +26,8 @@ export const publishersTable = pgTable(
 );
 
 export const publishersRelations = relations(publishersTable, ({ many }) => ({
-  names: many(namesTable, { relationName: 'publisher_names' }),
+  publications: many(publicationsTable, {
+    relationName: 'publisher_publications',
+  }),
   releases: many(releasesTable, { relationName: 'publisher_releases' }),
 }));

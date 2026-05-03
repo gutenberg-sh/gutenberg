@@ -1,3 +1,4 @@
+import { GUTENBERG_REGISTRY_PROGRAM_ID } from '@gutenberg/core';
 import { useEffect, useReducer } from 'react';
 
 import { env } from '@/env';
@@ -25,7 +26,7 @@ function delay(ms: number): Promise<void> {
 }
 
 export type ReleaseSource = {
-  name: string;
+  registry_id: string;
   version: string;
 };
 
@@ -55,7 +56,11 @@ type Action =
     };
 
 const INITIAL_STEPS: readonly VerifyStep[] = [
-  { id: 'registry', label: 'Looking up the publication on chain', state: 'pending' },
+  {
+    id: 'registry',
+    label: 'Looking up the release on chain',
+    state: 'pending',
+  },
   {
     id: 'manifest',
     label: 'Checking the manifest signature',
@@ -116,7 +121,7 @@ export function useVerifiedRelease(source: ReleaseSource): State {
     steps: INITIAL_STEPS.map((step) => ({ ...step })),
   });
 
-  const source_key = `${source.name}@${source.version}`;
+  const source_key = `${source.registry_id}@${source.version}`;
 
   useEffect(() => {
     let cancelled = false;
@@ -124,7 +129,7 @@ export function useVerifiedRelease(source: ReleaseSource): State {
       rpc_url: env.VITE_GUTENBERG_SOLANA_RPC_URL,
       irys_gateway: env.VITE_GUTENBERG_IRYS_GATEWAY,
       arweave_mirrors: env.VITE_GUTENBERG_ARWEAVE_MIRRORS,
-      program_id: env.VITE_GUTENBERG_REGISTRY_PROGRAM_ID,
+      program_id: GUTENBERG_REGISTRY_PROGRAM_ID,
     };
 
     void (async () => {
@@ -135,7 +140,7 @@ export function useVerifiedRelease(source: ReleaseSource): State {
 
       try {
         const out = await resolve_release(
-          { name: source.name, version: source.version },
+          { registry_id: source.registry_id, version: source.version },
           ctx,
         );
         release = out.release;
@@ -170,7 +175,7 @@ export function useVerifiedRelease(source: ReleaseSource): State {
           completed_before_fail: [
             {
               id: 'registry',
-              detail: `${release.name}@${release.version}`,
+              detail: `${release.registry_id}@${release.version}`,
             },
           ],
         });
@@ -195,7 +200,7 @@ export function useVerifiedRelease(source: ReleaseSource): State {
           completed_before_fail: [
             {
               id: 'registry',
-              detail: `${release.name}@${release.version}`,
+              detail: `${release.registry_id}@${release.version}`,
             },
             { id: 'manifest', detail: short_uri(release.manifest) },
           ],
@@ -208,7 +213,7 @@ export function useVerifiedRelease(source: ReleaseSource): State {
       await delay(Math.max(0, MIN_VERIFY_SHELL_MS - elapsed));
       if (cancelled) return;
 
-      const d_registry = `${release.name}@${release.version}`;
+      const d_registry = `${release.registry_id}@${release.version}`;
       const d_manifest = short_uri(release.manifest);
       const d_index = `${verified.files.size} files`;
 

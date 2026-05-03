@@ -11,7 +11,7 @@ export type PublishSessionFile = {
 
 export type PublishSessionInput = {
   protocol_version: typeof PUBLISH_SESSION_PROTOCOL_VERSION;
-  name: string;
+  registry_id: string;
   version: string;
   entry: `/${string}`;
   prev_version?: string;

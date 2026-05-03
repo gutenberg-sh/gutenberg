@@ -104,7 +104,9 @@ export function FilmGrain() {
     const schedule_loop = () => {
       if (!alive) return;
       paint();
-      const ms = reduced_motion_ref.current ? REDUCED_MOTION_MS : Math.round(1000 / FPS);
+      const ms = reduced_motion_ref.current
+        ? REDUCED_MOTION_MS
+        : Math.round(1000 / FPS);
       timer = window.setTimeout(schedule_loop, ms);
     };
 
@@ -126,7 +128,8 @@ export function FilmGrain() {
       className="pointer-events-none fixed inset-0 z-45"
       style={{
         opacity: 'var(--grain-opacity, 0.11)',
-        mixBlendMode: 'var(--grain-blend-mode, overlay)' as CSSProperties['mixBlendMode'],
+        mixBlendMode:
+          'var(--grain-blend-mode, overlay)' as CSSProperties['mixBlendMode'],
       }}
     >
       <canvas ref={canvas_ref} className="block h-full w-full" />

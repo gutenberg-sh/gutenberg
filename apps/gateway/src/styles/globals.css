@@ -201,7 +201,9 @@ html.dark {
     font-family: var(--font-mono);
     font-size: 0.875rem;
     line-height: 1.6;
-    font-feature-settings: 'ss01' 1, 'calt' 0;
+    font-feature-settings:
+      'ss01' 1,
+      'calt' 0;
   }
   h1,
   h2,
@@ -406,7 +408,8 @@ html.dark #root::before {
     }
   }
   .animate-verify-big-check-pop {
-    animation: verify-big-check-pop 0.62s cubic-bezier(0.34, 1.35, 0.64, 1) forwards;
+    animation: verify-big-check-pop 0.62s cubic-bezier(0.34, 1.35, 0.64, 1)
+      forwards;
   }
   .tactical-display {
     font-family: var(--font-sans);

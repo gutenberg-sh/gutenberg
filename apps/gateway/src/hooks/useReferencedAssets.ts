@@ -1,3 +1,4 @@
+import { GUTENBERG_REGISTRY_PROGRAM_ID } from '@gutenberg/core';
 import { useEffect, useMemo, useState } from 'react';
 
 import { env } from '@/env';
@@ -5,9 +6,10 @@ import type { VerifiedFile } from '@/lib/types';
 import { load_file_bytes } from '@/lib/verify';
 
 const URL_RE_MD_LINK = /\[[^\]]*\]\(([^)\s]+)\)/g;
-const URL_RE_HTML_SRC = /<\s*(?:img|source|video|audio)[^>]*\bsrc\s*=\s*"([^"]+)"/gi;
+const URL_RE_HTML_SRC =
+  /<\s*(?:img|source|video|audio)[^>]*\bsrc\s*=\s*"([^"]+)"/gi;
 
-export type AssetMap = ReadonlyMap<`/${string}`, string>;
+type AssetMap = ReadonlyMap<`/${string}`, string>;
 
 type State =
   | { status: 'idle' }
@@ -68,7 +70,11 @@ export function useReferencedAssets(input: {
       ? IDLE
       : referenced_asset_paths.length === 0
         ? EMPTY_SUCCESS
-        : { status: 'loading', loaded: 0, total: referenced_asset_paths.length };
+        : {
+            status: 'loading',
+            loaded: 0,
+            total: referenced_asset_paths.length,
+          };
 
   const [last_key, set_last_key] = useState(cache_key);
   const [state, set_state] = useState<State>(initial_state);
@@ -116,7 +122,7 @@ export function useReferencedAssets(input: {
                 rpc_url: env.VITE_GUTENBERG_SOLANA_RPC_URL,
                 irys_gateway: env.VITE_GUTENBERG_IRYS_GATEWAY,
                 arweave_mirrors: env.VITE_GUTENBERG_ARWEAVE_MIRRORS,
-                program_id: env.VITE_GUTENBERG_REGISTRY_PROGRAM_ID,
+                program_id: GUTENBERG_REGISTRY_PROGRAM_ID,
               },
             });
 

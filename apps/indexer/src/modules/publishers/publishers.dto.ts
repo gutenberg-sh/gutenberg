@@ -1,8 +1,14 @@
 import { OmitType, PartialType, PickType } from '@nestjs/mapped-types';
 import { Expose, Type } from 'class-transformer';
-import { IsArray, IsDate, IsOptional, IsString, Matches } from 'class-validator';
+import {
+  IsArray,
+  IsDate,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 
-import { NameWithRelationsDto } from '../names/names.dto';
+import { PublicationWithRelationsDto } from '../publications/publications.dto';
 import { ReleaseWithRelationsDto } from '../releases/releases.dto';
 
 export class BasePublisherDto {
@@ -25,10 +31,10 @@ export class BasePublisherDto {
   address: string;
 
   @Expose()
-  @Type(() => NameWithRelationsDto)
+  @Type(() => PublicationWithRelationsDto)
   @IsArray()
   @IsOptional()
-  names?: NameWithRelationsDto[];
+  publications?: PublicationWithRelationsDto[];
 
   @Expose()
   @Type(() => ReleaseWithRelationsDto)
@@ -37,12 +43,12 @@ export class BasePublisherDto {
   releases?: ReleaseWithRelationsDto[];
 }
 
-export const PUBLISHER_BASE_RELATIONS = ['names', 'releases'] as const;
+export const PUBLISHER_BASE_RELATIONS = ['publications', 'releases'] as const;
 export const PUBLISHER_NESTED_RELATIONS = [
-  'names.publisher',
-  'names.releases',
+  'publications.publisher',
+  'publications.releases',
   'releases.publisher',
-  'releases.name',
+  'releases.publication',
   'releases.manifest',
 ] as const;
 

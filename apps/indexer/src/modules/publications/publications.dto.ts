@@ -1,13 +1,19 @@
 import { OmitType, PartialType, PickType } from '@nestjs/mapped-types';
 import { Expose, Type } from 'class-transformer';
-import { IsArray, IsDate, IsOptional, IsString, Matches } from 'class-validator';
+import {
+  IsArray,
+  IsDate,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 
 import { PublisherWithRelationsDto } from '../publishers/publishers.dto';
 import { ReleaseWithRelationsDto } from '../releases/releases.dto';
 
-export class BaseNameDto {
+export class BasePublicationDto {
   @Expose()
-  @Matches(/^nam_[A-Za-z0-9_-]{21}$/)
+  @Matches(/^prt_[A-Za-z0-9_-]{21}$/)
   id: string;
 
   @Expose()
@@ -30,7 +36,7 @@ export class BaseNameDto {
 
   @Expose()
   @IsString()
-  name: string;
+  registry_id: string;
 
   @Expose()
   @Type(() => PublisherWithRelationsDto)
@@ -44,21 +50,24 @@ export class BaseNameDto {
   releases?: ReleaseWithRelationsDto[];
 }
 
-export const NAME_BASE_RELATIONS = ['publisher', 'releases'] as const;
-export const NAME_NESTED_RELATIONS = [
-  'publisher.names',
+export const PUBLICATION_BASE_RELATIONS = ['publisher', 'releases'] as const;
+export const PUBLICATION_NESTED_RELATIONS = [
+  'publisher.publications',
   'publisher.releases',
   'releases.publisher',
-  'releases.name',
+  'releases.publication',
   'releases.manifest',
 ] as const;
 
-export const NAME_RELATIONS = [
-  ...NAME_BASE_RELATIONS,
-  ...NAME_NESTED_RELATIONS,
+export const PUBLICATION_RELATIONS = [
+  ...PUBLICATION_BASE_RELATIONS,
+  ...PUBLICATION_NESTED_RELATIONS,
 ] as const;
 
-class WithoutRelations extends OmitType(BaseNameDto, NAME_BASE_RELATIONS) {}
+class WithoutRelations extends OmitType(
+  BasePublicationDto,
+  PUBLICATION_BASE_RELATIONS,
+) {}
 
 class WithoutMeta extends OmitType(WithoutRelations, [
   'id',
@@ -66,11 +75,13 @@ class WithoutMeta extends OmitType(WithoutRelations, [
   'updated_at',
 ] as const) {}
 
-export class NameDto extends WithoutRelations {}
-export class NameWithRelationsDto extends BaseNameDto {}
+export class PublicationDto extends WithoutRelations {}
+export class PublicationWithRelationsDto extends BasePublicationDto {}
 
-export class CreateNameDto extends WithoutMeta {}
+export class CreatePublicationDto extends WithoutMeta {}
 
-export class UpdateNameDto extends PartialType(WithoutMeta) {}
+export class UpdatePublicationDto extends PartialType(WithoutMeta) {}
 
-export class DeleteNameDto extends PickType(BaseNameDto, ['id'] as const) {}
+export class DeletePublicationDto extends PickType(BasePublicationDto, [
+  'id',
+] as const) {}

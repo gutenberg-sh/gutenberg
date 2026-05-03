@@ -9,10 +9,7 @@ import {
 import { desc, eq } from 'drizzle-orm';
 
 import type { QueryConfig } from '../../common/database/db.types';
-import {
-  publishersTable,
-  releasesTable,
-} from '../../common/database/tables';
+import { publishersTable, releasesTable } from '../../common/database/tables';
 import { SerializeWith } from '../../common/decorators/serialize-with.decorator';
 import { PaginationOptionsDto } from '../../common/dtos/pagination-options.dto';
 import { SerializationInterceptor } from '../../common/interceptors/serialization.interceptor';

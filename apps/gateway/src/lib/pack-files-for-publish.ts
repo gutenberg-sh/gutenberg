@@ -23,10 +23,7 @@ function segments_from_relative_path(relative: string): string[] {
 function should_skip_segments(segments: string[]): boolean {
   return segments.some(
     (s) =>
-      s === '.' ||
-      s === '..' ||
-      s.startsWith('.') ||
-      SKIP_TOP_SEGMENTS.has(s),
+      s === '.' || s === '..' || s.startsWith('.') || SKIP_TOP_SEGMENTS.has(s),
   );
 }
 
@@ -143,7 +140,7 @@ export async function pack_browser_file_selection(input: {
 /**
  * Synchronously unpacks a zip into session rows (paths normalized, unsafe segments rejected).
  */
-export function pack_zip_bytes(zip_bytes: Uint8Array): PublishSessionFile[] {
+function pack_zip_bytes(zip_bytes: Uint8Array): PublishSessionFile[] {
   const entries = unzipSync(zip_bytes);
   const pending: {
     segments: string[];

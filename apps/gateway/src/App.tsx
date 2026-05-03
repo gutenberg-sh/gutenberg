@@ -33,14 +33,20 @@ export function App() {
           <Route path="/publish" element={<PublishRoute />} />
           <Route path="/publisher/:address" element={<PublisherRoute />} />
           <Route path="/p/:address" element={<LegacyPublisherRedirect />} />
-          <Route path="/publication/:name" element={<LatestReleaseRoute />} />
           <Route
-            path="/publication/:name/versions"
+            path="/publication/:registry_id"
+            element={<LatestReleaseRoute />}
+          />
+          <Route
+            path="/publication/:registry_id/versions"
             element={<VersionsRoute />}
           />
-          <Route path="/publication/:name/:version" element={<ReleaseRoute />} />
           <Route
-            path="/publication/:name/:version/*"
+            path="/publication/:registry_id/:version"
+            element={<ReleaseRoute />}
+          />
+          <Route
+            path="/publication/:registry_id/:version/*"
             element={<ReleaseRoute />}
           />
           <Route path="/r" element={<LegacyPublicationRedirect />} />

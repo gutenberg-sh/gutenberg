@@ -13,17 +13,17 @@ export interface PublisherDto {
   created_at: string;
   updated_at: string;
   address: string;
-  names?: NameDto[];
+  publications?: PublicationDto[];
   releases?: ReleaseDto[];
 }
 
-export interface NameDto {
+export interface PublicationDto {
   id: string;
   created_at: string;
   updated_at: string;
   publisher_id: string;
   address: string;
-  name: string;
+  registry_id: string;
   publisher?: PublisherDto | null;
   releases?: ReleaseDto[];
 }
@@ -43,7 +43,7 @@ export interface ReleaseDto {
   created_at: string;
   updated_at: string;
   publisher_id: string;
-  name_id: string;
+  publication_id: string;
   address: string;
   version: string;
   schema_version: number;
@@ -52,7 +52,7 @@ export interface ReleaseDto {
   signature: string;
   published_at: string;
   publisher?: PublisherDto | null;
-  name?: NameDto | null;
+  publication?: PublicationDto | null;
   manifest?: ManifestDto | null;
 }
 
@@ -70,7 +70,7 @@ export interface IndexerHealth {
 
 export interface IndexerStats {
   releases: number;
-  names: number;
+  publications: number;
   publishers: number;
 }
 
@@ -87,14 +87,10 @@ export const query_keys = {
     offset: number;
     includes?: string;
   }) => ['indexer', 'search', input] as const,
-  name: (name: string, includes?: string) =>
-    ['indexer', 'name', name, includes ?? null] as const,
-  name_latest: (name: string, includes?: string) =>
-    ['indexer', 'name', name, 'latest', includes ?? null] as const,
-  name_versions: (
-    name: string,
+  publication_versions: (
+    registry_id: string,
     input: { limit: number; offset: number; includes?: string },
-  ) => ['indexer', 'name', name, 'versions', input] as const,
+  ) => ['indexer', 'publication', registry_id, 'versions', input] as const,
   publisher: (address: string, includes?: string) =>
     ['indexer', 'publisher', address, includes ?? null] as const,
   publisher_releases: (
@@ -116,7 +112,7 @@ function build_params(record: Record<string, string | number | undefined>) {
 export function useFeed(
   input: { limit?: number; offset?: number; includes?: string } = {},
 ) {
-  const { limit = 20, offset = 0, includes = 'publisher,name' } = input;
+  const { limit = 20, offset = 0, includes = 'publisher,publication' } = input;
   return useQuery({
     queryKey: query_keys.feed({ limit, offset, includes }),
     queryFn: async () => {
@@ -130,22 +126,22 @@ export function useFeed(
   });
 }
 
-export function useNameSearch(
+export function usePublicationSearch(
   input: {
     q: string;
     limit?: number;
     offset?: number;
     includes?: string;
   },
-  options?: Pick<UseQueryOptions<NameDto[]>, 'enabled'>,
+  options?: Pick<UseQueryOptions<PublicationDto[]>, 'enabled'>,
 ) {
   const { q, limit = 8, offset = 0, includes } = input;
   const trimmed = q.trim();
 
-  return useQuery<NameDto[]>({
+  return useQuery<PublicationDto[]>({
     queryKey: query_keys.search({ q: trimmed, limit, offset, includes }),
     queryFn: async () => {
-      const { data } = await api.get<NameDto[]>('/search', {
+      const { data } = await api.get<PublicationDto[]>('/search', {
         params: build_params({ q: trimmed, limit, offset, includes }),
       });
       return data;
@@ -156,51 +152,25 @@ export function useNameSearch(
   });
 }
 
-export function useName(name: string | undefined, includes?: string) {
-  return useQuery<NameDto>({
-    queryKey: query_keys.name(name ?? '', includes),
-    queryFn: async () => {
-      const { data } = await api.get<NameDto>(
-        `/names/${encodeURIComponent(name!)}`,
-        { params: build_params({ includes }) },
-      );
-      return data;
-    },
-    enabled: Boolean(name),
-    staleTime: STALE_LOOKUP,
-  });
-}
-
-export function useNameLatest(name: string | undefined, includes?: string) {
-  return useQuery<ReleaseDto>({
-    queryKey: query_keys.name_latest(name ?? '', includes),
-    queryFn: async () => {
-      const { data } = await api.get<ReleaseDto>(
-        `/names/${encodeURIComponent(name!)}/latest`,
-        { params: build_params({ includes }) },
-      );
-      return data;
-    },
-    enabled: Boolean(name),
-    staleTime: STALE_LOOKUP,
-  });
-}
-
-export function useNameVersions(
-  name: string | undefined,
+export function usePublicationVersions(
+  registry_id: string | undefined,
   input: { limit?: number; offset?: number; includes?: string } = {},
 ) {
   const { limit = 50, offset = 0, includes } = input;
   return useQuery<ReleaseDto[]>({
-    queryKey: query_keys.name_versions(name ?? '', { limit, offset, includes }),
+    queryKey: query_keys.publication_versions(registry_id ?? '', {
+      limit,
+      offset,
+      includes,
+    }),
     queryFn: async () => {
       const { data } = await api.get<ReleaseDto[]>(
-        `/names/${encodeURIComponent(name!)}/versions`,
+        `/publications/${encodeURIComponent(registry_id!)}/versions`,
         { params: build_params({ limit, offset, includes }) },
       );
       return data;
     },
-    enabled: Boolean(name),
+    enabled: Boolean(registry_id),
     staleTime: STALE_LOOKUP,
     placeholderData: keepPreviousData,
   });
@@ -231,7 +201,7 @@ export function usePublisherReleases(
   address: string | undefined,
   input: { limit?: number; offset?: number; includes?: string } = {},
 ) {
-  const { limit = 25, offset = 0, includes = 'name' } = input;
+  const { limit = 25, offset = 0, includes = 'publication' } = input;
   return useQuery<ReleaseDto[]>({
     queryKey: query_keys.publisher_releases(address ?? '', {
       limit,

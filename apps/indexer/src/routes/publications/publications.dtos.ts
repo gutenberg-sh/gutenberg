@@ -1,8 +1,8 @@
 import { Expose } from 'class-transformer';
 import { IsString } from 'class-validator';
 
-export class GetNameRequestDto {
+export class GetPublicationRequestDto {
   @Expose()
   @IsString()
-  name: string;
+  registry_id: string;
 }

@@ -1,9 +1,8 @@
 import { z } from 'zod';
 
-import { parse_gateway_list } from '@/lib/gateway-list';
+import { parse_gateway_list } from '@gutenberg/core';
 
 const env_schema = z.object({
-  VITE_GUTENBERG_REGISTRY_PROGRAM_ID: z.string().min(1),
   VITE_GUTENBERG_SOLANA_RPC_URL: z.string().url(),
   VITE_GUTENBERG_IRYS_GATEWAY: z
     .string()
@@ -28,7 +27,8 @@ const env_schema = z.object({
     .string()
     .url()
     .refine((value) => value.includes('{address}'), {
-      message: 'VITE_GUTENBERG_EXPLORER_URL must contain the `{address}` placeholder',
+      message:
+        'VITE_GUTENBERG_EXPLORER_URL must contain the `{address}` placeholder',
     })
     .optional(),
   VITE_GUTENBERG_INDEXER_URL: z
@@ -38,5 +38,3 @@ const env_schema = z.object({
 });
 
 export const env = env_schema.parse(import.meta.env);
-
-export type Env = z.infer<typeof env_schema>;

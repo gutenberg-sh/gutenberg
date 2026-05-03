@@ -6,7 +6,9 @@ import {
   type OnApplicationShutdown,
 } from '@nestjs/common';
 
-import { PROGRAM_ID, SOLANA_WS_URL } from '../../common/config/config.tokens';
+import { GUTENBERG_REGISTRY_PROGRAM_ID } from '@gutenberg/core';
+
+import { SOLANA_WS_URL } from '../../common/config/config.tokens';
 
 import { IngestService } from './ingest.service';
 
@@ -40,7 +42,6 @@ export class StreamService
 
   constructor(
     @Inject(SOLANA_WS_URL) private readonly ws_url: string,
-    @Inject(PROGRAM_ID) private readonly program_id: string,
     private readonly ingest: IngestService,
   ) {}
 
@@ -60,7 +61,9 @@ export class StreamService
       try {
         this.socket.close();
       } catch (error) {
-        this.logger.warn(`Error closing WebSocket: ${(error as Error).message}`);
+        this.logger.warn(
+          `Error closing WebSocket: ${(error as Error).message}`,
+        );
       }
     }
 
@@ -113,7 +116,7 @@ export class StreamService
       id,
       method: 'logsSubscribe',
       params: [
-        { mentions: [this.program_id] },
+        { mentions: [GUTENBERG_REGISTRY_PROGRAM_ID] },
         { commitment: 'confirmed' },
       ],
     });

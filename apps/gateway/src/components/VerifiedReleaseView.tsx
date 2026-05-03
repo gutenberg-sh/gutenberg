@@ -62,7 +62,10 @@ export function VerifiedReleaseView({
         <div>
           <ErrorView
             title="This publication didn't verify"
-            message={state.error ?? 'Something went wrong while checking this publication.'}
+            message={
+              state.error ??
+              'Something went wrong while checking this publication.'
+            }
             extras={
               state.partial_manifest_uri ? (
                 <GatewayLinks
@@ -345,7 +348,11 @@ function PublicationAside({
             Entry
           </dt>
           <dd className="flex items-start gap-1.5 font-mono text-[12px] tabular text-foreground-soft">
-            <FileCode2 className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" strokeWidth={1.75} aria-hidden />
+            <FileCode2
+              className="mt-0.5 size-3.5 shrink-0 text-muted-foreground"
+              strokeWidth={1.75}
+              aria-hidden
+            />
             <span className="break-all">{m.entry}</span>
           </dd>
         </div>
@@ -372,10 +379,14 @@ function PublicationAside({
 
         <div className="border-t border-border pt-4">
           <Link
-            to={`/publication/${encodeURIComponent(m.name)}/versions`}
+            to={`/publication/${encodeURIComponent(m.registry_id)}/versions`}
             className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-foreground underline-offset-4 hover:underline"
           >
-            <GitBranch className="size-3.5 text-muted-foreground" strokeWidth={1.75} aria-hidden />
+            <GitBranch
+              className="size-3.5 text-muted-foreground"
+              strokeWidth={1.75}
+              aria-hidden
+            />
             View all versions
           </Link>
         </div>
@@ -443,10 +454,7 @@ function ActiveMarkdown({
   bytes: Uint8Array;
   base_path: string;
 }) {
-  const source = useMemo(
-    () => new TextDecoder('utf-8').decode(bytes),
-    [bytes],
-  );
+  const source = useMemo(() => new TextDecoder('utf-8').decode(bytes), [bytes]);
 
   const asset_state = useReferencedAssets({
     source,
@@ -454,10 +462,7 @@ function ActiveMarkdown({
     files: release.files,
   });
 
-  if (
-    asset_state.status === 'idle' ||
-    asset_state.status === 'loading'
-  ) {
+  if (asset_state.status === 'idle' || asset_state.status === 'loading') {
     return <FileLoadingSkeleton path={target_path} />;
   }
 
@@ -512,18 +517,26 @@ function extension_of(path: `/${string}`): string {
   return idx >= 0 ? path.slice(idx).toLowerCase() : '';
 }
 
-type IdleHandle = { kind: 'idle'; id: number } | { kind: 'timeout'; id: number };
+type IdleHandle =
+  | { kind: 'idle'; id: number }
+  | { kind: 'timeout'; id: number };
 
 function schedule_idle(cb: () => void): IdleHandle {
   if (typeof window.requestIdleCallback === 'function') {
-    return { kind: 'idle', id: window.requestIdleCallback(cb, { timeout: 2000 }) };
+    return {
+      kind: 'idle',
+      id: window.requestIdleCallback(cb, { timeout: 2000 }),
+    };
   }
 
   return { kind: 'timeout', id: window.setTimeout(cb, 200) };
 }
 
 function cancel_idle(handle: IdleHandle): void {
-  if (handle.kind === 'idle' && typeof window.cancelIdleCallback === 'function') {
+  if (
+    handle.kind === 'idle' &&
+    typeof window.cancelIdleCallback === 'function'
+  ) {
     window.cancelIdleCallback(handle.id);
     return;
   }

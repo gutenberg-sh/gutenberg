@@ -4,11 +4,7 @@ import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { SQL } from 'drizzle-orm';
 import type { IndexColumn } from 'drizzle-orm/pg-core';
 
-import {
-  InferFindModel,
-  QueryConfig,
-  TableName,
-} from '../database/db.types';
+import { InferFindModel, QueryConfig, TableName } from '../database/db.types';
 import { BaseRepository } from '../repositories/base.repository';
 
 export abstract class BaseService<
@@ -21,8 +17,7 @@ export abstract class BaseService<
 
   constructor(
     protected readonly repository: BaseRepository<any, any, TTableName>,
-  ) {
-  }
+  ) {}
 
   async create(create_dto: TCreateDto): Promise<TDto> {
     try {

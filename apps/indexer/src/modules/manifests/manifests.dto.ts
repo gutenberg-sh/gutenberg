@@ -42,7 +42,7 @@ export class BaseManifestDto {
 export const MANIFEST_BASE_RELATIONS = ['release'] as const;
 export const MANIFEST_NESTED_RELATIONS = [
   'release.publisher',
-  'release.name',
+  'release.publication',
   'release.manifest',
 ] as const;
 

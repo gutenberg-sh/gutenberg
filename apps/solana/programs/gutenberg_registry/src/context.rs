@@ -1,16 +1,16 @@
 use anchor_lang::prelude::*;
 
-use crate::state::{Name, Release};
+use crate::state::{Publication, Release};
 
 #[derive(Accounts)]
 #[instruction(
-    name: String,
+    registry_id: String,
     version: String,
     manifest_uri: String,
     manifest_hash: [u8; 32],
     content_hash: [u8; 32],
     content_size_bytes: u64,
-    name_seed: [u8; 32],
+    registry_id_seed: [u8; 32],
     version_seed: [u8; 32],
 )]
 pub struct PublishRelease<'info> {
@@ -20,11 +20,11 @@ pub struct PublishRelease<'info> {
     #[account(
         init_if_needed,
         payer = publisher,
-        space = Name::SPACE,
-        seeds = [b"name", name_seed.as_ref()],
+        space = Publication::SPACE,
+        seeds = [b"publication", registry_id_seed.as_ref()],
         bump,
     )]
-    pub name: Account<'info, Name>,
+    pub publication: Account<'info, Publication>,
 
     #[account(
         init,
@@ -32,7 +32,7 @@ pub struct PublishRelease<'info> {
         space = Release::SPACE,
         seeds = [
             b"release",
-            name_seed.as_ref(),
+            registry_id_seed.as_ref(),
             version_seed.as_ref(),
         ],
         bump,

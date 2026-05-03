@@ -2,22 +2,22 @@ import {
   build_unsigned_manifest,
   canonical_json,
   fetch_minimum_balance_for_rent_exemption,
-  fetch_name_authority,
-  find_name_address,
-  NAME_ACCOUNT_SPACE,
+  fetch_registry_id_owner,
+  find_publication_address,
+  PUBLICATION_ACCOUNT_SPACE,
   PUBLISH_BASE_FEE_LAMPORTS,
   RELEASE_ACCOUNT_SPACE,
   type GutenbergManifestFile,
   type PublishSessionInput,
 } from '@gutenberg/core';
 
-export const LAMPORTS_PER_SOL = 1_000_000_000;
+const LAMPORTS_PER_SOL = 1_000_000_000;
 
 export type SolanaCostEstimate = {
   base_fee_lamports: number;
   release_rent_lamports: number;
-  name_rent_lamports: number;
-  creates_name: boolean;
+  publication_rent_lamports: number;
+  creates_publication: boolean;
   total_lamports: number;
 };
 
@@ -31,41 +31,41 @@ export type IrysCostEstimate = {
 
 export async function estimate_solana_publish_cost(input: {
   rpc_url: string;
-  name: string;
+  registry_id: string;
   program_id?: string;
 }): Promise<SolanaCostEstimate> {
-  const { address } = find_name_address({
-    name: input.name,
+  const { address } = find_publication_address({
+    registry_id: input.registry_id,
     ...(input.program_id ? { program_id: input.program_id } : {}),
   });
-  const authority = await fetch_name_authority({
+  const owner = await fetch_registry_id_owner({
     rpc_url: input.rpc_url,
-    name: input.name,
+    registry_id: input.registry_id,
     address,
   });
-  const creates_name = authority === undefined;
+  const creates_publication = owner === undefined;
 
   const release_rent = await fetch_minimum_balance_for_rent_exemption({
     rpc_url: input.rpc_url,
     data_length: RELEASE_ACCOUNT_SPACE,
   });
-  const name_rent = creates_name
+  const publication_rent = creates_publication
     ? await fetch_minimum_balance_for_rent_exemption({
         rpc_url: input.rpc_url,
-        data_length: NAME_ACCOUNT_SPACE,
+        data_length: PUBLICATION_ACCOUNT_SPACE,
       })
     : 0;
 
   return {
     base_fee_lamports: PUBLISH_BASE_FEE_LAMPORTS,
     release_rent_lamports: release_rent,
-    name_rent_lamports: name_rent,
-    creates_name,
-    total_lamports: release_rent + name_rent + PUBLISH_BASE_FEE_LAMPORTS,
+    publication_rent_lamports: publication_rent,
+    creates_publication,
+    total_lamports: release_rent + publication_rent + PUBLISH_BASE_FEE_LAMPORTS,
   };
 }
 
-export function estimate_manifest_size_for_session(
+function estimate_manifest_size_for_session(
   session: PublishSessionInput,
 ): number {
   const sample_files: Record<`/${string}`, GutenbergManifestFile> = {};
@@ -80,7 +80,7 @@ export function estimate_manifest_size_for_session(
   }
 
   const sample = build_unsigned_manifest({
-    name: session.name,
+    registry_id: session.registry_id,
     version: session.version,
     publisher: '11111111111111111111111111111111',
     entry: session.entry,

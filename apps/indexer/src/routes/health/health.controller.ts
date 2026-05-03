@@ -1,7 +1,7 @@
-import { Controller, Get, Inject, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, UseInterceptors } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 
-import { PROGRAM_ID } from '../../common/config/config.tokens';
+import { GUTENBERG_REGISTRY_PROGRAM_ID } from '@gutenberg/core';
 import { cursorsTable } from '../../common/database/tables';
 import { SerializeWith } from '../../common/decorators/serialize-with.decorator';
 import { SerializationInterceptor } from '../../common/interceptors/serialization.interceptor';
@@ -17,7 +17,6 @@ export class HealthController {
   constructor(
     private readonly cursor_service: CursorService,
     private readonly rpc: SolanaRpcClient,
-    @Inject(PROGRAM_ID) private readonly program_id: string,
   ) {}
 
   @Get()
@@ -36,7 +35,7 @@ export class HealthController {
       chain_slot = await this.rpc.get_slot();
 
       const tip_sigs = await this.rpc.get_signatures_for_address({
-        address: this.program_id,
+        address: GUTENBERG_REGISTRY_PROGRAM_ID,
         limit: 1,
       });
       program_tip_slot = tip_sigs[0]?.slot ?? null;

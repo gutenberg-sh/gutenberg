@@ -1,3 +1,4 @@
+import { GUTENBERG_REGISTRY_PROGRAM_ID } from '@gutenberg/core';
 import { useEffect, useState } from 'react';
 
 import { env } from '@/env';
@@ -48,7 +49,7 @@ function fetch_and_cache(key: string, file: VerifiedFile): Promise<Uint8Array> {
           rpc_url: env.VITE_GUTENBERG_SOLANA_RPC_URL,
           irys_gateway: env.VITE_GUTENBERG_IRYS_GATEWAY,
           arweave_mirrors: env.VITE_GUTENBERG_ARWEAVE_MIRRORS,
-          program_id: env.VITE_GUTENBERG_REGISTRY_PROGRAM_ID,
+          program_id: GUTENBERG_REGISTRY_PROGRAM_ID,
         },
       });
 

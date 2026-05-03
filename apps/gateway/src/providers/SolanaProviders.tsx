@@ -10,10 +10,7 @@ import { env } from '@/env';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
 export function SolanaProviders({ children }: { children: ReactNode }) {
-  const endpoint = useMemo(
-    () => env.VITE_GUTENBERG_SOLANA_RPC_URL,
-    [],
-  );
+  const endpoint = useMemo(() => env.VITE_GUTENBERG_SOLANA_RPC_URL, []);
 
   return (
     <ConnectionProvider endpoint={endpoint}>

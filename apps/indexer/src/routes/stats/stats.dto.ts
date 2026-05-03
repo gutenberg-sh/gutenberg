@@ -10,7 +10,7 @@ export class StatsDto {
   @Expose()
   @IsInt()
   @Min(0)
-  names: number;
+  publications: number;
 
   @Expose()
   @IsInt()

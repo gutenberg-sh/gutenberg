@@ -4,14 +4,14 @@ import { IsString, MinLength } from 'class-validator';
 
 import { PaginationOptionsDto } from '../../common/dtos/pagination-options.dto';
 
-class SearchNamesQueryFields {
+class SearchPublicationsQueryFields {
   @Expose()
   @IsString()
   @MinLength(1)
   q: string;
 }
 
-export class SearchNamesRequestDto extends IntersectionType(
-  SearchNamesQueryFields,
+export class SearchPublicationsRequestDto extends IntersectionType(
+  SearchPublicationsQueryFields,
   PaginationOptionsDto,
 ) {}

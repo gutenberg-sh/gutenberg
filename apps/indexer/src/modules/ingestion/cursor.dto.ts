@@ -60,6 +60,4 @@ export class CreateCursorDto extends WithoutMeta {}
 
 export class UpdateCursorDto extends PartialType(WithoutMeta) {}
 
-export class DeleteCursorDto extends PickType(BaseCursorDto, [
-  'id',
-] as const) {}
+export class DeleteCursorDto extends PickType(BaseCursorDto, ['id'] as const) {}

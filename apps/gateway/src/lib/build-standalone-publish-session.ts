@@ -1,18 +1,19 @@
 import {
+  GUTENBERG_REGISTRY_PROGRAM_ID,
   PUBLISH_SESSION_PROTOCOL_VERSION,
-  assert_valid_name,
+  assert_valid_registry_id,
+  infer_chain_id,
   type PublishSessionFile,
   type PublishSessionInput,
-  infer_chain_id,
 } from '@gutenberg/core';
 
 import { env } from '@/env';
 import { irys_network_from_bundler_url } from '@/lib/irys-network-from-bundler';
 
-export const STANDALONE_PUBLISH_ENTRY = '/index.md' as const;
+const STANDALONE_PUBLISH_ENTRY = '/index.md' as const;
 
-export type StandalonePublishMetadata = {
-  name: string;
+type StandalonePublishMetadata = {
+  registry_id: string;
   version: string;
 };
 
@@ -26,7 +27,10 @@ export function build_standalone_publish_session(input: {
     throw new Error('Add at least one file before publishing');
   }
 
-  assert_valid_name(metadata.name.trim(), 'Publication name');
+  assert_valid_registry_id(
+    metadata.registry_id.trim(),
+    'Publication id (registry id)',
+  );
 
   const version = metadata.version.trim();
 
@@ -44,15 +48,17 @@ export function build_standalone_publish_session(input: {
 
   return {
     protocol_version: PUBLISH_SESSION_PROTOCOL_VERSION,
-    name: metadata.name.trim(),
+    registry_id: metadata.registry_id.trim(),
     version,
     entry: STANDALONE_PUBLISH_ENTRY,
     chain: {
       chain_id: infer_chain_id(env.VITE_GUTENBERG_SOLANA_RPC_URL),
-      program_id: env.VITE_GUTENBERG_REGISTRY_PROGRAM_ID,
+      program_id: GUTENBERG_REGISTRY_PROGRAM_ID,
     },
     rpc_url: env.VITE_GUTENBERG_SOLANA_RPC_URL,
-    irys_network: irys_network_from_bundler_url(env.VITE_GUTENBERG_IRYS_GATEWAY),
+    irys_network: irys_network_from_bundler_url(
+      env.VITE_GUTENBERG_IRYS_GATEWAY,
+    ),
     files,
   };
 }

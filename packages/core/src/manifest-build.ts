@@ -22,7 +22,7 @@ export type ManifestSigner = (
 ) => Promise<Uint8Array>;
 
 export type BuildManifestInput = {
-  name: string;
+  registry_id: string;
   version: string;
   publisher: SolanaPublicKey;
   published_at?: string;
@@ -48,7 +48,7 @@ export function build_unsigned_manifest(
   const manifest: GutenbergUnsignedManifest = {
     schema_version: MANIFEST_SCHEMA_VERSION,
     storage_layout: STORAGE_LAYOUT_PER_FILE,
-    name: input.name,
+    registry_id: input.registry_id,
     version: input.version,
     publisher: input.publisher,
     published_at,

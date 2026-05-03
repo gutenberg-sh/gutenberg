@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 
 import { PublisherAddressLink } from '@/components/PublisherAddressLink';
-import { ReleaseListHeader, ReleaseListSkeleton } from '@/components/ReleaseRow';
+import {
+  ReleaseListHeader,
+  ReleaseListSkeleton,
+} from '@/components/ReleaseRow';
 import { format_relative_time, shorten } from '@/lib/format';
-import type { NameDto } from '@/lib/queries';
+import type { PublicationDto } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
 type PublicationFeedSectionProps = {
@@ -67,8 +70,8 @@ export function PublicationFeedSection({
   );
 }
 
-/** Name search hit — same grid and rhythm as `ReleaseRow`. */
-export function SearchPublicationRow({ item }: { item: NameDto }) {
+/** Publication search hit — same grid and rhythm as `ReleaseRow`. */
+export function SearchPublicationRow({ item }: { item: PublicationDto }) {
   const publisher_address = item.publisher?.address;
   const releases = useMemo(
     () =>
@@ -81,7 +84,7 @@ export function SearchPublicationRow({ item }: { item: NameDto }) {
 
   return (
     <Link
-      to={`/publication/${encodeURIComponent(item.name)}`}
+      to={`/publication/${encodeURIComponent(item.registry_id)}`}
       className={cn(
         'group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-2 py-4',
         'transition-[background-color,color] duration-200 ease-out',
@@ -91,7 +94,7 @@ export function SearchPublicationRow({ item }: { item: NameDto }) {
       <div className="grid min-w-0 gap-1.5 px-1 sm:px-2">
         <div className="flex min-w-0 items-baseline gap-2">
           <span className="truncate text-[15px] font-medium tracking-[-0.005em] text-foreground group-hover:underline">
-            {item.name}
+            {item.registry_id}
           </span>
           {latest ? (
             <span className="font-mono text-[12px] tabular text-foreground-soft">
@@ -115,7 +118,7 @@ export function SearchPublicationRow({ item }: { item: NameDto }) {
             ·
           </span>
           <span>
-            {releases.length} publication{releases.length === 1 ? '' : 's'}
+            {releases.length} release{releases.length === 1 ? '' : 's'}
           </span>
         </div>
       </div>

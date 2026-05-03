@@ -16,8 +16,7 @@ export function VerifyStatus({ steps }: { steps: readonly VerifyStep[] }) {
   const done = steps.filter((s) => s.state === 'success').length;
   const has_error = steps.some((s) => s.state === 'error');
   const running = steps.find((s) => s.state === 'running');
-  const all_verified =
-    total > 0 && done === total && !has_error;
+  const all_verified = total > 0 && done === total && !has_error;
 
   return (
     <div className="grid gap-5">

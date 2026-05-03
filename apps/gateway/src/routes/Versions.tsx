@@ -1,3 +1,4 @@
+import { REGISTRY_ID_RE } from '@gutenberg/core';
 import { ArrowUpRight, GitBranch } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 
@@ -6,30 +7,28 @@ import { Container } from '@/components/Layout';
 import { PublisherAddressLink } from '@/components/PublisherAddressLink';
 import { api_error_message } from '@/lib/api';
 import { format_bytes, format_relative_time, shorten } from '@/lib/format';
-import { useNameVersions, type ReleaseDto } from '@/lib/queries';
-
-const NAME_RE = /^[a-z0-9][a-z0-9._-]*$/;
+import { usePublicationVersions, type ReleaseDto } from '@/lib/queries';
 
 export function VersionsRoute() {
   const params = useParams();
-  const name = params.name;
+  const registry_id = params.registry_id;
 
-  if (!name || !NAME_RE.test(name)) {
+  if (!registry_id || !REGISTRY_ID_RE.test(registry_id)) {
     return (
       <Container className="py-20 lg:py-28">
         <ErrorView
-          title="That name doesn't look right"
-          message={`"${name ?? ''}" isn't a valid publication name. Names use lowercase letters, numbers, dots, underscores, or hyphens.`}
+          title="That registry id doesn't look right"
+          message={`"${registry_id ?? ''}" isn't a valid registry id. Use lowercase letters, numbers, dots, underscores, or hyphens.`}
         />
       </Container>
     );
   }
 
-  return <VersionsView name={name} />;
+  return <VersionsView registry_id={registry_id} />;
 }
 
-function VersionsView({ name }: { name: string }) {
-  const versions = useNameVersions(name, {
+function VersionsView({ registry_id }: { registry_id: string }) {
+  const versions = usePublicationVersions(registry_id, {
     limit: 100,
     includes: 'publisher',
   });
@@ -38,24 +37,24 @@ function VersionsView({ name }: { name: string }) {
     <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
       <header className="grid gap-3">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          Version history
+          Release history
         </p>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h1 className="text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
-            {name}
+            {registry_id}
           </h1>
           <Link
-            to={`/publication/${encodeURIComponent(name)}`}
+            to={`/publication/${encodeURIComponent(registry_id)}`}
             className="inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
           >
-            Open latest
+            Open latest release
             <ArrowUpRight className="size-3.5" strokeWidth={1.85} aria-hidden />
           </Link>
         </div>
         <p className="max-w-[60ch] text-[14.5px] leading-[1.7] text-foreground-soft">
-          Every version this author has ever published under this name,
-          newest first. Each one is permanent — once it&rsquo;s up, it stays
-          up exactly as it was signed.
+          Every release this publisher has anchored for this registry id, newest
+          first. Each release is permanent — once it&rsquo;s up, it stays up
+          exactly as it was signed.
         </p>
       </header>
 
@@ -63,19 +62,28 @@ function VersionsView({ name }: { name: string }) {
         <Skeleton />
       ) : versions.isError ? (
         <ErrorView
-          title="Couldn't load versions"
-          message={api_error_message(versions.error, "We can't reach the indexer right now. Try again in a moment.")}
+          title="Couldn't load releases"
+          message={api_error_message(
+            versions.error,
+            "We can't reach the indexer right now. Try again in a moment.",
+          )}
         />
       ) : (versions.data?.length ?? 0) === 0 ? (
         <EmptyVersions />
       ) : (
-        <Timeline name={name} versions={versions.data ?? []} />
+        <Timeline registry_id={registry_id} versions={versions.data ?? []} />
       )}
     </Container>
   );
 }
 
-function Timeline({ name, versions }: { name: string; versions: ReleaseDto[] }) {
+function Timeline({
+  registry_id,
+  versions,
+}: {
+  registry_id: string;
+  versions: ReleaseDto[];
+}) {
   return (
     <ol className="relative grid">
       <span
@@ -96,7 +104,7 @@ function Timeline({ name, versions }: { name: string; versions: ReleaseDto[] }) 
               }
             />
             <Link
-              to={`/publication/${encodeURIComponent(name)}/${encodeURIComponent(release.version)}`}
+              to={`/publication/${encodeURIComponent(registry_id)}/${encodeURIComponent(release.version)}`}
               className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 border-b border-border py-4 transition-colors hover:bg-surface/40"
             >
               <div className="grid min-w-0 gap-1 px-1">
@@ -114,9 +122,13 @@ function Timeline({ name, versions }: { name: string; versions: ReleaseDto[] }) 
                   <span title={new Date(release.published_at).toISOString()}>
                     {format_relative_time(release.published_at)}
                   </span>
-                  <span aria-hidden className="text-muted-foreground/50">·</span>
+                  <span aria-hidden className="text-muted-foreground/50">
+                    ·
+                  </span>
                   <span>{format_bytes(release.content_size_bytes)}</span>
-                  <span aria-hidden className="text-muted-foreground/50">·</span>
+                  <span aria-hidden className="text-muted-foreground/50">
+                    ·
+                  </span>
                   {publisher_address ? (
                     <PublisherAddressLink
                       address={publisher_address}
@@ -161,11 +173,15 @@ function Skeleton() {
 function EmptyVersions() {
   return (
     <div className="grid place-items-center gap-3 rounded-none border border-dashed border-border px-6 py-14 text-center">
-      <GitBranch className="size-5 text-muted-foreground" strokeWidth={1.6} aria-hidden />
-      <p className="text-[14px] text-foreground">No versions yet.</p>
+      <GitBranch
+        className="size-5 text-muted-foreground"
+        strokeWidth={1.6}
+        aria-hidden
+      />
+      <p className="text-[14px] text-foreground">No releases yet.</p>
       <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
-        Either this name doesn&apos;t exist, or it was just published and we&apos;re still
-        catching up. Refresh in a moment.
+        Either this registry id doesn&apos;t exist, or it was just published and
+        we&apos;re still catching up. Refresh in a moment.
       </p>
     </div>
   );

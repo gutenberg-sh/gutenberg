@@ -16,7 +16,7 @@ export const EVENT_DISCRIMINATOR = {
 
 export type DecodedReleaseEvent = GutenbergReleaseEvent & {
   release_address: string;
-  name_address: string;
+  publication_address: string;
 };
 
 export function decode_release_event_payload(
@@ -35,9 +35,9 @@ export function decode_release_event_payload(
   const reader = new EventReader(data, 8);
   const publisher_bytes = reader.read_bytes(32);
   const release_bytes = reader.read_bytes(32);
-  const name_bytes = reader.read_bytes(32);
+  const publication_bytes = reader.read_bytes(32);
   const schema_version = reader.read_u8();
-  const name = reader.read_string();
+  const registry_id = reader.read_string();
   const version = reader.read_string();
   const manifest_uri = reader.read_string();
   const manifest_hash_raw = reader.read_bytes(32);
@@ -52,7 +52,7 @@ export function decode_release_event_payload(
     type: release_event_type,
     schema_version,
     publisher: base58_encode(publisher_bytes),
-    name,
+    registry_id,
     version,
     manifest: manifest_uri as ContentUri,
     manifest_hash: prefixed_sha256(manifest_hash_raw),
@@ -60,7 +60,7 @@ export function decode_release_event_payload(
     content_size_bytes,
     published_at: new Date(published_at_unix * 1000).toISOString(),
     release_address: base58_encode(release_bytes),
-    name_address: base58_encode(name_bytes),
+    publication_address: base58_encode(publication_bytes),
   };
 }
 
@@ -96,10 +96,7 @@ export function decode_release_events_from_logs(
     }
 
     if (
-      !bytes_equal(
-        payload.subarray(0, 8),
-        EVENT_DISCRIMINATOR.ReleasePublished,
-      )
+      !bytes_equal(payload.subarray(0, 8), EVENT_DISCRIMINATOR.ReleasePublished)
     ) {
       continue;
     }
@@ -114,8 +111,8 @@ export function decode_release_events_from_logs(
   return events;
 }
 
-function anchor_event_discriminator(name: string): Uint8Array {
-  return sha256(new TextEncoder().encode(`event:${name}`)).subarray(0, 8);
+function anchor_event_discriminator(event_name: string): Uint8Array {
+  return sha256(new TextEncoder().encode(`event:${event_name}`)).subarray(0, 8);
 }
 
 function prefixed_sha256(bytes: Uint8Array): Sha256Hash {

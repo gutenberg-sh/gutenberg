@@ -18,7 +18,7 @@ export function NotFoundRoute() {
       <p className="max-w-[58ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
         Publications live at{' '}
         <code className="rounded-none border border-border bg-card px-1.5 py-0.5 font-mono text-[13px] tabular text-foreground">
-          /publication/&lt;name&gt;/&lt;version&gt;
+          /publication/&lt;registry_id&gt;/&lt;version&gt;
         </code>
         . Double-check both, then try again from search.
       </p>

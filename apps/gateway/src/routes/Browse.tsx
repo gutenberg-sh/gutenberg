@@ -27,7 +27,7 @@ export function BrowseRoute() {
   const feed = useFeed({
     limit: PAGE_SIZE,
     offset,
-    includes: 'publisher,name',
+    includes: 'publisher,publication',
   });
 
   const releases = feed.data ?? [];
@@ -38,7 +38,7 @@ export function BrowseRoute() {
     <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
       <header className="grid gap-3">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          New publications
+          New releases
         </p>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h1 className="text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
@@ -73,29 +73,28 @@ export function BrowseRoute() {
           </Button>
         </div>
         <p className="max-w-[62ch] text-[15px] leading-[1.68] text-foreground-soft">
-          A living feed of new publications — each row is a signed, immutable
-          release. Open one to read it.
+          A living feed of new releases — each row is one signed, immutable
+          version. Open one to read it.
         </p>
       </header>
 
       <PublicationFeedSection
-        aria-label="New publications feed"
+        aria-label="New releases feed"
         loading={feed.isLoading}
         skeleton_rows={8}
         footer={
           <PublicationFeedFooter
             summary={
               feed.isLoading ? (
-                'Loading publications…'
+                'Loading releases…'
               ) : feed.isError ? (
                 "Couldn't load this page."
               ) : releases.length === 0 ? (
-                'No publications on this page.'
+                'No releases on this page.'
               ) : (
                 <>
                   Showing{' '}
-                  <span className="text-foreground-soft">{offset + 1}</span>
-                  –
+                  <span className="text-foreground-soft">{offset + 1}</span>–
                   <span className="text-foreground-soft">
                     {offset + releases.length}
                   </span>
@@ -123,7 +122,10 @@ export function BrowseRoute() {
         {feed.isError ? (
           <ErrorView
             title="Couldn't load the feed"
-            message={api_error_message(feed.error, "We can't reach the indexer right now. Try again in a moment.")}
+            message={api_error_message(
+              feed.error,
+              "We can't reach the indexer right now. Try again in a moment.",
+            )}
           />
         ) : releases.length === 0 ? (
           <EmptyFeed />

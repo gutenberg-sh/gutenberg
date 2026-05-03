@@ -14,7 +14,7 @@ import {
 import { PublicationList } from '@/components/ReleaseRow';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { api_error_message } from '@/lib/api';
-import { useNameSearch } from '@/lib/queries';
+import { usePublicationSearch } from '@/lib/queries';
 
 const PAGE_SIZE = 20;
 
@@ -50,7 +50,7 @@ export function SearchRoute() {
 
   const offset = page * PAGE_SIZE;
 
-  const search = useNameSearch({
+  const search = usePublicationSearch({
     q: debounced_query,
     limit: PAGE_SIZE,
     offset,
@@ -71,14 +71,14 @@ export function SearchRoute() {
         </p>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h1 className="text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
-            Search publications by name.
+            Search publications by registry id.
           </h1>
         </div>
         <p className="max-w-[62ch] text-[15px] leading-[1.68] text-foreground-soft">
-          Same idea as a publication registry: type part of a name, pick a match,
-          then open the latest or pin an exact version with{' '}
+          Same idea as a publication registry: type part of a registry id, pick
+          a match, then open the latest release or jump to an exact version with{' '}
           <span className="font-mono text-[0.95em] tabular text-foreground">
-            name@version
+            registry_id@version
           </span>{' '}
           from the header search.
         </p>
@@ -113,8 +113,7 @@ export function SearchRoute() {
                       <span className="text-foreground-soft">
                         {showing_range_end}
                       </span>{' '}
-                      for{' '}
-                      <span className="text-foreground">{trimmed}</span>
+                      for <span className="text-foreground">{trimmed}</span>
                     </>
                   )
                 }
@@ -134,7 +133,10 @@ export function SearchRoute() {
             {search.isError ? (
               <ErrorView
                 title="Search isn't responding"
-                message={api_error_message(search.error, "We can't reach the indexer right now. Try again in a moment.")}
+                message={api_error_message(
+                  search.error,
+                  "We can't reach the indexer right now. Try again in a moment.",
+                )}
               />
             ) : results.length === 0 ? (
               <NoResults q={trimmed} />
@@ -205,11 +207,17 @@ function SearchInput({
 function EmptyQuery() {
   return (
     <div className="registry-command-shell grid place-items-center gap-3 px-6 py-14 text-center">
-      <SearchIcon className="size-5 text-muted-foreground" strokeWidth={1.6} aria-hidden />
-      <p className="text-[14px] text-foreground">Start typing to search the registry.</p>
+      <SearchIcon
+        className="size-5 text-muted-foreground"
+        strokeWidth={1.6}
+        aria-hidden
+      />
+      <p className="text-[14px] text-foreground">
+        Start typing to search the registry.
+      </p>
       <p className="max-w-[42ch] text-[12.5px] leading-[1.65] text-muted-foreground">
-        The first publisher to claim a name keeps it. Partial matches work — you
-        don&rsquo;t need the full slug.
+        The first publisher to register a registry id keeps it. Partial matches
+        work — you don&rsquo;t need the full slug.
       </p>
     </div>
   );
@@ -219,8 +227,7 @@ function NoResults({ q }: { q: string }) {
   return (
     <div className="grid place-items-center gap-3 rounded-none border border-dashed border-border px-6 py-14 text-center">
       <p className="text-[14px] text-foreground">
-        Nothing matches{' '}
-        <span className="font-mono tabular">{q}</span>.
+        Nothing matches <span className="font-mono tabular">{q}</span>.
       </p>
       <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
         Check the spelling, or browse what&apos;s been published recently — the

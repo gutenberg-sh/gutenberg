@@ -8,21 +8,18 @@ import {
 
 import {
   cursorsTable,
-  namesTable,
+  publicationsTable,
   publishersTable,
   releasesTable,
 } from '../../common/database/tables';
 import { ManifestsService } from '../manifests/manifests.service';
-import { NamesService } from '../names/names.service';
+import { PublicationsService } from '../publications/publications.service';
 import { PublishersService } from '../publishers/publishers.service';
 import { ReleasesService } from '../releases/releases.service';
 
 import { CursorService } from './cursor.service';
 import { RELEASES_CURSOR_SCOPE } from './ingest.types';
-import type {
-  IngestableTransaction,
-  IngestionResult,
-} from './ingest.types';
+import type { IngestableTransaction, IngestionResult } from './ingest.types';
 
 @Injectable()
 export class IngestService {
@@ -30,7 +27,7 @@ export class IngestService {
 
   constructor(
     private readonly publishers_service: PublishersService,
-    private readonly names_service: NamesService,
+    private readonly publications_service: PublicationsService,
     private readonly releases_service: ReleasesService,
     private readonly manifests_service: ManifestsService,
     private readonly cursor_service: CursorService,
@@ -112,14 +109,14 @@ export class IngestService {
     }
 
     const publisher = await this.upsert_publisher(input.event.publisher);
-    const name = await this.upsert_name({
+    const publication = await this.upsert_publication({
       event: input.event,
       publisher_id: publisher.id,
     });
 
     const release = await this.releases_service.create({
       publisher_id: publisher.id,
-      name_id: name.id,
+      publication_id: publication.id,
       address: input.event.release_address,
       version: input.event.version,
       schema_version: input.event.schema_version,
@@ -150,22 +147,22 @@ export class IngestService {
     return this.publishers_service.create({ address });
   }
 
-  private async upsert_name(input: {
+  private async upsert_publication(input: {
     event: DecodedReleaseEvent;
     publisher_id: string;
   }) {
-    const existing = await this.names_service.find({
-      where: eq(namesTable.address, input.event.name_address),
+    const existing = await this.publications_service.find({
+      where: eq(publicationsTable.address, input.event.publication_address),
     });
 
     if (existing) {
       return existing;
     }
 
-    return this.names_service.create({
+    return this.publications_service.create({
       publisher_id: input.publisher_id,
-      address: input.event.name_address,
-      name: input.event.name,
+      address: input.event.publication_address,
+      registry_id: input.event.registry_id,
     });
   }
 }

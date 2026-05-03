@@ -4,12 +4,7 @@ import {
 } from '@gutenberg/core';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import {
-  ArrowUpRight,
-  Check,
-  ChevronDown,
-  Loader2,
-} from 'lucide-react';
+import { ArrowUpRight, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -24,13 +19,10 @@ import {
   type IrysCostEstimate,
   type SolanaCostEstimate,
 } from '@/lib/publish-cost';
-import {
-  type PublishFlowEvent,
-  run_publish_flow,
-} from '@/lib/publish-flow';
+import { type PublishFlowEvent, run_publish_flow } from '@/lib/publish-flow';
 import { cn } from '@/lib/utils';
 
-export type RunState =
+type RunState =
   | { kind: 'idle' }
   | { kind: 'running'; events: PublishFlowEvent[] }
   | {
@@ -40,7 +32,11 @@ export type RunState =
     }
   | { kind: 'failed'; events: PublishFlowEvent[]; message: string };
 
-export function PublishFlowPanel({ session }: { session: PublishSessionInput }) {
+export function PublishFlowPanel({
+  session,
+}: {
+  session: PublishSessionInput;
+}) {
   const wallet = useWallet();
   const [run, set_run] = useState<RunState>({ kind: 'idle' });
   const publish_lock_ref = useRef(false);
@@ -108,8 +104,6 @@ export function PublishFlowPanel({ session }: { session: PublishSessionInput }) 
         on_publish={() => void on_publish()}
         on_cancel={on_cancel}
       />
-
-      <Advanced session={session} />
     </div>
   );
 }
@@ -126,7 +120,7 @@ function Identity({ session }: { session: PublishSessionInput }) {
         About to publish
       </p>
       <p className="min-w-0 break-words font-mono text-[13.5px] leading-snug text-foreground/90 tabular sm:text-[14px]">
-        {session.name}
+        {session.registry_id}
         <span className="text-muted-foreground/90">@</span>
         {session.version}
       </p>
@@ -183,7 +177,7 @@ function usePublishCostEstimates(
 
     estimate_solana_publish_cost({
       rpc_url: session.rpc_url,
-      name: session.name,
+      registry_id: session.registry_id,
       program_id: session.chain.program_id,
     })
       .then((data) => {
@@ -242,8 +236,8 @@ function CostBreakdown({ precomputed }: { precomputed: PublishCostEstimates }) {
       <p className="text-[12.5px] leading-[1.55] text-muted-foreground">
         Charged to your connected wallet. Covers Irys, Solana rent, and
         5,000-lamport base
-        {solana.kind === 'success' && solana.data.creates_name
-          ? ' · first publication for this name'
+        {solana.kind === 'success' && solana.data.creates_publication
+          ? ' · first on-chain publication record for this registry id'
           : ''}
         .
       </p>
@@ -260,7 +254,9 @@ function CostBreakdown({ precomputed }: { precomputed: PublishCostEstimates }) {
         <CostLine
           label="Irys upload"
           state={irys}
-          primary={(d) => `${format_lamports_as_sol(BigInt(d.price_atomic))} SOL`}
+          primary={(d) =>
+            `${format_lamports_as_sol(BigInt(d.price_atomic))} SOL`
+          }
           secondary={(d) =>
             `${format_bytes(d.bytes)} · ${format_bytes(d.files_bytes)} files + ${format_bytes(d.manifest_bytes)} manifest`
           }
@@ -270,7 +266,7 @@ function CostBreakdown({ precomputed }: { precomputed: PublishCostEstimates }) {
           state={solana}
           primary={(d) => `${format_lamports_as_sol(d.total_lamports)} SOL`}
           secondary={(d) =>
-            `rent ${format_lamports_as_sol(d.release_rent_lamports + d.name_rent_lamports)} + fee ${format_lamports_as_sol(d.base_fee_lamports)}`
+            `rent ${format_lamports_as_sol(d.release_rent_lamports + d.publication_rent_lamports)} + fee ${format_lamports_as_sol(d.base_fee_lamports)}`
           }
         />
       </div>
@@ -347,7 +343,7 @@ function Action({
     return (
       <Success
         result={run.result}
-        name={session.name}
+        registry_id={session.registry_id}
         version={session.version}
       />
     );
@@ -411,7 +407,7 @@ function Action({
               Publishing
             </>
           ) : (
-            <>Publish publication</>
+            <>Publish release</>
           )}
         </Button>
       </div>
@@ -484,15 +480,15 @@ const REDIRECT_AFTER_SECONDS = 5;
 
 function Success({
   result,
-  name,
+  registry_id,
   version,
 }: {
   result: PublishSessionResult;
-  name: string;
+  registry_id: string;
   version: string;
 }) {
   const navigate = useNavigate();
-  const target = `/publication/${encodeURIComponent(name)}/${encodeURIComponent(version)}`;
+  const target = `/publication/${encodeURIComponent(registry_id)}/${encodeURIComponent(version)}`;
   const [seconds_left, set_seconds_left] = useState(REDIRECT_AFTER_SECONDS);
 
   useEffect(() => {
@@ -519,7 +515,7 @@ function Success({
             Published
           </p>
           <p className="text-[14px] font-medium tracking-[-0.005em] text-foreground">
-            {name}{' '}
+            {registry_id}{' '}
             <span className="font-mono tabular text-foreground-soft">
               {version}
             </span>{' '}
@@ -545,7 +541,7 @@ function Success({
             </PublisherAddressLink>
           </dd>
         </div>
-        <Receipt label="Publication" value={result.release_address} />
+        <Receipt label="Release" value={result.release_address} />
         <Receipt label="Signature" value={result.signature} />
         <Receipt label="Manifest hash" value={result.manifest_hash} />
         <Receipt label="Manifest URI" value={result.manifest_uri} />
@@ -587,54 +583,6 @@ function Receipt({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Advanced({ session }: { session: PublishSessionInput }) {
-  return (
-    <details className="border-t border-border">
-      <summary className="group flex cursor-pointer list-none items-center gap-2 py-2.5 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground-soft [&::-webkit-details-marker]:hidden">
-        <ChevronDown
-          className="size-3.5 transition-transform duration-200 group-open:rotate-180"
-          strokeWidth={2}
-          aria-hidden
-        />
-        <span>Advanced details</span>
-      </summary>
-
-      <dl className="grid gap-2 pb-1.5 sm:grid-cols-2">
-        <Detail label="Entry" value={session.entry} />
-        <Detail label="Chain" value={session.chain.chain_id} />
-        <Detail label="Program ID" value={session.chain.program_id} />
-        <Detail label="RPC" value={session.rpc_url} />
-        <Detail label="Irys network" value={session.irys_network} />
-        {session.prev_version ? (
-          <Detail label="Previous version" value={session.prev_version} />
-        ) : null}
-        {session.license ? (
-          <Detail label="License" value={session.license} />
-        ) : null}
-        {session.language ? (
-          <Detail label="Language" value={session.language} />
-        ) : null}
-      </dl>
-    </details>
-  );
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="grid gap-0.5">
-      <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-        {label}
-      </p>
-      <p
-        className="truncate font-mono text-[12px] tabular text-foreground"
-        title={value}
-      >
-        {value}
-      </p>
-    </div>
-  );
-}
-
 const wallet_button_style: React.CSSProperties = {
   background: 'var(--foreground)',
   color: 'var(--background)',
@@ -667,7 +615,7 @@ function progress_message(event: PublishFlowEvent): string {
     case 'tx_sending':
       return 'Waiting for you to approve the Solana transaction…';
     case 'tx_confirmed':
-      return `Publication confirmed on Solana (${truncate(event.signature, 16)})`;
+      return `Release confirmed on Solana (${truncate(event.signature, 16)})`;
   }
 }
 

@@ -2,7 +2,13 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import { Check, Coins, ExternalLink, Loader2, Wallet, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+} from 'react';
 import { createPortal } from 'react-dom';
 
 import { PublisherAvatar } from '@/components/PublisherAvatar';
@@ -32,7 +38,9 @@ const chip_focus =
 const chip_pressable =
   'cursor-pointer transition-[color,border-color,background-color,transform] duration-200 ease-out hover:border-border-strong hover:bg-surface/50 hover:text-foreground active:translate-y-px';
 
-function parse_sol_input(raw: string): { ok: true; lamports: bigint } | { ok: false; error: string } {
+function parse_sol_input(
+  raw: string,
+): { ok: true; lamports: bigint } | { ok: false; error: string } {
   const normalized = raw.trim().replace(/,/g, '');
   if (normalized === '' || !/^\d+(\.\d{0,9})?$/.test(normalized)) {
     return { ok: false, error: 'Enter a valid amount.' };
@@ -42,7 +50,8 @@ function parse_sol_input(raw: string): { ok: true; lamports: bigint } | { ok: fa
   const whole_part = segments[0] ?? '';
   const frac_part = segments[1] ?? '';
   const frac_padded = `${frac_part}000000000`.slice(0, 9);
-  const lamports = BigInt(whole_part) * LAMPORTS_PER_SOL_BI + BigInt(frac_padded);
+  const lamports =
+    BigInt(whole_part) * LAMPORTS_PER_SOL_BI + BigInt(frac_padded);
 
   if (lamports < 1n) {
     return { ok: false, error: 'Amount must be greater than zero.' };
@@ -64,7 +73,11 @@ function format_lamports_display(lamports: bigint): string {
   return `${whole}.${frac_str}`;
 }
 
-export function PublisherTip({ recipient_address }: { recipient_address: string }) {
+export function PublisherTip({
+  recipient_address,
+}: {
+  recipient_address: string;
+}) {
   const { connection } = useConnection();
   const { publicKey, connected, sendTransaction, wallet } = useWallet();
 
@@ -73,12 +86,16 @@ export function PublisherTip({ recipient_address }: { recipient_address: string 
   const [busy, set_busy] = useState(false);
   const [error, set_error] = useState<string | null>(null);
   const [last_signature, set_last_signature] = useState<string | null>(null);
-  const [sent_amount_label, set_sent_amount_label] = useState<string | null>(null);
+  const [sent_amount_label, set_sent_amount_label] = useState<string | null>(
+    null,
+  );
 
-  const is_self =
-    connected && publicKey?.toBase58() === recipient_address;
+  const is_self = connected && publicKey?.toBase58() === recipient_address;
 
-  const amount_parsed = useMemo(() => parse_sol_input(amount_input), [amount_input]);
+  const amount_parsed = useMemo(
+    () => parse_sol_input(amount_input),
+    [amount_input],
+  );
   const can_send =
     connected &&
     !is_self &&
@@ -179,7 +196,9 @@ export function PublisherTip({ recipient_address }: { recipient_address: string 
     }
   }
 
-  const tx_href = last_signature ? explorer_transaction_url(last_signature) : undefined;
+  const tx_href = last_signature
+    ? explorer_transaction_url(last_signature)
+    : undefined;
   const wallet_label = wallet?.adapter?.name ?? 'Wallet';
   const from_short = publicKey ? shorten(publicKey.toBase58(), 4, 4) : null;
 
@@ -242,7 +261,11 @@ export function PublisherTip({ recipient_address }: { recipient_address: string 
                       aria-live="polite"
                       aria-busy
                     >
-                      <Loader2 className="size-7 animate-spin text-foreground" strokeWidth={1.5} aria-hidden />
+                      <Loader2
+                        className="size-7 animate-spin text-foreground"
+                        strokeWidth={1.5}
+                        aria-hidden
+                      />
                       <p className="text-center text-[12px] font-medium text-foreground">
                         Confirm in your wallet
                       </p>
@@ -253,7 +276,11 @@ export function PublisherTip({ recipient_address }: { recipient_address: string 
                     <div className="grid gap-5 px-3 py-6 sm:px-4">
                       <div className="grid place-items-center gap-3">
                         <div className="grid size-12 place-items-center rounded-full border-2 border-accent/40 bg-accent/10">
-                          <Check className="size-6 text-accent" strokeWidth={2} aria-hidden />
+                          <Check
+                            className="size-6 text-accent"
+                            strokeWidth={2}
+                            aria-hidden
+                          />
                         </div>
                         <div className="text-center">
                           <p className="font-mono text-[1.85rem] font-semibold leading-none tracking-tight text-foreground tabular-nums sm:text-[2rem]">
@@ -289,8 +316,16 @@ export function PublisherTip({ recipient_address }: { recipient_address: string 
                             )}
                             asChild
                           >
-                            <a href={tx_href} target="_blank" rel="noreferrer noopener">
-                              <ExternalLink className="size-3.5" strokeWidth={1.85} aria-hidden />
+                            <a
+                              href={tx_href}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                            >
+                              <ExternalLink
+                                className="size-3.5"
+                                strokeWidth={1.85}
+                                aria-hidden
+                              />
                               View on explorer
                             </a>
                           </Button>
@@ -299,7 +334,9 @@ export function PublisherTip({ recipient_address }: { recipient_address: string 
                           type="button"
                           variant="link"
                           className="h-auto py-1 font-mono text-[11px] text-muted-foreground"
-                          onClick={() => void navigator.clipboard.writeText(last_signature)}
+                          onClick={() =>
+                            void navigator.clipboard.writeText(last_signature)
+                          }
                         >
                           Copy transaction ID
                         </Button>
@@ -307,7 +344,9 @@ export function PublisherTip({ recipient_address }: { recipient_address: string 
                     </div>
                   ) : !connected ? (
                     <div className="grid gap-4 px-3 py-6 text-center sm:px-4">
-                      <p className="text-[13px] font-medium text-foreground">Connect a wallet to send SOL.</p>
+                      <p className="text-[13px] font-medium text-foreground">
+                        Connect a wallet to send SOL.
+                      </p>
                       <div className="flex justify-center">
                         <WalletMultiButton style={wallet_button_style} />
                       </div>
@@ -315,13 +354,19 @@ export function PublisherTip({ recipient_address }: { recipient_address: string 
                   ) : is_self ? (
                     <div className="px-3 py-6 text-center sm:px-4">
                       <p className="text-[13px] leading-relaxed text-muted-foreground">
-                        {"This profile is your connected wallet; you can't tip yourself."}
+                        {
+                          "This profile is your connected wallet; you can't tip yourself."
+                        }
                       </p>
                     </div>
                   ) : (
                     <div className="grid gap-0 px-3 pb-4 pt-3 sm:px-4">
                       <div className="mb-3 flex items-center gap-3 border-b border-border pb-3">
-                        <PublisherAvatar address={recipient_address} size={40} className="shrink-0" />
+                        <PublisherAvatar
+                          address={recipient_address}
+                          size={40}
+                          className="shrink-0"
+                        />
                         <div className="min-w-0 flex-1">
                           <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
                             To
@@ -336,7 +381,10 @@ export function PublisherTip({ recipient_address }: { recipient_address: string 
                       </div>
 
                       <div className="mb-3 rounded-none border border-border bg-muted/25 px-3 py-4">
-                        <label htmlFor="publisher-tip-amount" className="sr-only">
+                        <label
+                          htmlFor="publisher-tip-amount"
+                          className="sr-only"
+                        >
                           Amount in SOL
                         </label>
                         <div className="flex flex-wrap items-baseline justify-center gap-x-1">
@@ -359,7 +407,10 @@ export function PublisherTip({ recipient_address }: { recipient_address: string 
                           </span>
                         </div>
                         {error ? (
-                          <p className="mt-2 text-center text-[12px] text-destructive" role="alert">
+                          <p
+                            className="mt-2 text-center text-[12px] text-destructive"
+                            role="alert"
+                          >
                             {error}
                           </p>
                         ) : null}
@@ -399,7 +450,11 @@ export function PublisherTip({ recipient_address }: { recipient_address: string 
                       </div>
 
                       <div className="mb-1 flex items-center gap-2.5 rounded-none border border-border bg-surface/30 px-2.5 py-2">
-                        <Wallet className="size-3.5 shrink-0 text-muted-foreground" strokeWidth={1.75} aria-hidden />
+                        <Wallet
+                          className="size-3.5 shrink-0 text-muted-foreground"
+                          strokeWidth={1.75}
+                          aria-hidden
+                        />
                         <div className="min-w-0 flex-1">
                           <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
                             From
@@ -407,7 +462,10 @@ export function PublisherTip({ recipient_address }: { recipient_address: string 
                           <p className="truncate font-mono text-[11px] text-foreground-soft">
                             {wallet_label}
                             {from_short ? (
-                              <span className="text-muted-foreground"> · {from_short}</span>
+                              <span className="text-muted-foreground">
+                                {' '}
+                                · {from_short}
+                              </span>
                             ) : null}
                           </p>
                         </div>
@@ -425,7 +483,10 @@ export function PublisherTip({ recipient_address }: { recipient_address: string 
                       className="h-10 w-full text-[14px] font-semibold"
                       onClick={() => void submit_send()}
                     >
-                      Send {amount_parsed.ok ? `${format_lamports_display(amount_parsed.lamports)} SOL` : 'SOL'}
+                      Send{' '}
+                      {amount_parsed.ok
+                        ? `${format_lamports_display(amount_parsed.lamports)} SOL`
+                        : 'SOL'}
                     </Button>
                   </div>
                 ) : null}

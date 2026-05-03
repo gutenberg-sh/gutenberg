@@ -8,7 +8,7 @@ import { DatabaseModule } from './common/database/database.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { IngestionModule } from './modules/ingestion/ingestion.module';
 import { ManifestsModule } from './modules/manifests/manifests.module';
-import { NamesModule } from './modules/names/names.module';
+import { PublicationsModule } from './modules/publications/publications.module';
 import { PublishersModule } from './modules/publishers/publishers.module';
 import { ReleasesModule } from './modules/releases/releases.module';
 import { StatsModule } from './modules/stats/stats.module';
@@ -25,7 +25,7 @@ import { StatsModule } from './modules/stats/stats.module';
     ]),
     DatabaseModule,
     PublishersModule,
-    NamesModule,
+    PublicationsModule,
     ReleasesModule,
     ManifestsModule,
     StatsModule,

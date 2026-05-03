@@ -16,7 +16,10 @@ export type ApiError = AxiosError<{
   error?: string;
 }>;
 
-export function api_error_message(error: unknown, fallback = 'Request failed'): string {
+export function api_error_message(
+  error: unknown,
+  fallback = 'Request failed',
+): string {
   const ax = error as ApiError;
   const data = ax?.response?.data;
   if (data) {

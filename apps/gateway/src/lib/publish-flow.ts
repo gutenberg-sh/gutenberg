@@ -4,7 +4,7 @@ import {
   canonical_json,
   encode_publish_release_instruction,
   encode_signature,
-  find_name_address,
+  find_publication_address,
   find_release_address,
   guess_mime_for_path,
   manifest_hash,
@@ -41,7 +41,7 @@ export type PublishFlowEvent =
   | { kind: 'tx_sending' }
   | { kind: 'tx_confirmed'; signature: string };
 
-export type PublishFlowResult = {
+type PublishFlowResult = {
   manifest: GutenbergManifest;
   manifest_uri: `ar://${string}`;
   manifest_hash: Sha256Hash;
@@ -98,10 +98,7 @@ export async function run_publish_flow(input: {
   }));
 
   if (session.irys_network === 'mainnet') {
-    const total_bytes = decoded_files.reduce(
-      (acc, f) => acc + f.size_bytes,
-      0,
-    );
+    const total_bytes = decoded_files.reduce((acc, f) => acc + f.size_bytes, 0);
     const manifest_size_estimate = estimate_manifest_size(
       session,
       decoded_files,
@@ -168,7 +165,7 @@ export async function run_publish_flow(input: {
   }
 
   const unsigned_manifest = build_unsigned_manifest({
-    name: session.name,
+    registry_id: session.registry_id,
     version: session.version,
     publisher,
     entry: session.entry,
@@ -196,7 +193,7 @@ export async function run_publish_flow(input: {
       tags: [
         { name: 'Content-Type', value: 'application/json' },
         { name: 'Gutenberg-Schema', value: 'gutenberg.manifest.v1' },
-        { name: 'Gutenberg-Name', value: session.name },
+        { name: 'Gutenberg-Registry-Id', value: session.registry_id },
         { name: 'Gutenberg-Version', value: session.version },
       ],
     },
@@ -222,7 +219,7 @@ export async function run_publish_flow(input: {
     wallet,
     rpc_url: session.rpc_url,
     program_id: session.chain.program_id,
-    name: session.name,
+    registry_id: session.registry_id,
     version: session.version,
     manifest_uri,
     manifest_hash: m_hash,
@@ -233,7 +230,7 @@ export async function run_publish_flow(input: {
   on_event({ kind: 'tx_confirmed', signature });
 
   const release_addr = find_release_address({
-    name: session.name,
+    registry_id: session.registry_id,
     version: session.version,
     program_id: session.chain.program_id,
   }).address;
@@ -260,7 +257,8 @@ async function build_irys(
     .bundlerUrl(bundler_url)
     .withTokenOptions({ disablePriorityFees: true });
 
-  const configured = network === 'mainnet' ? builder.mainnet() : builder.devnet();
+  const configured =
+    network === 'mainnet' ? builder.mainnet() : builder.devnet();
 
   return configured.build();
 }
@@ -285,14 +283,15 @@ async function send_publish_release_tx(input: {
   wallet: WalletContextState;
   rpc_url: string;
   program_id: string;
-  name: string;
+  registry_id: string;
   version: string;
   manifest_uri: `ar://${string}`;
   manifest_hash: Sha256Hash;
   content_hash: Sha256Hash;
   content_size_bytes: number;
 }): Promise<string> {
-  const { wallet, rpc_url, program_id, name, version, manifest_uri } = input;
+  const { wallet, rpc_url, program_id, registry_id, version, manifest_uri } =
+    input;
 
   if (!wallet.publicKey) {
     throw new Error('Wallet disconnected mid-flow');
@@ -307,17 +306,17 @@ async function send_publish_release_tx(input: {
   const program_pubkey = new PublicKey(program_id);
   const release_addr = new PublicKey(
     find_release_address({
-      name,
+      registry_id,
       version,
       program_id,
     }).address,
   );
-  const name_addr = new PublicKey(
-    find_name_address({ name, program_id }).address,
+  const publication_addr = new PublicKey(
+    find_publication_address({ registry_id, program_id }).address,
   );
 
   const data = encode_publish_release_instruction({
-    name,
+    registry_id,
     version,
     manifest_uri,
     manifest_hash: input.manifest_hash,
@@ -329,7 +328,7 @@ async function send_publish_release_tx(input: {
     programId: program_pubkey,
     keys: [
       { pubkey: wallet.publicKey, isSigner: true, isWritable: true },
-      { pubkey: name_addr, isSigner: false, isWritable: true },
+      { pubkey: publication_addr, isSigner: false, isWritable: true },
       { pubkey: release_addr, isSigner: false, isWritable: true },
       { pubkey: SYSTEM_PROGRAM_ID, isSigner: false, isWritable: false },
     ],
@@ -351,10 +350,9 @@ async function send_publish_release_tx(input: {
   }
 
   const signed_tx = await wallet.signTransaction(tx);
-  const signature = await connection.sendRawTransaction(
-    signed_tx.serialize(),
-    { skipPreflight: false },
-  );
+  const signature = await connection.sendRawTransaction(signed_tx.serialize(), {
+    skipPreflight: false,
+  });
 
   await connection.confirmTransaction(
     { signature, blockhash, lastValidBlockHeight },
@@ -394,7 +392,7 @@ function estimate_manifest_size(
   }
 
   const sample = build_unsigned_manifest({
-    name: session.name,
+    registry_id: session.registry_id,
     version: session.version,
     publisher: '11111111111111111111111111111111',
     entry: session.entry,

@@ -2,7 +2,7 @@ export const signature_prefix = 'ed25519:' as const;
 export const sha256_prefix = 'sha256:' as const;
 export const release_event_type = 'gutenberg.release.v1' as const;
 
-export const MANIFEST_SCHEMA_VERSION = 1 as const;
+export const MANIFEST_SCHEMA_VERSION = 2 as const;
 export const STORAGE_LAYOUT_PER_FILE = 'per_file' as const;
 
 export type SolanaPublicKey = string;
@@ -29,7 +29,7 @@ export type GutenbergUnsignedManifest = {
   schema_version: typeof MANIFEST_SCHEMA_VERSION;
   storage_layout: typeof STORAGE_LAYOUT_PER_FILE;
 
-  name: string;
+  registry_id: string;
   version: string;
   publisher: SolanaPublicKey;
   published_at: string;
@@ -55,7 +55,7 @@ export type GutenbergReleaseEvent = {
   type: typeof release_event_type;
   schema_version: number;
   publisher: SolanaPublicKey;
-  name: string;
+  registry_id: string;
   version: string;
   manifest: ContentUri;
   manifest_hash: Sha256Hash;

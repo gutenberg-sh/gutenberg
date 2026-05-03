@@ -2,11 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { BaseService } from '../../common/services/base.service';
 
-import {
-  CreateCursorDto,
-  CursorDto,
-  UpdateCursorDto,
-} from './cursor.dto';
+import { CreateCursorDto, CursorDto, UpdateCursorDto } from './cursor.dto';
 import { CursorRepository } from './cursor.repository';
 
 @Injectable()

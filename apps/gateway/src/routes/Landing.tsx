@@ -31,8 +31,9 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     q: 'What can I publish?',
     a: (
       <>
-        Whatever fits in a folder: writing, images, PDFs, archives. Markdown shows
-        here as pages; everything else comes down exactly as you uploaded it.
+        Whatever fits in a folder: writing, images, PDFs, archives. Markdown
+        shows here as pages; everything else comes down exactly as you uploaded
+        it.
       </>
     ),
   },
@@ -99,8 +100,8 @@ export function LandingRoute() {
               Publish work that stays public.
             </h1>
             <p className="max-w-[42ch] text-[14px] leading-relaxed text-foreground-soft sm:text-[15px] sm:leading-relaxed">
-              Anyone can publish; once it&rsquo;s on the record, nobody can unpublish
-              it.
+              Anyone can publish; once it&rsquo;s on the record, nobody can
+              unpublish it.
             </p>
             <div className="flex flex-wrap gap-2">
               <Link
@@ -124,13 +125,13 @@ export function LandingRoute() {
                 Find a publication
               </p>
               <p className="hidden text-[11.5px] text-muted-foreground sm:block">
-                <span className="kbd">⌘K</span> / <span className="kbd">Ctrl K</span>{' '}
-                anywhere
+                <span className="kbd">⌘K</span> /{' '}
+                <span className="kbd">Ctrl K</span> anywhere
               </p>
             </div>
             <LookupForm
               size="lg"
-              placeholder="name or name@version"
+              placeholder="registry_id or registry_id@version"
             />
           </div>
         </div>
@@ -142,14 +143,19 @@ export function LandingRoute() {
         <RecentReleases limit={8} />
       </Container>
 
-      <Section eyebrow="01 / Why" title="Your reading shouldn&rsquo;t depend on someone else&rsquo;s mood.">
+      <Section
+        eyebrow="01 / Why"
+        title="Your reading shouldn&rsquo;t depend on someone else&rsquo;s mood."
+      >
         <p className="max-w-[60ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
           Most of what you read lives on someone else&rsquo;s computer. They can
-          pull it, rewrite it in place, or let it sink — often without telling you.
+          pull it, rewrite it in place, or let it sink — often without telling
+          you.
         </p>
         <p className="mt-4 max-w-[60ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
-          On Gutenberg you choose what to publish. Once it is signed onto the record, nobody can
-          censor that publication for you: no institution, no government or court.
+          On Gutenberg you choose what to publish. Once it is signed onto the
+          record, nobody can censor that publication for you: no institution, no
+          government or court.
         </p>
 
         <dl className="mt-10 grid divide-y divide-border border-y border-border text-[14.5px]">
@@ -180,7 +186,10 @@ export function LandingRoute() {
         </dl>
       </Section>
 
-      <Section eyebrow="02 / Permanence" title="Where your publication lives without asking us to stay up.">
+      <Section
+        eyebrow="02 / Permanence"
+        title="Where your publication lives without asking us to stay up."
+      >
         <p className="max-w-[60ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
           Your publication isn&rsquo;t one fragile website we could turn off.
           It&rsquo;s split so no single outfit flips the switch alone.
@@ -211,7 +220,7 @@ export function LandingRoute() {
             {
               k: 'solana://release',
               t: 'The public record',
-              v: 'The slot for name + version — who published and what the bundle must match.',
+              v: 'The slot for registry id + version — who published and what the bundle must match.',
             },
           ].map((row) => (
             <div
@@ -294,12 +303,12 @@ function StatsStrip() {
   const stats = useIndexerStats();
 
   const items: ReadonlyArray<{
-    key: 'releases' | 'names' | 'publishers';
+    key: 'releases' | 'publications' | 'publishers';
     label: string;
     href: string;
   }> = [
-    { key: 'releases', label: 'publications', href: '/browse' },
-    { key: 'names', label: 'names', href: '/search' },
+    { key: 'releases', label: 'releases', href: '/browse' },
+    { key: 'publications', label: 'publications', href: '/search' },
     { key: 'publishers', label: 'publishers', href: '/search' },
   ];
 
@@ -311,7 +320,7 @@ function StatsStrip() {
       className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 text-[13px] sm:mt-12"
     >
       {items.map((it, idx) => {
-        const value = ready ? stats.data?.[it.key] ?? 0 : null;
+        const value = ready ? (stats.data?.[it.key] ?? 0) : null;
         return (
           <Link
             key={it.key}
@@ -390,7 +399,8 @@ function ReleaseDiagram() {
               </span>
             </div>
             <p className="font-mono text-[11px] leading-[1.65] tabular text-foreground-soft">
-              <span className="text-muted-foreground">name</span>: gutenberg
+              <span className="text-muted-foreground">registry_id</span>:
+              gutenberg
               <br />
               <span className="text-muted-foreground">version</span>: 1.0.0
               <br />
@@ -442,7 +452,11 @@ function Connector({ vertical = false }: { vertical?: boolean }) {
     );
   }
   return (
-    <svg viewBox="0 0 64 16" className="h-4 w-16 text-border-strong" aria-hidden>
+    <svg
+      viewBox="0 0 64 16"
+      className="h-4 w-16 text-border-strong"
+      aria-hidden
+    >
       <path d="M0 8 H64" fill="none" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );

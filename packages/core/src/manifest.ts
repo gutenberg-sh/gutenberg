@@ -23,7 +23,7 @@ const SOLANA_PUBLIC_KEY_LENGTH = 32;
 const manifest_required_keys: ReadonlySet<string> = new Set([
   'schema_version',
   'storage_layout',
-  'name',
+  'registry_id',
   'version',
   'publisher',
   'published_at',
@@ -79,7 +79,11 @@ export function verify_manifest_signature(
     const public_key = decode_publisher_public_key(manifest.publisher);
     const signature_bytes = decode_signature(signature);
 
-    return verify_ed25519(canonical_json(unsigned), signature_bytes, public_key);
+    return verify_ed25519(
+      canonical_json(unsigned),
+      signature_bytes,
+      public_key,
+    );
   } catch {
     return false;
   }
@@ -123,11 +127,11 @@ function assert_valid_unsigned_manifest_record(
   }
 
   if (
-    typeof manifest.name !== 'string' ||
-    !/^[a-z0-9][a-z0-9._-]*$/.test(manifest.name)
+    typeof manifest.registry_id !== 'string' ||
+    !/^[a-z0-9][a-z0-9._-]*$/.test(manifest.registry_id)
   ) {
     throw new Error(
-      'Manifest name must use lowercase letters, numbers, dots, underscores, or hyphens',
+      'Manifest registry_id must use lowercase letters, numbers, dots, underscores, or hyphens',
     );
   }
 
@@ -164,7 +168,9 @@ function assert_valid_unsigned_manifest_record(
     !Number.isInteger(manifest.content_size_bytes) ||
     manifest.content_size_bytes < 0
   ) {
-    throw new Error('Manifest content_size_bytes must be a non-negative integer');
+    throw new Error(
+      'Manifest content_size_bytes must be a non-negative integer',
+    );
   }
 
   const computed_size = Object.values(

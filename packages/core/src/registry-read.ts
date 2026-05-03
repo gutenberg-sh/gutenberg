@@ -61,10 +61,10 @@ async function rpc_call<T>(input: {
   return body.result;
 }
 
-export async function fetch_release_by_name_at_version(input: {
+export async function fetch_release_by_registry_id_and_version(input: {
   rpc_url: string;
   program_id?: string;
-  name: string;
+  registry_id: string;
   version: string;
 }): Promise<
   | {
@@ -75,7 +75,7 @@ export async function fetch_release_by_name_at_version(input: {
 > {
   const program_id = input.program_id ?? GUTENBERG_REGISTRY_PROGRAM_ID;
   const { address: address } = find_release_address({
-    name: input.name,
+    registry_id: input.registry_id,
     version: input.version,
     program_id,
   });
@@ -110,20 +110,20 @@ export async function list_releases(input: {
 }): Promise<GutenbergReleaseEvent[]> {
   const program_id = input.program_id ?? GUTENBERG_REGISTRY_PROGRAM_ID;
   const filter_bytes_base58 = base58_encode(ACCOUNT_DISCRIMINATOR.Release);
-  const result = await rpc_call<
-    Array<{ pubkey: string; account: RpcAccount }>
-  >({
-    rpc_url: input.rpc_url,
-    method: 'getProgramAccounts',
-    params: [
-      program_id,
-      {
-        encoding: 'base64',
-        commitment: 'confirmed',
-        filters: [{ memcmp: { offset: 0, bytes: filter_bytes_base58 } }],
-      },
-    ],
-  });
+  const result = await rpc_call<Array<{ pubkey: string; account: RpcAccount }>>(
+    {
+      rpc_url: input.rpc_url,
+      method: 'getProgramAccounts',
+      params: [
+        program_id,
+        {
+          encoding: 'base64',
+          commitment: 'confirmed',
+          filters: [{ memcmp: { offset: 0, bytes: filter_bytes_base58 } }],
+        },
+      ],
+    },
+  );
 
   const events: GutenbergReleaseEvent[] = [];
 
@@ -138,27 +138,33 @@ export async function list_releases(input: {
   }
 
   return events.sort((a, b) =>
-    a.published_at < b.published_at ? -1 : a.published_at > b.published_at ? 1 : 0,
+    a.published_at < b.published_at
+      ? -1
+      : a.published_at > b.published_at
+        ? 1
+        : 0,
   );
 }
 
-export async function find_latest_release_by_name(input: {
+export async function find_latest_release_by_registry_id(input: {
   rpc_url: string;
   program_id?: string;
-  name: string;
+  registry_id: string;
 }): Promise<GutenbergReleaseEvent | undefined> {
   const releases = await list_releases({
     rpc_url: input.rpc_url,
     ...(input.program_id ? { program_id: input.program_id } : {}),
   });
 
-  return releases.filter((event) => event.name === input.name).at(-1);
+  return releases
+    .filter((event) => event.registry_id === input.registry_id)
+    .at(-1);
 }
 
-export async function fetch_name_authority(input: {
+export async function fetch_registry_id_owner(input: {
   rpc_url: string;
   program_id?: string;
-  name: string;
+  registry_id: string;
   address: string;
 }): Promise<string | undefined> {
   const result = await rpc_call<{
@@ -166,10 +172,7 @@ export async function fetch_name_authority(input: {
   }>({
     rpc_url: input.rpc_url,
     method: 'getAccountInfo',
-    params: [
-      input.address,
-      { encoding: 'base64', commitment: 'confirmed' },
-    ],
+    params: [input.address, { encoding: 'base64', commitment: 'confirmed' }],
   });
 
   if (!result.value) {
@@ -182,7 +185,7 @@ export async function fetch_name_authority(input: {
     return undefined;
   }
 
-  if (!bytes_equal(data.subarray(0, 8), ACCOUNT_DISCRIMINATOR.Name)) {
+  if (!bytes_equal(data.subarray(0, 8), ACCOUNT_DISCRIMINATOR.Publication)) {
     return undefined;
   }
 
@@ -224,7 +227,7 @@ function decode_release_account(data: Uint8Array): GutenbergReleaseEvent {
   const reader = new AccountReader(data, 8);
   const schema_version = reader.read_u8();
   const publisher_bytes = reader.read_bytes(32);
-  const name = reader.read_string();
+  const registry_id = reader.read_string();
   const version = reader.read_string();
   const manifest = reader.read_string();
   const manifest_hash_raw = reader.read_bytes(32);
@@ -237,7 +240,7 @@ function decode_release_account(data: Uint8Array): GutenbergReleaseEvent {
     type: release_event_type,
     schema_version,
     publisher: base58_encode(publisher_bytes),
-    name,
+    registry_id,
     version,
     manifest: manifest as ContentUri,
     manifest_hash: prefixed_sha256(manifest_hash_raw),

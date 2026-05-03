@@ -2,11 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { BaseService } from '../../common/services/base.service';
 
-import {
-  CreateReleaseDto,
-  ReleaseDto,
-  UpdateReleaseDto,
-} from './releases.dto';
+import { CreateReleaseDto, ReleaseDto, UpdateReleaseDto } from './releases.dto';
 import { ReleasesRepository } from './releases.repository';
 
 @Injectable()

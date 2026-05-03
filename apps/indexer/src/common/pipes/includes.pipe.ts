@@ -12,9 +12,10 @@ interface IncludesNode {
 }
 
 @Injectable()
-export class IncludesPipe
-  implements PipeTransform<string | string[] | undefined, Record<string, object>>
-{
+export class IncludesPipe implements PipeTransform<
+  string | string[] | undefined,
+  Record<string, object>
+> {
   constructor(private readonly options: RelationOptions) {}
 
   transform(value: string | string[] | undefined): Record<string, object> {

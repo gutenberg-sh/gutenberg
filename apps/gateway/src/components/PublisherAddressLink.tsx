@@ -24,7 +24,11 @@ export function PublisherAddressLink({
       className={cn('inline-flex min-w-0 items-center gap-2', className)}
       title={address}
     >
-      <PublisherAvatar address={address} size={avatarSize} className="shrink-0" />
+      <PublisherAvatar
+        address={address}
+        size={avatarSize}
+        className="shrink-0"
+      />
       {children}
     </Link>
   );

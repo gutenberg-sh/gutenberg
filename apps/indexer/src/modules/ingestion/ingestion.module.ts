@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../../common/database/database.module';
 import { HealthController } from '../../routes/health/health.controller';
 import { ManifestsModule } from '../manifests/manifests.module';
-import { NamesModule } from '../names/names.module';
+import { PublicationsModule } from '../publications/publications.module';
 import { PublishersModule } from '../publishers/publishers.module';
 import { ReleasesModule } from '../releases/releases.module';
 
@@ -19,7 +19,7 @@ import { StreamService } from './stream.service';
   imports: [
     DatabaseModule,
     PublishersModule,
-    NamesModule,
+    PublicationsModule,
     ReleasesModule,
     ManifestsModule,
   ],

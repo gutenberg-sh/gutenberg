@@ -12,7 +12,7 @@ import {
 import type { Sha256Hash } from '@gutenberg/core';
 
 import { ManifestWithRelationsDto } from '../manifests/manifests.dto';
-import { NameWithRelationsDto } from '../names/names.dto';
+import { PublicationWithRelationsDto } from '../publications/publications.dto';
 import { PublisherWithRelationsDto } from '../publishers/publishers.dto';
 
 export class BaseReleaseDto {
@@ -35,8 +35,8 @@ export class BaseReleaseDto {
   publisher_id: string;
 
   @Expose()
-  @Matches(/^nam_[A-Za-z0-9_-]{21}$/)
-  name_id: string;
+  @Matches(/^prt_[A-Za-z0-9_-]{21}$/)
+  publication_id: string;
 
   @Expose()
   @IsString()
@@ -75,9 +75,9 @@ export class BaseReleaseDto {
   publisher?: PublisherWithRelationsDto | null;
 
   @Expose()
-  @Type(() => NameWithRelationsDto)
+  @Type(() => PublicationWithRelationsDto)
   @IsOptional()
-  name?: NameWithRelationsDto | null;
+  publication?: PublicationWithRelationsDto | null;
 
   @Expose()
   @Type(() => ManifestWithRelationsDto)
@@ -87,14 +87,14 @@ export class BaseReleaseDto {
 
 export const RELEASE_BASE_RELATIONS = [
   'publisher',
-  'name',
+  'publication',
   'manifest',
 ] as const;
 export const RELEASE_NESTED_RELATIONS = [
-  'publisher.names',
+  'publisher.publications',
   'publisher.releases',
-  'name.publisher',
-  'name.releases',
+  'publication.publisher',
+  'publication.releases',
   'manifest.release',
 ] as const;
 

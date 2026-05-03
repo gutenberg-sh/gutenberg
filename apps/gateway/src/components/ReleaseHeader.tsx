@@ -27,7 +27,7 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
   ].filter((v): v is string => Boolean(v));
 
   return (
-    <header aria-label="Publication" className="grid gap-3">
+    <header aria-label="Release" className="grid gap-3">
       <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
         Publication
       </p>
@@ -35,11 +35,11 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
       <div className="grid gap-4">
         <h1 className="text-balance text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
           <Link
-            to={`/publication/${encodeURIComponent(manifest.name)}`}
+            to={`/publication/${encodeURIComponent(manifest.registry_id)}`}
             className="hover:underline"
             title="Open the latest version"
           >
-            {manifest.name}
+            {manifest.registry_id}
           </Link>
           <span className="ml-2.5 inline-flex translate-y-[-0.03em] align-middle">
             <span className="rounded-none border border-border-strong bg-surface px-2.5 py-1 font-mono text-[14px] font-normal tabular leading-none text-foreground sm:text-[15px]">
@@ -47,7 +47,7 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
             </span>
           </span>
           <Link
-            to={`/publication/${encodeURIComponent(manifest.name)}/versions`}
+            to={`/publication/${encodeURIComponent(manifest.registry_id)}/versions`}
             className="ml-2.5 inline-flex items-center gap-1 align-middle text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground sm:ml-3"
             title="Version history"
           >
@@ -189,7 +189,11 @@ export function ProvenancePanel({
 
         <div className="rounded-none border border-border/90 bg-surface/45 p-3 shadow-[inset_0_1px_0_oklch(1_0_0/5%)] sm:p-4 lg:p-5 dark:bg-surface/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/6%)]">
           <div className="grid w-full gap-5">
-            <ProofGroup title="Registry" caption="Solana accounts" className="min-w-0">
+            <ProofGroup
+              title="Registry"
+              caption="Solana accounts"
+              className="min-w-0"
+            >
               <ProofRow
                 label="Publication"
                 display={shorten(release.release_address, 6, 6)}

@@ -1,7 +1,10 @@
 import { ExternalLink } from 'lucide-react';
 
-import { gateway_host } from '@/lib/gateway-list';
-import { resolve_content_links, type ResolvedGatewayLink } from '@/lib/storage';
+import {
+  gateway_host,
+  resolve_content_links,
+  type ResolvedGatewayLink,
+} from '@gutenberg/core';
 
 export function GatewayLinks({
   uri,

@@ -17,11 +17,6 @@
     "node": ">=22.12.0",
     "pnpm": ">=10.28.2 <11.0.0"
   },
-  "dependencies": {
-    "@gutenberg/core": "workspace:*",
-    "@gutenberg/gateway": "workspace:*",
-    "@gutenberg/indexer": "workspace:*"
-  },
   "scripts": {
     "env:setup": "docker compose up -d --wait && pnpm indexer:db:apply",
     "env:teardown": "docker compose down",
@@ -43,7 +38,9 @@
     "indexer:build": "pnpm --filter @gutenberg/core run build && pnpm --filter @gutenberg/indexer run build",
     "indexer:start": "pnpm --filter @gutenberg/indexer run start",
     "indexer:format": "pnpm --filter @gutenberg/indexer run format",
-    "indexer:lint": "pnpm --filter @gutenberg/indexer run lint"
+    "indexer:lint": "pnpm --filter @gutenberg/indexer run lint",
+    "format": "pnpm --filter @gutenberg/core run format && pnpm --filter @gutenberg/gateway run format && pnpm --filter @gutenberg/indexer run format",
+    "lint": "pnpm --filter @gutenberg/core run lint && pnpm --filter @gutenberg/gateway run lint && pnpm --filter @gutenberg/indexer run lint"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

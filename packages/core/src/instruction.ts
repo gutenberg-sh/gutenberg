@@ -4,23 +4,23 @@ import { concat_bytes, sha256 } from './hash.js';
 import { sha256_prefix, type Sha256Hash } from './types.js';
 
 export const GUTENBERG_REGISTRY_PROGRAM_ID =
-  'NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517';
+  'gut2vkAAtjGsxj3VDkFcRCB1HbwTd6VN2u6wZMno6Wt';
 
-// Account sizes mirror `Release::SPACE` / `Name::SPACE` in
+// Account sizes mirror `Release::SPACE` / `Publication::SPACE` in
 // apps/solana/programs/gutenberg_registry/src/state.rs.
 export const RELEASE_ACCOUNT_SPACE =
   8 + 1 + 32 + (4 + 64) + (4 + 32) + (4 + 512) + 32 + 32 + 8 + 8 + 8;
-export const NAME_ACCOUNT_SPACE = 8 + 32;
+export const PUBLICATION_ACCOUNT_SPACE = 8 + 32;
 
 // Solana charges 5000 lamports per signature; publish_release has exactly one.
 export const PUBLISH_BASE_FEE_LAMPORTS = 5000;
 
 const RELEASE_SEED = new TextEncoder().encode('release');
-const NAME_SEED = new TextEncoder().encode('name');
+const PUBLICATION_SEED = new TextEncoder().encode('publication');
 const PDA_MARKER = new TextEncoder().encode('ProgramDerivedAddress');
 
 export type PublishReleaseInstructionInput = {
-  name: string;
+  registry_id: string;
   version: string;
   manifest_uri: string;
   manifest_hash: Sha256Hash;
@@ -33,60 +33,60 @@ export function encode_publish_release_instruction(
 ): Uint8Array {
   return concat_bytes(
     instruction_discriminator('publish_release'),
-    encode_string(input.name),
+    encode_string(input.registry_id),
     encode_string(input.version),
     encode_string(input.manifest_uri),
     sha256_string_to_raw(input.manifest_hash),
     sha256_string_to_raw(input.content_hash),
     encode_u64_le(input.content_size_bytes),
-    seed_hash(input.name),
+    seed_hash(input.registry_id),
     seed_hash(input.version),
   );
 }
 
 export function find_release_address(input: {
-  name: string;
+  registry_id: string;
   version: string;
   program_id?: string;
 }): { address: string; bump: number } {
   const program_id = input.program_id ?? GUTENBERG_REGISTRY_PROGRAM_ID;
 
   return find_program_address(
-    [RELEASE_SEED, seed_hash(input.name), seed_hash(input.version)],
+    [RELEASE_SEED, seed_hash(input.registry_id), seed_hash(input.version)],
     program_id,
   );
 }
 
-export function find_name_address(input: {
-  name: string;
+export function find_publication_address(input: {
+  registry_id: string;
   program_id?: string;
 }): { address: string; bump: number } {
   const program_id = input.program_id ?? GUTENBERG_REGISTRY_PROGRAM_ID;
 
   return find_program_address(
-    [NAME_SEED, seed_hash(input.name)],
+    [PUBLICATION_SEED, seed_hash(input.registry_id)],
     program_id,
   );
 }
 
 export function release_address(input: {
-  name: string;
+  registry_id: string;
   version: string;
   program_id?: string;
 }): string {
   return find_release_address(input).address;
 }
 
-export function name_address(input: {
-  name: string;
+export function publication_address(input: {
+  registry_id: string;
   program_id?: string;
 }): string {
-  return find_name_address(input).address;
+  return find_publication_address(input).address;
 }
 
 export const ACCOUNT_DISCRIMINATOR = {
   Release: account_discriminator('Release'),
-  Name: account_discriminator('Name'),
+  Publication: account_discriminator('Publication'),
 } as const;
 
 function find_program_address(

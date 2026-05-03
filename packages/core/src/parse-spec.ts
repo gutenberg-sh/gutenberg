@@ -1,24 +1,24 @@
-export const NAME_RE = /^[a-z0-9][a-z0-9._-]*$/;
+export const REGISTRY_ID_RE = /^[a-z0-9][a-z0-9._-]*$/;
 
-export function parse_name_at_version(
+export function parse_registry_id_at_version(
   spec: string,
   label: string,
-): { name: string; version: string } {
+): { registry_id: string; version: string } {
   const trimmed = spec.trim();
   const at = trimmed.indexOf('@');
 
   if (at <= 0 || at === trimmed.length - 1) {
     throw new Error(
-      `${label}: expected name@version (e.g. my-thing@1.0.0), got "${trimmed}"`,
+      `${label}: expected registry_id@version (e.g. my-thing@1.0.0), got "${trimmed}"`,
     );
   }
 
-  const name = trimmed.slice(0, at);
+  const registry_id = trimmed.slice(0, at);
   const version = trimmed.slice(at + 1);
 
-  if (!NAME_RE.test(name)) {
+  if (!REGISTRY_ID_RE.test(registry_id)) {
     throw new Error(
-      `${label}: name must match release naming rules, got "${name}"`,
+      `${label}: registry id must match publication id rules, got "${registry_id}"`,
     );
   }
 
@@ -26,13 +26,16 @@ export function parse_name_at_version(
     throw new Error(`${label}: version must not be empty`);
   }
 
-  return { name, version };
+  return { registry_id, version };
 }
 
-export function assert_valid_name(name: string, label: string): void {
-  if (!NAME_RE.test(name)) {
+export function assert_valid_registry_id(
+  registry_id: string,
+  label: string,
+): void {
+  if (!REGISTRY_ID_RE.test(registry_id)) {
     throw new Error(
-      `${label}: name must match release naming rules, got "${name}"`,
+      `${label}: registry id must match publication id rules, got "${registry_id}"`,
     );
   }
 }

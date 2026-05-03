@@ -16,7 +16,8 @@ export function IndexerStatus() {
           aria-hidden
           className={cn(
             'absolute inline-flex size-2 rounded-none opacity-60',
-            status.tone === 'ok' && 'animate-ping bg-[var(--telemetry-green)]/70',
+            status.tone === 'ok' &&
+              'animate-ping bg-[var(--telemetry-green)]/70',
           )}
         />
         <span
@@ -52,7 +53,8 @@ function derive_status(health: ReturnType<typeof useIndexerHealth>): {
     return {
       tone: 'down',
       label: 'Indexer · offline',
-      title: "We can't reach the indexer. Recent publications won't refresh until it's back.",
+      title:
+        "We can't reach the indexer. Recent publications won't refresh until it's back.",
     };
   }
 

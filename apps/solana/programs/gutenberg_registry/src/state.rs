@@ -1,11 +1,11 @@
 use anchor_lang::prelude::*;
 
 #[account]
-pub struct Name {
-    pub authority: Pubkey,
+pub struct Publication {
+    pub owner: Pubkey,
 }
 
-impl Name {
+impl Publication {
     pub const SPACE: usize = 8 + 32;
 }
 
@@ -14,7 +14,7 @@ pub struct Release {
     pub schema_version: u8,
 
     pub publisher: Pubkey,
-    pub name: String,
+    pub registry_id: String,
     pub version: String,
 
     pub manifest_uri: String,
@@ -28,7 +28,7 @@ pub struct Release {
 }
 
 impl Release {
-    pub const MAX_NAME_LEN: usize = 64;
+    pub const MAX_REGISTRY_ID_LEN: usize = 64;
     pub const MAX_VERSION_LEN: usize = 32;
     pub const MAX_URI_LEN: usize = 512;
 
@@ -37,7 +37,7 @@ impl Release {
     pub const SPACE: usize = 8
         + 1
         + 32
-        + 4 + Self::MAX_NAME_LEN
+        + 4 + Self::MAX_REGISTRY_ID_LEN
         + 4 + Self::MAX_VERSION_LEN
         + 4 + Self::MAX_URI_LEN
         + 32

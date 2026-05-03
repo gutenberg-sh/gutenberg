@@ -11,7 +11,7 @@ pub use errors::GutenbergError;
 pub use event::*;
 pub use state::*;
 
-declare_id!("NRrK71RxAHpt5CdLUWgRzTuzMopnRBnEqCiCku6J517");
+declare_id!("gut2vkAAtjGsxj3VDkFcRCB1HbwTd6VN2u6wZMno6Wt");
 
 #[program]
 pub mod gutenberg_registry {
@@ -20,18 +20,18 @@ pub mod gutenberg_registry {
     #[allow(clippy::too_many_arguments)]
     pub fn publish_release(
         ctx: Context<PublishRelease>,
-        name: String,
+        registry_id: String,
         version: String,
         manifest_uri: String,
         manifest_hash: [u8; 32],
         content_hash: [u8; 32],
         content_size_bytes: u64,
-        name_seed: [u8; 32],
+        registry_id_seed: [u8; 32],
         version_seed: [u8; 32],
     ) -> Result<()> {
         require!(
-            name.len() <= Release::MAX_NAME_LEN,
-            GutenbergError::NameTooLong
+            registry_id.len() <= Release::MAX_REGISTRY_ID_LEN,
+            GutenbergError::RegistryIdTooLong
         );
         require!(
             version.len() <= Release::MAX_VERSION_LEN,
@@ -42,7 +42,7 @@ pub mod gutenberg_registry {
             GutenbergError::ManifestUriTooLong
         );
         require!(
-            hashv(&[name.as_bytes()]).to_bytes() == name_seed,
+            hashv(&[registry_id.as_bytes()]).to_bytes() == registry_id_seed,
             GutenbergError::InvalidSeedHash
         );
         require!(
@@ -52,16 +52,16 @@ pub mod gutenberg_registry {
 
         let publisher_key = ctx.accounts.publisher.key();
         let release_address = ctx.accounts.release.key();
-        let name_address = ctx.accounts.name.key();
+        let publication_address = ctx.accounts.publication.key();
 
-        let name_account = &mut ctx.accounts.name;
+        let publication_account = &mut ctx.accounts.publication;
 
-        if name_account.authority == Pubkey::default() {
-            name_account.authority = publisher_key;
+        if publication_account.owner == Pubkey::default() {
+            publication_account.owner = publisher_key;
         } else {
             require!(
-                name_account.authority == publisher_key,
-                GutenbergError::NameAlreadyClaimed
+                publication_account.owner == publisher_key,
+                GutenbergError::RegistryIdAlreadyClaimed
             );
         }
 
@@ -69,7 +69,7 @@ pub mod gutenberg_registry {
         let release = &mut ctx.accounts.release;
         release.schema_version = Release::CURRENT_SCHEMA_VERSION;
         release.publisher = publisher_key;
-        release.name = name;
+        release.registry_id = registry_id;
         release.version = version;
         release.manifest_uri = manifest_uri;
         release.manifest_hash = manifest_hash;
@@ -81,9 +81,9 @@ pub mod gutenberg_registry {
         emit!(ReleasePublished {
             publisher: publisher_key,
             release_address,
-            name_address,
+            publication_address,
             schema_version: release.schema_version,
-            name: release.name.clone(),
+            registry_id: release.registry_id.clone(),
             version: release.version.clone(),
             manifest_uri: release.manifest_uri.clone(),
             manifest_hash: release.manifest_hash,

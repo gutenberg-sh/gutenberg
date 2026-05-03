@@ -9,17 +9,16 @@ export function explorer_address_url(address: string): string | undefined {
     return undefined;
   }
 
-  return template.replaceAll(
-    ADDRESS_PLACEHOLDER,
-    encodeURIComponent(address),
-  );
+  return template.replaceAll(ADDRESS_PLACEHOLDER, encodeURIComponent(address));
 }
 
 /**
  * Best-effort transaction link derived from the configured address explorer URL
  * (e.g. Solana Explorer `/address/{address}` → `/tx/<signature>`).
  */
-export function explorer_transaction_url(signature: string): string | undefined {
+export function explorer_transaction_url(
+  signature: string,
+): string | undefined {
   const template = env.VITE_GUTENBERG_EXPLORER_URL;
 
   if (!template) {
