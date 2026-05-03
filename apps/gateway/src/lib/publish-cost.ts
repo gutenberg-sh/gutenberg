@@ -89,7 +89,6 @@ export function estimate_manifest_size_for_session(
     ...(session.prev_version ? { prev_version: session.prev_version } : {}),
     ...(session.license ? { license: session.license } : {}),
     ...(session.language ? { language: session.language } : {}),
-    ...(session.tags && session.tags.length > 0 ? { tags: session.tags } : {}),
   });
 
   const text = canonical_json({

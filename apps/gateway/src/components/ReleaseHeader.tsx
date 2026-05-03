@@ -69,19 +69,6 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
           ))}
         </div>
       ) : null}
-
-      {manifest.tags && manifest.tags.length > 0 ? (
-        <div className="flex flex-wrap gap-1.5">
-          {manifest.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-none border border-border px-2 py-0.5 font-mono text-[10.5px] tabular text-foreground-soft"
-            >
-              #{tag}
-            </span>
-          ))}
-        </div>
-      ) : null}
     </header>
   );
 }

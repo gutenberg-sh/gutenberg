@@ -40,9 +40,15 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     q: 'How do I publish?',
     a: (
       <>
-        Install the <Code>gutenberg</Code> CLI, point it at your folder, run{' '}
-        <Code>gutenberg publish</Code>. You\u2019ll land here, your wallet signs,
-        and the CLI prints a URL. See the{' '}
+        Open{' '}
+        <Link
+          to="/publish"
+          className="text-foreground underline-offset-4 hover:underline"
+        >
+          Publish
+        </Link>
+        , add a folder, files, or a zip, then connect your wallet and confirm
+        costs before you sign. See the{' '}
         <a
           href="https://github.com/itsmekamal/gutenberg"
           target="_blank"
@@ -68,7 +74,7 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     q: 'Is the code open?',
     a: (
       <>
-        Yes — this site, the CLI, and the on-chain program live in the{' '}
+        Yes — this site and the on-chain program live in the{' '}
         <a
           href="https://github.com/itsmekamal/gutenberg"
           target="_blank"
@@ -239,7 +245,7 @@ export function LandingRoute() {
               className="grid items-baseline gap-3 py-7 sm:grid-cols-[minmax(0,0.85fr)_minmax(0,1.6fr)] sm:gap-10"
             >
               <dt
-                id={q === 'How do I publish?' ? 'cli-publish' : undefined}
+                id={q === 'How do I publish?' ? 'web-publish' : undefined}
                 className={cn(
                   'text-[16.5px] font-medium tracking-[-0.005em] text-foreground sm:text-[17.5px]',
                   q === 'How do I publish?' && 'scroll-mt-28',
@@ -333,14 +339,6 @@ function StatsStrip() {
         );
       })}
     </dl>
-  );
-}
-
-function Code({ children }: { children: React.ReactNode }) {
-  return (
-    <code className="rounded-none border border-border bg-card px-1.5 py-0.5 font-mono text-[0.85em] tabular text-foreground">
-      {children}
-    </code>
   );
 }
 

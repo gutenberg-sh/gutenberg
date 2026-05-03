@@ -43,6 +43,7 @@ export function SiteHeader() {
           >
             <HeaderLink to="/browse">[ browse ]</HeaderLink>
             <HeaderLink to="/search">[ search ]</HeaderLink>
+            <HeaderLink to="/publish">[ publish ]</HeaderLink>
           </nav>
 
           <div className="hidden min-w-0 flex-1 justify-center px-2 md:flex">

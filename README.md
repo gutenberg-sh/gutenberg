@@ -42,11 +42,13 @@ pnpm install
 
 ## Environment
 
-Copy the example file and set values for your gateway, network, and RPC:
+Copy the example file and set values for the gateway (Vite), indexer, and your network:
 
 ```bash
 cp .env.example .env
 ```
+
+The gateway reads **`VITE_*`** variables from `.env` at dev and build time. For local publishing against the validator, align `VITE_GUTENBERG_SOLANA_RPC_URL` with `GUTENBERG_INDEXER_SOLANA_RPC_URL` (see comments in `.env.example`).
 
 ## Local infrastructure
 
@@ -68,33 +70,6 @@ To wipe all local state (validator ledger and Postgres data):
 pnpm env:reset
 ```
 
-```txt
-# CLI
-GUTENBERG_CLI_IRYS_NETWORK=
-GUTENBERG_CLI_SOLANA_RPC_URL=
-GUTENBERG_CLI_GATEWAY_URL=
-
-# Gateway
-VITE_GUTENBERG_REGISTRY_PROGRAM_ID=
-VITE_GUTENBERG_SOLANA_RPC_URL=
-VITE_GUTENBERG_IRYS_GATEWAY=
-VITE_GUTENBERG_ARWEAVE_MIRRORS=
-VITE_GUTENBERG_EXPLORER_URL=
-VITE_GUTENBERG_INDEXER_URL=
-
-# Indexer
-GUTENBERG_INDEXER_NODE_ENV=
-GUTENBERG_INDEXER_PORT=
-GUTENBERG_INDEXER_DATABASE_URL=
-GUTENBERG_INDEXER_SOLANA_RPC_URL=
-GUTENBERG_INDEXER_SOLANA_WS_URL=
-GUTENBERG_INDEXER_PROGRAM_ID=
-GUTENBERG_INDEXER_BACKFILL_BATCH_SIZE=
-GUTENBERG_INDEXER_BACKFILL_TX_CONCURRENCY=
-GUTENBERG_INDEXER_RECONCILE_LOOKBACK_SLOTS=
-```
-
-
 To fund your publisher, you can airdrop some SOL via:
 
 ```bash
@@ -108,28 +83,17 @@ pnpm solana:build
 pnpm solana:deploy
 ```
 
-## CLI
+## Gateway
 
-The CLI is the publisher's tool. It uploads your content to durable storage (Irys/Arweave), builds and signs a manifest with your wallet, and submits the release to the registry program.
-
-Check configuration:
+The gateway is the reader-facing web app and the **publisher UI**. It looks up releases on the registry, fetches manifests and files from durable storage, verifies signatures and content hashes in the browser, and exposes **`/publish`** to upload a bundle (folder, files, or zip), sign with your wallet, and register the release.
 
 ```bash
-pnpm cli:start doctor
+pnpm gateway:dev
+pnpm gateway:build
+pnpm gateway:preview
 ```
 
-Publish the demo folder:
-
-```bash
-pnpm cli:start publish gutenberg-demo@1.0.0 examples/gutenberg-demo
-```
-
-Open a release in the gateway:
-
-```bash
-pnpm cli:start open gutenberg-demo@1.0.0
-pnpm cli:start open gutenberg-demo
-```
+Use `examples/gutenberg-demo` as a sample tree: it includes **`/index.md`** at the root, which the publish flow requires.
 
 ## Indexer
 
@@ -140,16 +104,6 @@ pnpm indexer:db:apply
 pnpm indexer:dev
 ```
 
-## Gateway
-
-The gateway is the reader-facing web app. It looks up a release on the registry, fetches the manifest and files from durable storage, verifies signatures and content hashes locally in your browser, and renders the result. It also exposes a `/publish` flow that lets you publish from the browser using your wallet.
-
-```bash
-pnpm gateway:dev
-pnpm gateway:build
-pnpm gateway:start
-```
-
 ## Contributing
 
 Contributions are welcome. For larger changes, please open an issue first so the direction is agreed before you invest heavy time.
@@ -158,10 +112,10 @@ Contributions are welcome. For larger changes, please open an issue first so the
 
 1. Fork the repository and create a branch from the default branch.
 2. Keep pull requests focused: one logical change per PR is easier to review and revert.
-3. After `pnpm install`, run `pnpm cli:build` and `pnpm cli:lint` before submitting. Use `pnpm cli:format` if you touched CLI formatting or want ESLint/Prettier fixes applied consistently.
+3. After `pnpm install`, run `pnpm gateway:build` and `pnpm gateway:lint` before submitting. Use `pnpm gateway:format` when you want ESLint/Prettier fixes applied in the gateway app.
 4. Describe what changed and why in the PR body; link related issues when applicable.
 
-If you are unsure whether something belongs in the CLI, the Solana program, or both, ask in an issue and we can narrow the scope.
+If you are unsure whether something belongs in the gateway, the Solana program, or both, ask in an issue and we can narrow the scope.
 
 ## License
 

@@ -18,7 +18,6 @@
     "pnpm": ">=10.28.2 <11.0.0"
   },
   "dependencies": {
-    "@gutenberg/cli": "workspace:*",
     "@gutenberg/core": "workspace:*",
     "@gutenberg/gateway": "workspace:*",
     "@gutenberg/indexer": "workspace:*"
@@ -33,10 +32,6 @@
     "core:build": "pnpm --filter @gutenberg/core run build",
     "core:format": "pnpm --filter @gutenberg/core run format",
     "core:lint": "pnpm --filter @gutenberg/core run lint",
-    "cli:build": "pnpm --filter @gutenberg/core run build && pnpm --filter @gutenberg/cli run build",
-    "cli:start": "pnpm --filter @gutenberg/core run build && pnpm --filter @gutenberg/cli run start --",
-    "cli:format": "pnpm --filter @gutenberg/cli run format",
-    "cli:lint": "pnpm --filter @gutenberg/cli run lint",
     "gateway:dev": "pnpm --filter @gutenberg/gateway run dev",
     "gateway:build": "pnpm --filter @gutenberg/core run build && pnpm --filter @gutenberg/gateway run build",
     "gateway:preview": "pnpm --filter @gutenberg/gateway run preview",

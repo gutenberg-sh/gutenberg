@@ -177,7 +177,6 @@ export async function run_publish_flow(input: {
     ...(session.prev_version ? { prev_version: session.prev_version } : {}),
     ...(session.license ? { license: session.license } : {}),
     ...(session.language ? { language: session.language } : {}),
-    ...(session.tags && session.tags.length > 0 ? { tags: session.tags } : {}),
   });
 
   on_event({ kind: 'manifest_signing' });

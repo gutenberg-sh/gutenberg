@@ -45,7 +45,6 @@ export type GutenbergUnsignedManifest = {
   prev_version?: string;
   license?: string;
   language?: string;
-  tags?: string[];
 };
 
 export type GutenbergManifest = GutenbergUnsignedManifest & {

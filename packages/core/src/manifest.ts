@@ -33,6 +33,7 @@ const manifest_required_keys: ReadonlySet<string> = new Set([
   'content_size_bytes',
   'chain',
 ]);
+// `tags` is optional only for legacy manifests; new releases must not include it.
 const manifest_optional_keys: ReadonlySet<string> = new Set([
   'prev_version',
   'license',
@@ -49,7 +50,7 @@ const chain_keys: ReadonlySet<string> = new Set(['chain_id', 'program_id']);
 
 export const SPDX_LICENSE_RE = /^[A-Za-z0-9.+-]+$/;
 export const BCP47_LANGUAGE_RE = /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/;
-export const TAG_RE = /^[a-z0-9][a-z0-9._-]{0,31}$/;
+const TAG_RE = /^[a-z0-9][a-z0-9._-]{0,31}$/;
 
 export function assert_valid_manifest(
   manifest: unknown,

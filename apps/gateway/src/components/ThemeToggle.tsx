@@ -15,7 +15,7 @@ export function ThemeToggle() {
   }, []);
 
   useEffect(() => {
-    sync();
+    queueMicrotask(() => sync());
   }, [sync]);
 
   const cycle = useCallback(() => {

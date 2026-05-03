@@ -17,7 +17,6 @@ export type PublishSessionInput = {
   prev_version?: string;
   license?: string;
   language?: string;
-  tags?: string[];
   chain: {
     chain_id: ChainId;
     program_id: string;

@@ -32,7 +32,6 @@ export type BuildManifestInput = {
   prev_version?: string;
   license?: string;
   language?: string;
-  tags?: string[];
 };
 
 export function build_unsigned_manifest(
@@ -61,7 +60,6 @@ export function build_unsigned_manifest(
     ...(input.prev_version ? { prev_version: input.prev_version } : {}),
     ...(input.license ? { license: input.license } : {}),
     ...(input.language ? { language: input.language } : {}),
-    ...(input.tags && input.tags.length > 0 ? { tags: input.tags } : {}),
   };
 
   return manifest;
