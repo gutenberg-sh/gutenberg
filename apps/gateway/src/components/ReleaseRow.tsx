@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
+import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import { ArrowUpRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { PublisherAddressLink } from '@/components/PublisherAddressLink';
 import { format_bytes, format_relative_time, shorten } from '@/lib/format';
@@ -13,19 +13,44 @@ export function PublicationList({ children }: { children: ReactNode }) {
 }
 
 export function ReleaseRow({ release }: { release: ReleaseDto }) {
+  const navigate = useNavigate();
   const registry_id =
     release.publication?.registry_id ?? release.publication_id;
   const publisher_address = release.publisher?.address;
   const target = `/publication/${encodeURIComponent(registry_id)}/${encodeURIComponent(release.version)}`;
 
+  const go_publication = () => {
+    navigate(target);
+  };
+
+  const on_row_key_down = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      go_publication();
+    }
+  };
+
+  const on_row_aux_click = (e: MouseEvent<HTMLDivElement>) => {
+    if (e.button === 1) {
+      e.preventDefault();
+      window.open(target, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
-    <Link
-      to={target}
+    <div
+      role="link"
+      tabIndex={0}
+      aria-label={`Publication ${registry_id}, version ${release.version}`}
       className={cn(
-        'group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-2 py-4',
+        'group grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-2 py-4',
         'transition-[background-color,color] duration-200 ease-out',
         'hover:bg-surface/40 active:translate-y-px',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
       )}
+      onClick={go_publication}
+      onKeyDown={on_row_key_down}
+      onAuxClick={on_row_aux_click}
     >
       <div className="grid min-w-0 gap-1.5 px-1 sm:px-2">
         <div className="flex min-w-0 items-baseline gap-2">
@@ -73,7 +98,7 @@ export function ReleaseRow({ release }: { release: ReleaseDto }) {
           aria-hidden
         />
       </div>
-    </Link>
+    </div>
   );
 }
 
