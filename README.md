@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="assets/banner.png" alt="Gutenberg; publish freely, privately, and permanently on Solana" width="720" />
-</p>
-
 <h1 align="center">Gutenberg</h1>
 
 <p align="center">
