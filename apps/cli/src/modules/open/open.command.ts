@@ -39,7 +39,7 @@ export class OpenCommand {
           /\/$/,
           '',
         );
-        const url = `${gateway_base}/r/${encodeURIComponent(name)}/${encodeURIComponent(version)}`;
+        const url = `${gateway_base}/publication/${encodeURIComponent(name)}/${encodeURIComponent(version)}`;
 
         ui.success(
           `Opening ${ui.fmt.bold(name)}${ui.fmt.dim('@')}${ui.fmt.bold(version)}`,

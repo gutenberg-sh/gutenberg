@@ -13,7 +13,7 @@ export function RecentReleases({ limit = 8 }: { limit?: number }) {
 
   return (
     <section
-      aria-label="Recently published releases"
+      aria-label="Recently published"
       className="grid gap-5"
     >
       <header className="flex items-end justify-between gap-4">
@@ -22,7 +22,7 @@ export function RecentReleases({ limit = 8 }: { limit?: number }) {
             Recently published
           </p>
           <h2 className="text-[22px] font-semibold tracking-[-0.02em] text-foreground sm:text-[26px]">
-            Fresh packages hitting the registry.
+            Fresh publications hitting the registry.
           </h2>
         </div>
         <Link
@@ -54,7 +54,7 @@ export function RecentReleases({ limit = 8 }: { limit?: number }) {
 function CompactRow({ release }: { release: ReleaseDto }) {
   const name = release.name?.name ?? release.name_id;
   const publisher = release.publisher?.address ?? release.publisher_id;
-  const target = `/r/${encodeURIComponent(name)}/${encodeURIComponent(release.version)}`;
+  const target = `/publication/${encodeURIComponent(name)}/${encodeURIComponent(release.version)}`;
 
   return (
     <Link
@@ -71,7 +71,15 @@ function CompactRow({ release }: { release: ReleaseDto }) {
           </span>
         </div>
         <span className="font-mono text-[11px] tabular text-muted-foreground">
-          by {shorten(publisher, 4, 4)}
+          by{' '}
+          <Link
+            to={`/p/${encodeURIComponent(publisher)}`}
+            onClick={(e) => e.stopPropagation()}
+            className="text-foreground-soft hover:text-foreground hover:underline"
+            title={publisher}
+          >
+            {shorten(publisher, 4, 4)}
+          </Link>
         </span>
       </div>
       <span className="hidden text-[12px] text-muted-foreground sm:inline">

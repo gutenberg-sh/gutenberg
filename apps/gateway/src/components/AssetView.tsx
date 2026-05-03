@@ -1,6 +1,7 @@
-import { Download, FileText, Image as ImageIcon } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 
+import { format_bytes } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 const TEXT_EXTS = new Set([
@@ -67,7 +68,6 @@ export function AssetView({
   if (IMAGE_EXTS.has(ext)) {
     return (
       <figure className="grid gap-3">
-        <Caption icon={ImageIcon} path={path} bytes={bytes} />
         <img
           src={blob_url}
           alt={path}
@@ -88,7 +88,6 @@ export function AssetView({
 
     return (
       <div className="grid gap-3">
-        <Caption icon={FileText} path={path} bytes={bytes} />
         <pre
           className={cn(
             'max-h-[72vh] overflow-auto rounded-none border border-border bg-muted/40 p-4',
@@ -122,41 +121,6 @@ export function AssetView({
       </div>
     </div>
   );
-}
-
-function Caption({
-  icon: Icon,
-  path,
-  bytes,
-}: {
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  path: string;
-  bytes: Uint8Array;
-}) {
-  return (
-    <figcaption className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-muted-foreground">
-      <span className="inline-flex items-center gap-1.5 text-foreground">
-        <Icon className="size-3.5" strokeWidth={1.75} aria-hidden />
-        <code className="font-mono tabular">{path}</code>
-      </span>
-      <span aria-hidden className="text-muted-foreground/40">
-        ·
-      </span>
-      <span className="font-mono tabular">{format_bytes(bytes.byteLength)}</span>
-    </figcaption>
-  );
-}
-
-function format_bytes(byte_count: number): string {
-  if (byte_count < 1024) {
-    return `${byte_count} B`;
-  }
-
-  if (byte_count < 1024 * 1024) {
-    return `${(byte_count / 1024).toFixed(1)} KB`;
-  }
-
-  return `${(byte_count / 1024 / 1024).toFixed(2)} MB`;
 }
 
 function mime_for_ext(ext: string): string {

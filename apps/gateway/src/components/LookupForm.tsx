@@ -8,7 +8,7 @@ import {
   type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { format_relative_time, shorten } from '@/lib/format';
@@ -23,7 +23,7 @@ type Size = 'sm' | 'lg';
 export function LookupForm({
   auto_focus = false,
   size = 'lg',
-  placeholder = 'find a release or publisher',
+  placeholder = 'find a publication or publisher',
   on_navigate,
   className,
 }: {
@@ -53,7 +53,7 @@ export function LookupForm({
     {
       q: debounced_query,
       limit: SUGGESTION_LIMIT,
-      includes: 'releases',
+      includes: 'releases,publisher',
     },
     { enabled: focused && debounced_query.length > 0 },
   );
@@ -82,13 +82,13 @@ export function LookupForm({
   function go_to_release(name: string, version: string) {
     on_navigate?.();
     void navigate(
-      `/r/${encodeURIComponent(name)}/${encodeURIComponent(version)}`,
+      `/publication/${encodeURIComponent(name)}/${encodeURIComponent(version)}`,
     );
   }
 
   function go_to_name(name: string) {
     on_navigate?.();
-    void navigate(`/r/${encodeURIComponent(name)}`);
+    void navigate(`/publication/${encodeURIComponent(name)}`);
   }
 
   function go_to_search(query: string) {
@@ -118,7 +118,7 @@ export function LookupForm({
 
     const at = trimmed.indexOf('@');
     if (at <= 0 || at === trimmed.length - 1) {
-      set_error('Releases use the form name@version (e.g. gutenberg-demo@1.0.0).');
+      set_error('Publications use the form name@version (e.g. gutenberg-demo@1.0.0).');
       return;
     }
 
@@ -237,14 +237,14 @@ export function LookupForm({
 
           <button
             type="submit"
-            aria-label={has_at ? 'Verify release' : 'Search'}
+            aria-label={has_at ? 'Open publication' : 'Search'}
             className={cn(
               'inline-flex shrink-0 items-center gap-1.5 bg-primary font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
               lg ? 'mx-1.5 my-1.5 rounded-none px-4 text-[13.5px]' : 'mx-1 my-1 rounded-none px-3 text-[12.5px]',
             )}
           >
             <span className="inline-flex min-w-[4.25rem] justify-center">
-              {has_at ? 'Verify' : 'Search'}
+              {has_at ? 'Open' : 'Search'}
             </span>
             <ArrowRight
               className={lg ? 'size-3.5' : 'size-3'}
@@ -277,7 +277,7 @@ export function LookupForm({
               <span className="font-mono tabular text-foreground-soft">
                 name@version
               </span>{' '}
-              opens that exact release
+              opens that exact publication
             </>
           )}
         </p>
@@ -288,7 +288,7 @@ export function LookupForm({
               <SuggestionSkeleton />
             ) : search.isError ? (
               <div className="rounded-none border-2 border-border bg-elevated px-4 py-3 text-[12px] text-muted-foreground">
-                Search is offline. You can still open a release by typing{' '}
+                Search is offline. You can still open a publication by typing{' '}
                 <span className="font-mono tabular text-foreground">
                   name@version
                 </span>
@@ -369,7 +369,7 @@ function SuggestionItem({
   on_select: () => void;
 }) {
   const latest = item.releases?.[0];
-  const publisher = item.publisher_id;
+  const publisher_address = item.publisher?.address;
 
   return (
     <li
@@ -396,7 +396,18 @@ function SuggestionItem({
           ) : null}
         </div>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
-          <span className="font-mono tabular">{shorten(publisher, 4, 4)}</span>
+          {publisher_address ? (
+            <Link
+              to={`/p/${encodeURIComponent(publisher_address)}`}
+              onClick={(e) => e.stopPropagation()}
+              className="font-mono tabular text-foreground-soft hover:text-foreground hover:underline"
+              title={publisher_address}
+            >
+              {shorten(publisher_address, 4, 4)}
+            </Link>
+          ) : (
+            <span className="font-mono tabular text-muted-foreground">—</span>
+          )}
           {latest ? (
             <>
               <span aria-hidden className="text-muted-foreground/50">

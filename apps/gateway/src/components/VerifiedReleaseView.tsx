@@ -8,11 +8,12 @@ import { FileNav } from '@/components/FileNav';
 import { GatewayLinks } from '@/components/GatewayLinks';
 import { Container } from '@/components/Layout';
 import { MarkdownContent } from '@/components/MarkdownContent';
-import { ReleaseHeader } from '@/components/ReleaseHeader';
+import { ProvenancePanel, ReleaseHeader } from '@/components/ReleaseHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VerifyStatus } from '@/components/VerifyStatus';
 import { env } from '@/env';
 import { shorten } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import { useReferencedAssets } from '@/hooks/useReferencedAssets';
 import {
   prefetch_verified_file,
@@ -39,15 +40,16 @@ export function VerifiedReleaseView({
     return (
       <Container className="grid gap-8 pb-20 pt-8 lg:gap-10 lg:pb-28 lg:pt-10">
         <ReleaseHeaderSkeleton />
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-12">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_18.5rem] xl:gap-14">
           <div className="min-w-0">
             <VerifyStatus steps={state.steps} />
           </div>
-          <div className="grid content-start gap-3">
-            <Skeleton className="h-24 w-full rounded-none" />
-            <Skeleton className="h-40 w-full rounded-none" />
-          </div>
+          <aside className="grid gap-6 lg:sticky lg:top-24 lg:self-start">
+            <PublicationAsideSkeleton />
+            <FileNavSkeleton />
+          </aside>
         </div>
+        <ProvenancePanelSkeleton />
       </Container>
     );
   }
@@ -58,8 +60,8 @@ export function VerifiedReleaseView({
         <VerifyStatus steps={state.steps} />
         <div>
           <ErrorView
-            title="This release didn't verify"
-            message={state.error ?? 'Something went wrong while checking this release.'}
+            title="This publication didn't verify"
+            message={state.error ?? 'Something went wrong while checking this publication.'}
             extras={
               state.partial_manifest_uri ? (
                 <GatewayLinks
@@ -84,21 +86,129 @@ export function VerifiedReleaseView({
   );
 }
 
+function ProvenancePanelSkeleton({ className }: { className?: string }) {
+  return (
+    <div className={cn('border-t border-border pt-8 lg:pt-10', className)}>
+      <div className="grid gap-8 lg:gap-10">
+        <header className="grid max-w-[72ch] gap-2">
+          <Skeleton className="h-[0.95rem] w-28 rounded-none" />
+          <div className="grid gap-1.5">
+            <Skeleton className="h-3.5 w-full max-w-lg rounded-none" />
+            <Skeleton className="h-3.5 w-full max-w-md rounded-none" />
+          </div>
+        </header>
+        <div className="rounded-none border border-border/90 bg-surface/45 p-5 shadow-[inset_0_1px_0_oklch(1_0_0/5%)] sm:p-6 dark:bg-surface/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/6%)]">
+          <div className="grid gap-10 sm:gap-12">
+            <div className="grid gap-4">
+              <div className="grid gap-1 border-b border-border/60 pb-3">
+                <Skeleton className="h-[13px] w-24 rounded-none" />
+                <Skeleton className="h-3 w-full max-w-md rounded-none" />
+              </div>
+              <Skeleton className="h-16 w-full rounded-none" />
+              <Skeleton className="h-16 w-full rounded-none border-t border-border/40 pt-3" />
+              <Skeleton className="h-14 w-full rounded-none border-t border-border/40 pt-3" />
+            </div>
+            <div className="grid gap-4">
+              <div className="grid gap-1 border-b border-border/60 pb-3">
+                <Skeleton className="h-[13px] w-40 rounded-none" />
+                <Skeleton className="h-3 w-full max-w-lg rounded-none" />
+              </div>
+              <Skeleton className="h-16 w-full rounded-none" />
+              <Skeleton className="h-16 w-full rounded-none border-t border-border/40 pt-3" />
+            </div>
+            <div className="grid gap-4">
+              <div className="grid gap-1 border-b border-border/60 pb-3">
+                <Skeleton className="h-[13px] w-28 rounded-none" />
+                <Skeleton className="h-3 w-full max-w-md rounded-none" />
+              </div>
+              <Skeleton className="h-16 w-full rounded-none" />
+              <Skeleton className="h-16 w-full rounded-none border-t border-border/40 pt-3" />
+              <Skeleton className="h-20 w-full rounded-none border-t border-border/40 pt-3" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ReleaseHeaderSkeleton() {
   return (
-    <section className="grid gap-5">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <Skeleton className="h-6 w-20 rounded-none" />
-        <Skeleton className="h-5 w-36 rounded-none" />
-        <Skeleton className="h-3.5 w-28" />
+    <section className="grid gap-5" aria-hidden>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-3">
+        <Skeleton className="h-[30px] w-19 rounded-none" />
+        <Skeleton className="h-[30px] w-26 rounded-none" />
       </div>
-      <div className="grid gap-2.5">
-        <Skeleton className="h-9 w-72 max-w-full" />
+
+      <div className="grid gap-4">
+        <div className="flex min-h-13 flex-wrap items-baseline gap-x-2.5 gap-y-2 sm:min-h-[3.85rem] lg:min-h-[4.35rem]">
+          <Skeleton className="h-9 w-full max-w-[min(100%,22rem)] rounded-none sm:h-10 lg:h-11 lg:max-w-[min(100%,28rem)]" />
+          <Skeleton className="h-7 w-14 rounded-none sm:h-8 sm:w-16" />
+          <Skeleton className="h-3 w-18 rounded-none sm:ml-1" />
+        </div>
       </div>
-      <div className="border-t border-border pt-3">
-        <Skeleton className="h-3 w-44" />
+
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <Skeleton className="h-[13px] w-30 rounded-none" />
+        <Skeleton className="h-[13px] w-22 rounded-none" />
+        <Skeleton className="h-[13px] w-24 rounded-none" />
       </div>
     </section>
+  );
+}
+
+function PublicationAsideSkeleton() {
+  return (
+    <div className="rounded-none border border-border bg-card p-4 shadow-[inset_0_1px_0_oklch(1_0_0/6%)] dark:shadow-[inset_0_1px_0_oklch(1_0_0/8%)]">
+      <Skeleton className="h-2.5 w-34 rounded-none" />
+      <dl className="mt-4 grid gap-4 text-[13px]">
+        <div className="grid gap-1">
+          <Skeleton className="h-2.5 w-24 rounded-none" />
+          <Skeleton className="h-4 w-32 rounded-none" />
+        </div>
+        <div className="grid gap-1">
+          <Skeleton className="h-2.5 w-16 rounded-none" />
+          <Skeleton className="h-4 w-full max-w-48 rounded-none" />
+        </div>
+        <div className="grid gap-1">
+          <Skeleton className="h-2.5 w-30 rounded-none" />
+          <Skeleton className="h-4 w-20 rounded-none" />
+        </div>
+        <div className="border-t border-border pt-4">
+          <Skeleton className="h-4 w-36 rounded-none" />
+        </div>
+      </dl>
+    </div>
+  );
+}
+
+function FileNavSkeleton() {
+  return (
+    <nav
+      aria-hidden
+      className="grid gap-6 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto"
+    >
+      {[0, 1].map((section) => (
+        <div key={section} className="grid gap-0">
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <Skeleton className="h-2.5 w-24 rounded-none" />
+            <Skeleton className="h-3 w-6 rounded-none" />
+          </div>
+          <ul className="grid">
+            {[0, 1, 2].map((i) => (
+              <li
+                key={i}
+                className="border-t border-border/60 last:border-b last:border-border/60"
+              >
+                <div className="py-2.5">
+                  <Skeleton className="h-[13px] w-full max-w-44 rounded-none" />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </nav>
   );
 }
 
@@ -118,17 +228,25 @@ function VerifiedReleaseRendered({
       : manifest.entry;
   const target_file = release.files.get(target_path);
 
-  const all_paths = useMemo(
+  const page_paths = useMemo(
     () =>
       Object.keys(manifest.files)
-        .filter((path) => path.endsWith('.md'))
+        .filter((path) => path.toLowerCase().endsWith('.md'))
+        .sort() as Array<`/${string}`>,
+    [manifest.files],
+  );
+
+  const asset_paths = useMemo(
+    () =>
+      Object.keys(manifest.files)
+        .filter((path) => !path.toLowerCase().endsWith('.md'))
         .sort() as Array<`/${string}`>,
     [manifest.files],
   );
 
   useEffect(() => {
     const handle = schedule_idle(() => {
-      for (const path of all_paths) {
+      for (const path of page_paths) {
         if (path === target_path) continue;
         const file = release.files.get(path);
         if (file) prefetch_verified_file(file);
@@ -136,14 +254,14 @@ function VerifiedReleaseRendered({
     });
 
     return () => cancel_idle(handle);
-  }, [all_paths, release.files, target_path]);
+  }, [page_paths, release.files, target_path]);
 
   if (!target_file) {
     return (
       <Container className="py-20 lg:py-28">
         <ErrorView
-          title="File not in this release"
-          message={`This release doesn't include ${target_path}. Pick a file from the index, or open the entry page.`}
+          title="File not in this publication"
+          message={`This publication doesn't include ${target_path}. Pick a file from the index, or open the entry page.`}
           back_to={base_path}
         />
       </Container>
@@ -156,9 +274,6 @@ function VerifiedReleaseRendered({
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_18.5rem] xl:gap-14">
         <div className="min-w-0">
-          <div className="mb-5 lg:hidden">
-            <ViewingStrip entry={manifest.entry} path={target_path} />
-          </div>
           <ActiveFile
             release={release}
             target_path={target_path}
@@ -167,60 +282,35 @@ function VerifiedReleaseRendered({
         </div>
 
         <aside className="grid gap-6 lg:sticky lg:top-24 lg:self-start">
-          <div className="hidden lg:block">
-            <ViewingStrip entry={manifest.entry} path={target_path} />
-          </div>
-
-          <ReleasePackageAside
+          <PublicationAside
             release={release}
-            page_count={all_paths.length}
+            page_count={page_paths.length}
+            asset_count={asset_paths.length}
           />
 
           <FileNav
-            files={all_paths}
+            pages={page_paths}
+            assets={asset_paths}
             base_path={base_path}
             current_path={target_path}
+            entry_path={manifest.entry}
           />
         </aside>
       </div>
+
+      <ProvenancePanel release={release} />
     </Container>
   );
 }
 
-function ViewingStrip({
-  entry,
-  path,
-}: {
-  entry: `/${string}`;
-  path: `/${string}`;
-}) {
-  const is_default_doc =
-    path === entry && path.toLowerCase().endsWith('.md');
-  const headline = is_default_doc
-    ? 'Readme'
-    : path.replace(/^\//, '') || path;
-
-  return (
-    <div className="border-b border-border pb-3">
-      <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-        {is_default_doc ? 'Documentation' : 'File'}
-      </p>
-      <p
-        className="mt-1 truncate font-mono text-[13px] tabular text-foreground"
-        title={path}
-      >
-        {headline}
-      </p>
-    </div>
-  );
-}
-
-function ReleasePackageAside({
+function PublicationAside({
   release,
   page_count,
+  asset_count,
 }: {
   release: VerifiedRelease;
   page_count: number;
+  asset_count: number;
 }) {
   const m = release.manifest;
   const publisher = m.publisher;
@@ -228,7 +318,7 @@ function ReleasePackageAside({
   return (
     <div className="rounded-none border border-border bg-card p-4 shadow-[inset_0_1px_0_oklch(1_0_0/6%)] dark:shadow-[inset_0_1px_0_oklch(1_0_0/8%)]">
       <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-        Package details
+        Publication details
       </p>
       <dl className="mt-4 grid gap-4 text-[13px]">
         <div className="grid gap-1">
@@ -259,16 +349,27 @@ function ReleasePackageAside({
 
         <div className="grid gap-1">
           <dt className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Pages in bundle
+            Pages
           </dt>
           <dd className="font-mono text-[12px] tabular text-foreground-soft">
             {page_count} markdown file{page_count === 1 ? '' : 's'}
           </dd>
         </div>
 
+        <div className="grid gap-1">
+          <dt className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Assets
+          </dt>
+          <dd className="font-mono text-[12px] tabular text-foreground-soft">
+            {asset_count === 0
+              ? 'None'
+              : `${asset_count} file${asset_count === 1 ? '' : 's'}`}
+          </dd>
+        </div>
+
         <div className="border-t border-border pt-4">
           <Link
-            to={`/r/${encodeURIComponent(m.name)}/versions`}
+            to={`/publication/${encodeURIComponent(m.name)}/versions`}
             className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-foreground underline-offset-4 hover:underline"
           >
             <GitBranch className="size-3.5 text-muted-foreground" strokeWidth={1.75} aria-hidden />
@@ -368,19 +469,21 @@ function ActiveMarkdown({
   }
 
   return (
-    <MarkdownContent
-      source={source}
-      resolve_url={(raw) =>
-        resolve_relative_url({
-          raw,
-          current_path: target_path,
-          manifest: release.manifest,
-          base_path,
-          assets: asset_state.assets,
-          files: release.files,
-        })
-      }
-    />
+    <div className="grid gap-3">
+      <MarkdownContent
+        source={source}
+        resolve_url={(raw) =>
+          resolve_relative_url({
+            raw,
+            current_path: target_path,
+            manifest: release.manifest,
+            base_path,
+            assets: asset_state.assets,
+            files: release.files,
+          })
+        }
+      />
+    </div>
   );
 }
 

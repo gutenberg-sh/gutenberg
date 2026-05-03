@@ -38,7 +38,7 @@ export function LookupDialog({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Open a release"
+      aria-label="Open a publication"
       onClick={() => on_open_change(false)}
       className="fixed inset-0 z-[60] flex items-start justify-center bg-background/92 p-4 pt-[18vh]"
     >
@@ -59,9 +59,9 @@ export function LookupDialog({
             Registry quick open
           </p>
           <p className="mt-1 text-[13px] text-foreground-soft">
-            Search like npm — or paste{' '}
+            Search the registry — or paste{' '}
             <span className="font-mono tabular text-foreground">name@version</span>{' '}
-            to verify an exact release.
+            to jump straight to a version.
           </p>
         </div>
         <LookupForm

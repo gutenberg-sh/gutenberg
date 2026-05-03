@@ -6,6 +6,7 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { BrowseRoute } from '@/routes/Browse';
 import { LandingRoute } from '@/routes/Landing';
 import { LatestReleaseRoute } from '@/routes/LatestRelease';
+import { LegacyPublicationRedirect } from '@/routes/LegacyPublicationRedirect';
 import { NotFoundRoute } from '@/routes/NotFound';
 import { PublishRoute } from '@/routes/Publish';
 import { PublisherRoute } from '@/routes/Publisher';
@@ -28,10 +29,18 @@ export function App() {
           <Route path="/search" element={<SearchRoute />} />
           <Route path="/publish" element={<PublishRoute />} />
           <Route path="/p/:address" element={<PublisherRoute />} />
-          <Route path="/r/:name" element={<LatestReleaseRoute />} />
-          <Route path="/r/:name/versions" element={<VersionsRoute />} />
-          <Route path="/r/:name/:version" element={<ReleaseRoute />} />
-          <Route path="/r/:name/:version/*" element={<ReleaseRoute />} />
+          <Route path="/publication/:name" element={<LatestReleaseRoute />} />
+          <Route
+            path="/publication/:name/versions"
+            element={<VersionsRoute />}
+          />
+          <Route path="/publication/:name/:version" element={<ReleaseRoute />} />
+          <Route
+            path="/publication/:name/:version/*"
+            element={<ReleaseRoute />}
+          />
+          <Route path="/r" element={<LegacyPublicationRedirect />} />
+          <Route path="/r/*" element={<LegacyPublicationRedirect />} />
           <Route path="*" element={<NotFoundRoute />} />
         </Routes>
       </main>

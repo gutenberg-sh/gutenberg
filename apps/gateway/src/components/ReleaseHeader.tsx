@@ -1,10 +1,8 @@
 import {
   Calendar,
   Check,
-  ChevronDown,
   Copy,
   ExternalLink,
-  Fingerprint,
   GitBranch,
   ShieldCheck,
 } from 'lucide-react';
@@ -28,16 +26,13 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
   ].filter((v): v is string => Boolean(v));
 
   return (
-    <section aria-label="Release" className="grid gap-5">
-      <IdentityStrip
-        publisher={manifest.publisher}
-        published_at={manifest.published_at}
-      />
+    <section aria-label="Publication" className="grid gap-5">
+      <IdentityStrip published_at={manifest.published_at} />
 
       <div className="grid gap-4">
         <h1 className="text-balance font-semibold tracking-[-0.02em] text-foreground">
           <Link
-            to={`/r/${encodeURIComponent(manifest.name)}`}
+            to={`/publication/${encodeURIComponent(manifest.name)}`}
             className="text-[1.625rem] leading-[1.16] hover:underline sm:text-[2rem] lg:text-[2.35rem]"
             title="Open the latest version"
           >
@@ -49,7 +44,7 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
             </span>
           </span>
           <Link
-            to={`/r/${encodeURIComponent(manifest.name)}/versions`}
+            to={`/publication/${encodeURIComponent(manifest.name)}/versions`}
             className="ml-2.5 inline-flex items-center gap-1 align-middle text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground sm:ml-3"
             title="Version history"
           >
@@ -82,58 +77,26 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
           ))}
         </div>
       ) : null}
-
-      <ProvenanceDisclosure release={release} />
     </section>
   );
 }
 
-function IdentityStrip({
-  publisher,
-  published_at,
-}: {
-  publisher: string;
-  published_at: string;
-}) {
+function IdentityStrip({ published_at }: { published_at: string }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-3">
+      <Chip
+        variant="accent"
+        title="Manifest signature and content hashes matched the on-chain record for this release."
+        icon={<ShieldCheck className="size-3" strokeWidth={1.85} aria-hidden />}
+      >
+        Verified
+      </Chip>
+
       <Chip
         icon={<Calendar className="size-3" strokeWidth={1.85} aria-hidden />}
       >
         {format_date(published_at)}
       </Chip>
-
-      <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-        <Chip
-          variant="accent"
-          title="Verified in your browser — author signature, manifest hash, and content hash all match the chain."
-          icon={<ShieldCheck className="size-3" strokeWidth={1.85} aria-hidden />}
-        >
-          Verified
-        </Chip>
-
-        <span className="inline-flex items-center gap-1">
-          <Link
-            to={`/p/${encodeURIComponent(publisher)}`}
-            title="Open publisher profile"
-            className="inline-flex items-center gap-1.5 rounded-none border border-border bg-surface/50 px-2.5 py-1 font-mono text-[11.5px] font-medium tabular tracking-tight text-foreground transition-colors hover:border-border-strong hover:bg-surface hover:text-foreground"
-          >
-            <Fingerprint className="size-3" strokeWidth={1.85} aria-hidden />
-            {shorten(publisher, 6, 6)}
-          </Link>
-          <a
-            href={explorer_address_url(publisher)}
-            target="_blank"
-            rel="noreferrer noopener"
-            aria-label="View publisher on the Solana explorer"
-            title="Solana explorer"
-            className="inline-flex size-5 items-center justify-center rounded-none text-muted-foreground transition-colors hover:bg-surface hover:text-foreground"
-          >
-            <ExternalLink className="size-2.5" strokeWidth={1.85} aria-hidden />
-          </a>
-          <CopyButton value={publisher} label="Publisher" inline />
-        </span>
-      </div>
     </div>
   );
 }
@@ -199,101 +162,115 @@ function Dot() {
   );
 }
 
-function ProvenanceDisclosure({ release }: { release: VerifiedRelease }) {
-  const [open, set_open] = useState(false);
+export function ProvenancePanel({
+  release,
+  className,
+}: {
+  release: VerifiedRelease;
+  className?: string;
+}) {
   const manifest = release.manifest;
   const event = release.release;
 
   return (
-    <details
-      onToggle={(e) => set_open(e.currentTarget.open)}
-      className="border-t border-border"
+    <section
+      id="provenance"
+      aria-labelledby="provenance-heading"
+      className={cn(
+        'scroll-mt-8 border-t border-border pt-8 lg:pt-10',
+        className,
+      )}
     >
-      <summary className="flex cursor-pointer list-none items-center gap-2 py-3 text-[11.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground-soft [&::-webkit-details-marker]:hidden">
-        <ChevronDown
-          className={cn(
-            'size-3.5 transition-transform duration-200',
-            open && 'rotate-180',
-          )}
-          strokeWidth={2}
-          aria-hidden
-        />
-        <span>Provenance</span>
-      </summary>
+      <div className="grid gap-8 lg:gap-10">
+        <header className="grid max-w-[72ch] gap-2">
+          <h2
+            id="provenance-heading"
+            className="text-[0.95rem] font-semibold leading-tight tracking-[-0.02em] text-foreground"
+          >
+            Provenance
+          </h2>
+          <p className="text-pretty text-[12.5px] leading-relaxed text-muted-foreground">
+            Registry fields, hashes, and signatures for this release. Copy values
+            or follow links to the explorer.
+          </p>
+        </header>
 
-      <div className="grid gap-5 pb-1">
-        <ProofGroup
-          title="Registry"
-          caption="Where this release lives on Solana"
-        >
-          <ProofRow
-            label="Release"
-            display={shorten(release.release_address, 6, 6)}
-            value={release.release_address}
-            copyable
-            explorer_url={explorer_address_url(release.release_address)}
-          />
-          <ProofRow
-            label="Program"
-            display={shorten(manifest.chain.program_id, 6, 6)}
-            value={manifest.chain.program_id}
-            copyable
-            explorer_url={explorer_address_url(manifest.chain.program_id)}
-          />
-          <ProofRow
-            label="Network"
-            display={manifest.chain.chain_id}
-            value={manifest.chain.chain_id}
-          />
-        </ProofGroup>
-
-        <ProofGroup
-          title="Content"
-          caption="What was signed, and by whom"
-        >
-          <ProofRow
-            label="Hash"
-            display={shorten(event.content_hash, 14, 8)}
-            value={event.content_hash}
-            copyable
-          />
-          <ProofRow
-            label="Signature"
-            display={shorten(manifest.signature, 14, 8)}
-            value={manifest.signature}
-            copyable
-          />
-        </ProofGroup>
-
-        <ProofGroup
-          title="Manifest"
-          caption="The signed file index your browser fetched"
-        >
-          <ProofRow
-            label="Hash"
-            display={shorten(event.manifest_hash, 14, 8)}
-            value={event.manifest_hash}
-            copyable
-          />
-          <ProofRow
-            label="Location"
-            display={shorten(release.manifest_uri, 8, 12)}
-            value={release.manifest_uri}
-            copyable
-          />
-          <ProofRow
-            label="Mirrors"
-            aside={
-              <GatewayLinks
-                uri={release.manifest_uri}
-                irys_gateway={env.VITE_GUTENBERG_IRYS_GATEWAY}
-                arweave_mirrors={env.VITE_GUTENBERG_ARWEAVE_MIRRORS}
+        <div className="rounded-none border border-border/90 bg-surface/45 p-5 shadow-[inset_0_1px_0_oklch(1_0_0/5%)] sm:p-6 dark:bg-surface/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/6%)]">
+          <div className="grid gap-10 sm:gap-12">
+            <ProofGroup
+              title="Registry"
+              caption="Account and program on Solana"
+            >
+              <ProofRow
+                label="Publication"
+                display={shorten(release.release_address, 6, 6)}
+                value={release.release_address}
+                copyable
+                explorer_url={explorer_address_url(release.release_address)}
               />
-            }
-          />
-        </ProofGroup>
+              <ProofRow
+                label="Program"
+                display={shorten(manifest.chain.program_id, 6, 6)}
+                value={manifest.chain.program_id}
+                copyable
+                explorer_url={explorer_address_url(manifest.chain.program_id)}
+              />
+              <ProofRow
+                label="Network"
+                display={manifest.chain.chain_id}
+                value={manifest.chain.chain_id}
+              />
+            </ProofGroup>
+
+            <ProofGroup
+              title="Content & signature"
+              caption="Payload hash and author signature on the manifest"
+            >
+              <ProofRow
+                label="Content hash"
+                display={shorten(event.content_hash, 14, 8)}
+                value={event.content_hash}
+                copyable
+              />
+              <ProofRow
+                label="Manifest signature"
+                display={shorten(manifest.signature, 14, 8)}
+                value={manifest.signature}
+                copyable
+              />
+            </ProofGroup>
+
+            <ProofGroup
+              title="Manifest"
+              caption="The signed index for this release"
+            >
+              <ProofRow
+                label="Manifest hash"
+                display={shorten(event.manifest_hash, 14, 8)}
+                value={event.manifest_hash}
+                copyable
+              />
+              <ProofRow
+                label="Source URI"
+                display={shorten(release.manifest_uri, 8, 12)}
+                value={release.manifest_uri}
+                copyable
+              />
+              <ProofRow
+                label="Mirrors"
+                aside={
+                  <GatewayLinks
+                    uri={release.manifest_uri}
+                    irys_gateway={env.VITE_GUTENBERG_IRYS_GATEWAY}
+                    arweave_mirrors={env.VITE_GUTENBERG_ARWEAVE_MIRRORS}
+                  />
+                }
+              />
+            </ProofGroup>
+          </div>
+        </div>
       </div>
-    </details>
+    </section>
   );
 }
 
@@ -301,20 +278,24 @@ function ProofGroup({
   title,
   caption,
   children,
+  className,
 }: {
   title: string;
   caption: string;
   children: ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="grid gap-1.5">
-      <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 px-1 sm:px-2">
-        <h2 className="text-[10px] font-semibold uppercase tracking-[0.22em] text-foreground-soft">
+    <div className={cn('grid gap-4', className)}>
+      <div className="grid gap-1 border-b border-border/60 pb-3">
+        <h3 className="text-[13px] font-semibold leading-snug tracking-[-0.01em] text-foreground">
           {title}
-        </h2>
-        <span className="text-[11px] text-muted-foreground">{caption}</span>
+        </h3>
+        <p className="max-w-[62ch] text-[11.5px] leading-relaxed text-muted-foreground">
+          {caption}
+        </p>
       </div>
-      <dl className="grid">{children}</dl>
+      <dl className="grid gap-0">{children}</dl>
     </div>
   );
 }
@@ -326,6 +307,7 @@ function ProofRow({
   copyable,
   explorer_url,
   aside,
+  icon,
 }: {
   label: string;
   display?: string;
@@ -333,31 +315,58 @@ function ProofRow({
   copyable?: boolean;
   explorer_url?: string;
   aside?: ReactNode;
+  icon?: ReactNode;
 }) {
+  const has_actions = Boolean(
+    explorer_url || (copyable && value !== undefined),
+  );
+
   return (
-    <div className="grid grid-cols-[96px_minmax(0,1fr)_auto] items-start gap-3 px-1 py-1 sm:px-2">
-      <dt className="pt-0.5 text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-        {label}
-      </dt>
-      <dd className="grid min-w-0 gap-2">
+    <div className="border-b border-border/40 py-3.5 last:border-b-0 last:pb-0">
+      <dt className="text-[11px] font-medium text-muted-foreground">{label}</dt>
+      <dd className="m-0 mt-2 min-w-0">
         {display !== undefined ? (
-          <span
-            title={display === value ? undefined : value}
-            className="block truncate font-mono text-[12px] tabular text-foreground"
+          <div className="flex w-full items-start justify-between gap-3">
+            <span
+              title={value && display !== value ? value : undefined}
+              className="min-w-0 flex-1 break-all font-mono text-[12px] leading-snug tabular text-foreground"
+            >
+              {display}
+            </span>
+            {has_actions ? (
+              <div className="flex shrink-0 items-center gap-0.5 pt-px">
+                {explorer_url ? (
+                  <ExplorerLink href={explorer_url} label={label} />
+                ) : null}
+                {copyable && value !== undefined ? (
+                  <CopyButton value={value} label={label} />
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+        {aside ? (
+          <div
+            className={cn(
+              'flex w-full min-w-0 flex-wrap items-start gap-2',
+              display !== undefined && 'mt-3',
+            )}
           >
-            {display}
-          </span>
+            {icon}
+            <div className="min-w-0 flex-1">{aside}</div>
+            {has_actions && display === undefined ? (
+              <div className="flex shrink-0 items-center gap-0.5">
+                {explorer_url ? (
+                  <ExplorerLink href={explorer_url} label={label} />
+                ) : null}
+                {copyable && value !== undefined ? (
+                  <CopyButton value={value} label={label} />
+                ) : null}
+              </div>
+            ) : null}
+          </div>
         ) : null}
-        {aside}
       </dd>
-      <div className="ml-auto flex items-center gap-0.5">
-        {explorer_url ? (
-          <ExplorerLink href={explorer_url} label={label} />
-        ) : null}
-        {copyable && value !== undefined ? (
-          <CopyButton value={value} label={label} />
-        ) : null}
-      </div>
     </div>
   );
 }

@@ -1,9 +1,10 @@
-import { Check, Copy, ExternalLink, Hash, Layers } from 'lucide-react';
+import { Check, Copy, ExternalLink, Info, Library } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { ErrorView } from '@/components/ErrorView';
 import { Container } from '@/components/Layout';
+import { PublisherAvatar } from '@/components/PublisherAvatar';
 import { Pagination } from '@/components/Pagination';
 import {
   ReleaseListHeader,
@@ -12,18 +13,21 @@ import {
 } from '@/components/ReleaseRow';
 import { api_error_message } from '@/lib/api';
 import { explorer_address_url } from '@/lib/explorer';
-import { format_date_short, shorten } from '@/lib/format';
+import { format_date_short } from '@/lib/format';
 import { usePublisher, usePublisherReleases } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 25;
+
+const chip_focus =
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
 export function PublisherRoute() {
   const params = useParams();
   const address = params.address;
   const [page, set_page] = useState(0);
 
-  const publisher = usePublisher(address, 'names');
+  const publisher = usePublisher(address);
   const releases = usePublisherReleases(address, {
     limit: PAGE_SIZE,
     offset: page * PAGE_SIZE,
@@ -46,7 +50,7 @@ export function PublisherRoute() {
       <Container className="py-20 lg:py-28">
         <ErrorView
           title="Publisher not found"
-          message={api_error_message(publisher.error, "We don't have a record of this address. Double-check the public key, or browse recent releases.")}
+          message={api_error_message(publisher.error, "We don't have a record of this address. Double-check the public key, or browse recent publications.")}
         />
       </Container>
     );
@@ -54,64 +58,73 @@ export function PublisherRoute() {
 
   const list = releases.data ?? [];
   const has_next = list.length === PAGE_SIZE;
-
   return (
     <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
-      <header className="grid gap-5">
+      <header className="grid gap-3">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
           Publisher
         </p>
-
-        {publisher.isLoading ? (
-          <PublisherHeaderSkeleton />
-        ) : (
-          <>
-            <h1 className="break-all font-mono text-[18px] font-medium tabular leading-[1.38] text-foreground sm:text-[22px] sm:leading-[1.4]">
-              {address}
-            </h1>
-            <div className="flex flex-wrap items-center gap-2 text-[12px] text-muted-foreground">
-              <CopyChip value={address} label="address" />
-              <a
-                href={explorer_address_url(address)}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1 text-[11.5px] font-medium text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
-              >
-                <ExternalLink className="size-3" strokeWidth={1.85} aria-hidden />
-                Explorer
-              </a>
-              {publisher.data ? (
-                <span className="ml-auto font-mono tabular">
-                  First seen {format_date_short(publisher.data.created_at)}
-                </span>
-              ) : null}
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex min-w-0 flex-wrap items-end gap-4 sm:gap-6">
+            <PublisherAvatar address={address} size={88} className="shrink-0" />
+            <div className="grid min-w-0 gap-2">
+              <h1 className="text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
+                Anonymous
+              </h1>
+              <p className="break-all font-mono text-[13px] tabular leading-[1.45] text-foreground-soft sm:text-[14px]">
+                {address}
+              </p>
             </div>
-          </>
-        )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <CopyChip value={address} label="address" />
+            <a
+              href={explorer_address_url(address)}
+              target="_blank"
+              rel="noreferrer noopener"
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground',
+                chip_focus,
+              )}
+            >
+              <ExternalLink className="size-3.5" strokeWidth={1.85} aria-hidden />
+              Explorer
+            </a>
+          </div>
+        </div>
+        {publisher.data ? (
+          <p className="text-[12.5px] text-muted-foreground">
+            First seen{' '}
+            <span className="font-mono tabular text-foreground-soft">
+              {format_date_short(publisher.data.created_at)}
+            </span>
+          </p>
+        ) : publisher.isLoading ? (
+          <div className="h-4 max-w-xs animate-pulse bg-muted/70" aria-hidden />
+        ) : null}
       </header>
 
-      {publisher.data ? <PublisherStats data={publisher.data} /> : null}
+      <aside
+        className="flex gap-3 rounded-none border border-border bg-surface px-4 py-3 sm:px-5 sm:py-4"
+        aria-label="How publisher keys work"
+      >
+        <Info
+          className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+          strokeWidth={1.85}
+          aria-hidden
+        />
+        <p className="min-w-0 flex-1 text-[13px] leading-relaxed text-foreground-soft">
+          The publisher is fully anonymous: no profile or display name, only this public address. Use Copy or Explorer to see the same entries on the blockchain and confirm them yourself.
+        </p>
+      </aside>
 
       <section className="grid gap-2">
-        <div className="flex items-baseline justify-between gap-3">
-          <h2 className="text-[12px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-            Releases
-          </h2>
-          {publisher.data?.names ? (
-            <p className="text-[12px] text-muted-foreground">
-              <span className="font-mono tabular text-foreground">
-                {publisher.data.names.length}
-              </span>{' '}
-              name{publisher.data.names.length === 1 ? '' : 's'} claimed
-            </p>
-          ) : null}
-        </div>
         <ReleaseListHeader />
         {releases.isLoading ? (
           <ReleaseListSkeleton rows={6} />
         ) : releases.isError ? (
           <ErrorView
-            title="Couldn't load this publisher's releases"
+            title="Couldn't load this publisher's publications"
             message={api_error_message(releases.error, "We can't reach the indexer right now. Try again in a moment.")}
           />
         ) : list.length === 0 ? (
@@ -138,75 +151,17 @@ export function PublisherRoute() {
   );
 }
 
-function PublisherHeaderSkeleton() {
-  return (
-    <div className="grid gap-3">
-      <div className="h-7 w-2/3 animate-pulse rounded-none bg-muted" />
-      <div className="flex gap-2">
-        <div className="h-6 w-24 animate-pulse rounded-none bg-muted/70" />
-        <div className="h-6 w-24 animate-pulse rounded-none bg-muted/70" />
-      </div>
-    </div>
-  );
-}
-
-function PublisherStats({ data }: { data: NonNullable<ReturnType<typeof usePublisher>['data']> }) {
-  const names = data.names ?? [];
-  return (
-    <section className="grid gap-3 border-y border-border py-5 sm:grid-cols-2">
-      <div className="grid gap-1 px-1">
-        <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-          Claimed names
-        </p>
-        <p className="font-mono text-[18px] tabular text-foreground">
-          {names.length}
-        </p>
-        {names.length > 0 ? (
-          <ul className="mt-1.5 flex flex-wrap gap-1.5">
-            {names.slice(0, 8).map((n) => (
-              <li
-                key={n.id}
-                className="inline-flex items-center gap-1.5 rounded-none border border-border px-2 py-0.5 font-mono text-[11px] tabular text-foreground-soft"
-              >
-                <Hash className="size-2.5" strokeWidth={1.85} aria-hidden />
-                {n.name}
-              </li>
-            ))}
-            {names.length > 8 ? (
-              <li className="inline-flex items-center px-1 font-mono text-[11px] tabular text-muted-foreground">
-                +{names.length - 8} more
-              </li>
-            ) : null}
-          </ul>
-        ) : null}
-      </div>
-      <div className="grid gap-1 px-1">
-        <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-          Identity
-        </p>
-        <p className="font-mono text-[12px] tabular text-foreground-soft">
-          {shorten(data.address, 8, 8)}
-        </p>
-        <p className="text-[12px] leading-[1.65] text-muted-foreground">
-          On Gutenberg, an author is a key — not a profile, not a display
-          name, just a signature. This is what they&rsquo;ve published.
-        </p>
-        <Layers
-          className="hidden size-3 text-muted-foreground"
-          strokeWidth={1.85}
-          aria-hidden
-        />
-      </div>
-    </section>
-  );
-}
-
 function EmptyReleases() {
   return (
-    <div className="grid place-items-center gap-2 rounded-none border border-dashed border-border px-6 py-12 text-center">
-      <p className="text-[13.5px] text-foreground">No releases yet.</p>
-      <p className="max-w-[40ch] text-[12px] leading-[1.65] text-muted-foreground">
-        This key is registered but hasn't signed anything yet.
+    <div className="grid place-items-center gap-3 rounded-none border border-dashed border-border px-6 py-16 text-center">
+      <Library
+        className="size-5 text-muted-foreground"
+        strokeWidth={1.6}
+        aria-hidden
+      />
+      <p className="text-[14px] text-foreground">No publications yet.</p>
+      <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
+        This key is registered but has not signed a release we have indexed.
       </p>
     </div>
   );
@@ -232,13 +187,14 @@ function CopyChip({ value, label }: { value: string; label: string }) {
           .catch(() => set_copied(false));
       }}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1 text-[11.5px] font-medium text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground active:translate-y-px',
+        'inline-flex cursor-pointer items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground disabled:cursor-not-allowed',
+        chip_focus,
       )}
     >
       {copied ? (
-        <Check className="size-3 text-accent" strokeWidth={2.4} aria-hidden />
+        <Check className="size-3.5 text-accent" strokeWidth={2.4} aria-hidden />
       ) : (
-        <Copy className="size-3" strokeWidth={1.85} aria-hidden />
+        <Copy className="size-3.5" strokeWidth={1.85} aria-hidden />
       )}
       {copied ? 'Copied' : 'Copy'}
     </button>

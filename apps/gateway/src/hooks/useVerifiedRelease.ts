@@ -9,6 +9,21 @@ import {
 } from '@/lib/verify';
 import type { VerifyStep, VerifyStepState } from '@/components/VerifyStatus';
 
+/** Minimum time the work phase runs before we start the success checklist. */
+const MIN_VERIFY_SHELL_MS = 380;
+
+/** Pause between each animated step completing (registry → manifest → index). */
+const STAGGER_BETWEEN_STEPS_MS = 260;
+
+/** Hold on “all checks passed” before swapping to the publication view. */
+const AFTER_ALL_CHECKS_MS = 480;
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 export type ReleaseSource = {
   name: string;
   version: string;
@@ -32,10 +47,15 @@ type Action =
     }
   | { kind: 'partial_manifest_uri'; uri: ContentUri }
   | { kind: 'success'; result: VerifiedRelease }
-  | { kind: 'error'; message: string; failing_step_id?: string };
+  | {
+      kind: 'error';
+      message: string;
+      failing_step_id?: string;
+      completed_before_fail?: ReadonlyArray<{ id: string; detail: string }>;
+    };
 
 const INITIAL_STEPS: readonly VerifyStep[] = [
-  { id: 'registry', label: 'Looking up the release on chain', state: 'pending' },
+  { id: 'registry', label: 'Looking up the publication on chain', state: 'pending' },
   {
     id: 'manifest',
     label: 'Checking the manifest signature',
@@ -77,9 +97,16 @@ function reducer(state: State, action: Action): State {
     ...state,
     status: 'error',
     error: action.message,
-    steps: state.steps.map((step) =>
-      step.id === action.failing_step_id ? { ...step, state: 'error' } : step,
-    ),
+    steps: state.steps.map((step) => {
+      const done = action.completed_before_fail?.find((c) => c.id === step.id);
+      if (done) {
+        return { ...step, state: 'success', detail: done.detail };
+      }
+      if (action.failing_step_id && step.id === action.failing_step_id) {
+        return { ...step, state: 'error', detail: undefined };
+      }
+      return { ...step, state: 'pending', detail: undefined };
+    }),
   };
 }
 
@@ -93,7 +120,6 @@ export function useVerifiedRelease(source: ReleaseSource): State {
 
   useEffect(() => {
     let cancelled = false;
-    let current_step_id: string | undefined;
     const ctx = {
       rpc_url: env.VITE_GUTENBERG_SOLANA_RPC_URL,
       irys_gateway: env.VITE_GUTENBERG_IRYS_GATEWAY,
@@ -101,51 +127,119 @@ export function useVerifiedRelease(source: ReleaseSource): State {
       program_id: env.VITE_GUTENBERG_REGISTRY_PROGRAM_ID,
     };
 
-    const begin_step = (id: string) => {
-      current_step_id = id;
-      dispatch({ kind: 'step', id, state: 'running' });
-    };
-    const finish_step = (id: string, detail?: string) => {
-      dispatch({ kind: 'step', id, state: 'success', detail });
-    };
-
     void (async () => {
+      const t0 = performance.now();
+
+      let release: Awaited<ReturnType<typeof resolve_release>>['release'];
+      let release_address: string;
+
       try {
-        begin_step('registry');
-        const { release, release_address } = await resolve_release(
+        const out = await resolve_release(
           { name: source.name, version: source.version },
           ctx,
         );
-        if (cancelled) return;
-        finish_step('registry', `${release.name}@${release.version}`);
-        dispatch({ kind: 'partial_manifest_uri', uri: release.manifest });
-
-        begin_step('manifest');
-        const { manifest } = await verify_manifest_uri({
-          expected_release: release,
-          ctx,
-        });
-        if (cancelled) return;
-        finish_step('manifest', short_uri(release.manifest));
-
-        begin_step('index');
-        const verified = assemble_verified_release({
-          release,
-          release_address,
-          manifest,
-        });
-        if (cancelled) return;
-        finish_step('index', `${verified.files.size} files`);
-
-        dispatch({ kind: 'success', result: verified });
+        release = out.release;
+        release_address = out.release_address;
       } catch (err) {
         if (cancelled) return;
         dispatch({
           kind: 'error',
           message: err instanceof Error ? err.message : String(err),
-          failing_step_id: current_step_id,
+          failing_step_id: 'registry',
         });
+        return;
       }
+      if (cancelled) return;
+
+      dispatch({ kind: 'partial_manifest_uri', uri: release.manifest });
+
+      let manifest: Awaited<ReturnType<typeof verify_manifest_uri>>['manifest'];
+
+      try {
+        const out = await verify_manifest_uri({
+          expected_release: release,
+          ctx,
+        });
+        manifest = out.manifest;
+      } catch (err) {
+        if (cancelled) return;
+        dispatch({
+          kind: 'error',
+          message: err instanceof Error ? err.message : String(err),
+          failing_step_id: 'manifest',
+          completed_before_fail: [
+            {
+              id: 'registry',
+              detail: `${release.name}@${release.version}`,
+            },
+          ],
+        });
+        return;
+      }
+      if (cancelled) return;
+
+      let verified: VerifiedRelease;
+
+      try {
+        verified = assemble_verified_release({
+          release,
+          release_address,
+          manifest,
+        });
+      } catch (err) {
+        if (cancelled) return;
+        dispatch({
+          kind: 'error',
+          message: err instanceof Error ? err.message : String(err),
+          failing_step_id: 'index',
+          completed_before_fail: [
+            {
+              id: 'registry',
+              detail: `${release.name}@${release.version}`,
+            },
+            { id: 'manifest', detail: short_uri(release.manifest) },
+          ],
+        });
+        return;
+      }
+      if (cancelled) return;
+
+      const elapsed = performance.now() - t0;
+      await delay(Math.max(0, MIN_VERIFY_SHELL_MS - elapsed));
+      if (cancelled) return;
+
+      const d_registry = `${release.name}@${release.version}`;
+      const d_manifest = short_uri(release.manifest);
+      const d_index = `${verified.files.size} files`;
+
+      dispatch({
+        kind: 'step',
+        id: 'registry',
+        state: 'success',
+        detail: d_registry,
+      });
+      await delay(STAGGER_BETWEEN_STEPS_MS);
+      if (cancelled) return;
+
+      dispatch({
+        kind: 'step',
+        id: 'manifest',
+        state: 'success',
+        detail: d_manifest,
+      });
+      await delay(STAGGER_BETWEEN_STEPS_MS);
+      if (cancelled) return;
+
+      dispatch({
+        kind: 'step',
+        id: 'index',
+        state: 'success',
+        detail: d_index,
+      });
+      await delay(AFTER_ALL_CHECKS_MS);
+      if (cancelled) return;
+
+      dispatch({ kind: 'success', result: verified });
     })();
 
     return () => {

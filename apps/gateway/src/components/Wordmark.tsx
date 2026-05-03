@@ -10,15 +10,15 @@ export function Wordmark({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-2 font-sans text-[0.95em] font-extrabold tracking-[-0.05em] uppercase',
+        'inline-block whitespace-nowrap font-sans text-[0.95em] font-extrabold tracking-[-0.05em] uppercase',
         className,
       )}
     >
       <span className="leading-none">Gutenberg</span>
       {showSubmark ? (
-        <span className="ml-0.5 font-mono text-[9px] font-medium uppercase tracking-[0.28em] text-muted-foreground">
-          gateway
-        </span>
+        <sup className="ml-1.5 font-mono text-[0.54em] font-semibold leading-none tracking-[0.18em] text-muted-foreground uppercase sm:ml-2">
+          Gateway
+        </sup>
       ) : null}
     </span>
   );

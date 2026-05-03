@@ -7,7 +7,7 @@ import type { ReleaseDto } from '@/lib/queries';
 export function ReleaseRow({ release }: { release: ReleaseDto }) {
   const name = release.name?.name ?? release.name_id;
   const publisher = release.publisher?.address ?? release.publisher_id;
-  const target = `/r/${encodeURIComponent(name)}/${encodeURIComponent(release.version)}`;
+  const target = `/publication/${encodeURIComponent(name)}/${encodeURIComponent(release.version)}`;
 
   return (
     <Link
@@ -67,7 +67,7 @@ function Dot() {
 export function ReleaseListHeader() {
   return (
     <div className="hidden grid-cols-[minmax(0,1fr)_auto] gap-x-6 border-b border-border pb-2 text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground sm:grid">
-      <div className="px-2">Package</div>
+      <div className="px-2">Publication</div>
       <div className="px-2 text-right">Published</div>
     </div>
   );

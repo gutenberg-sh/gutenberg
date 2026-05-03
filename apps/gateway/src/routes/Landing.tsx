@@ -7,39 +7,13 @@ import { format_count } from '@/lib/format';
 import { useIndexerStats } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
-const PROOF_STEPS: ReadonlyArray<{
-  index: string;
-  label: string;
-  detail: string;
-}> = [
-  {
-    index: '01',
-    label: 'Who published it',
-    detail:
-      'The publisher signs every release with a key only they hold. Your browser checks that signature against the public key the chain has on record.',
-  },
-  {
-    index: '02',
-    label: 'What was published',
-    detail:
-      'The chain stores a fingerprint of the whole release. The files your browser fetches have to match that fingerprint exactly — every byte.',
-  },
-  {
-    index: '03',
-    label: 'What you\u2019re reading right now',
-    detail:
-      'Every file has its own fingerprint too. If a single byte differs from the one the author signed, the file refuses to render.',
-  },
-];
-
 const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
   {
-    q: 'Who can take a release down?',
+    q: 'Who can take a publication down?',
     a: (
       <>
-        No one. There is no unpublish button — not for us, not for the
-        publisher, not for a court. Once a release is signed and recorded,
-        the original is permanent.
+        No one — not you, not us, not the person who published it. Once a
+        publication is signed and recorded, that signed version stays.
       </>
     ),
   },
@@ -47,10 +21,9 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     q: 'How do I know what I\u2019m reading is real?',
     a: (
       <>
-        Every page on this site verifies itself in your browser before it
-        renders. The signature, the file fingerprints, and the on-chain
-        record all have to line up. If anything is off, the page refuses
-        to load.
+        Each publication is signed and anchored on-chain. Change the stored
+        bundle without updating the record and readers hit errors — not a silent
+        substitute.
       </>
     ),
   },
@@ -58,9 +31,8 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     q: 'What can I publish?',
     a: (
       <>
-        Anything that fits in a folder — writing, photos, PDFs, archives,
-        whatever. Markdown renders directly here; everything else is served
-        byte-for-byte the way you uploaded it.
+        Whatever fits in a folder: writing, images, PDFs, archives. Markdown shows
+        here as pages; everything else comes down exactly as you uploaded it.
       </>
     ),
   },
@@ -68,9 +40,9 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     q: 'How do I publish?',
     a: (
       <>
-        Install the <Code>gutenberg</Code> CLI, point it at your folder, and
-        run <Code>gutenberg publish</Code>. It opens this site, your wallet
-        signs the release, and your terminal hands you back the URL. See the{' '}
+        Install the <Code>gutenberg</Code> CLI, point it at your folder, run{' '}
+        <Code>gutenberg publish</Code>. You\u2019ll land here, your wallet signs,
+        and the CLI prints a URL. See the{' '}
         <a
           href="https://github.com/itsmekamal/gutenberg"
           target="_blank"
@@ -87,19 +59,25 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     q: 'What if a publisher loses their key?',
     a: (
       <>
-        Old releases stay valid — they were signed by that key at that time,
-        and that fact is permanent. Anything new has to come from a new key,
-        and readers can see the change.
+        If you lose your key, old publications still count for what they were.
+        Anything new needs a new key — readers see the break.
       </>
     ),
   },
   {
-    q: 'Is the verifier open?',
+    q: 'Is the code open?',
     a: (
       <>
-        Yes. The whole site, the CLI, and the on-chain program are open
-        source. The verifier ships in this page — you can read it, audit it,
-        or run it yourself.
+        Yes — this site, the CLI, and the on-chain program live in the{' '}
+        <a
+          href="https://github.com/itsmekamal/gutenberg"
+          target="_blank"
+          rel="noreferrer noopener"
+          className="text-foreground underline-offset-4 hover:underline"
+        >
+          repository
+        </a>
+        .
       </>
     ),
   },
@@ -110,34 +88,26 @@ export function LandingRoute() {
     <div className="flex flex-col">
       <Container className="pb-16 pt-10 lg:pb-24 lg:pt-14">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start lg:gap-16">
-          <div className="grid content-start gap-5 lg:pt-2">
-            <p className="font-mono text-[10.5px] uppercase tracking-[0.28em] text-muted-foreground">
-              [ public registry // permanent release records ]
-            </p>
-            <h1 className="tactical-display text-[clamp(1.5rem,5.5vw,2.75rem)] text-foreground sm:max-w-[20ch]">
-              Find, publish, and read releases that verify in-browser.
+          <div className="grid content-start gap-6 lg:pt-2">
+            <h1 className="tactical-display text-[clamp(1.65rem,6vw,3.25rem)] leading-[1.14] tracking-[-0.042em] text-foreground sm:max-w-[20ch]">
+              Publish work that stays public.
             </h1>
-            <p className="max-w-[56ch] text-[13.5px] leading-[1.68] text-foreground-soft sm:text-[14px] sm:leading-[1.7]">
-              Think of it like a package registry for immutable work: search by
-              name, open an exact version with{' '}
-              <span className="font-mono text-[0.92em] tabular text-foreground">
-                name@version
-              </span>
-              , and read knowing your browser checked the author&rsquo;s
-              signature and fingerprints before rendering a byte.
+            <p className="max-w-[42ch] text-[14px] leading-relaxed text-foreground-soft sm:text-[15px] sm:leading-relaxed">
+              Anyone can publish; once it&rsquo;s on the record, nobody can unpublish
+              it.
             </p>
-            <div className="flex flex-wrap gap-2 pt-1">
+            <div className="flex flex-wrap gap-2">
               <Link
                 to="/browse"
                 className="inline-flex items-center rounded-none bg-primary px-3.5 py-2 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px"
               >
-                Browse new releases
+                Browse publications
               </Link>
               <Link
                 to="/search"
                 className="registry-command-shell inline-flex items-center px-3.5 py-2 text-[13px] font-medium text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
               >
-                Advanced search
+                Search
               </Link>
             </div>
           </div>
@@ -145,7 +115,7 @@ export function LandingRoute() {
           <div className="grid gap-3 lg:self-center">
             <div className="flex items-baseline justify-between gap-3 px-1">
               <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
-                Jump to a release
+                Find a publication
               </p>
               <p className="hidden text-[11.5px] text-muted-foreground sm:block">
                 <span className="kbd">⌘K</span> / <span className="kbd">Ctrl K</span>{' '}
@@ -154,7 +124,7 @@ export function LandingRoute() {
             </div>
             <LookupForm
               size="lg"
-              placeholder="search packages… try ledger-notes or demo@1.2.0"
+              placeholder="name or name@version"
             />
           </div>
         </div>
@@ -166,34 +136,29 @@ export function LandingRoute() {
         <RecentReleases limit={8} />
       </Container>
 
-      <Section eyebrow="01 / Why" title="Publishing should outlive its publisher.">
+      <Section eyebrow="01 / Why" title="Your reading shouldn&rsquo;t depend on someone else&rsquo;s mood.">
         <p className="max-w-[60ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
-          Most of what you read today lives on someone else&rsquo;s servers.
-          That someone can take it down, edit it after the fact, or quietly
-          de-rank it until it&rsquo;s gone. Governments and major platforms
-          do this constantly — and most of the time you&rsquo;ll never know
-          it happened.
+          Most of what you read lives on someone else&rsquo;s computer. They can
+          pull it, rewrite it in place, or let it sink — often without telling you.
         </p>
         <p className="mt-4 max-w-[60ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
-          Gutenberg makes that impossible. The author signs the work with
-          their own key, the files go to storage no single company controls,
-          and the record lives on a public chain. Once it&rsquo;s up, the
-          original is permanent. No host, editor, or court can revoke it.
+          On Gutenberg you choose what to publish. Once it is signed onto the record, nobody can
+          censor that publication for you: no institution, no government or court.
         </p>
 
         <dl className="mt-10 grid divide-y divide-border border-y border-border text-[14.5px]">
           {[
             {
               k: 'Freely',
-              v: 'No platform decides who gets to publish. If you can sign, you can publish.',
+              v: 'You don\u2019t wait on us to approve a publication.',
             },
             {
               k: 'Privately',
-              v: 'Your identity is a key, not a profile. Nothing connects your release to your name unless you do.',
+              v: 'You\u2019re a key, not a profile — tie it to your name only if you want.',
             },
             {
               k: 'Permanently',
-              v: 'Files live on Arweave. The signed record lives on Solana. Either outlasts the other.',
+              v: 'What you published outlasts any one site or company.',
             },
           ].map((row) => (
             <div
@@ -209,68 +174,38 @@ export function LandingRoute() {
         </dl>
       </Section>
 
-      <Section eyebrow="02 / Proof" title="How you know it&rsquo;s the original.">
+      <Section eyebrow="02 / Permanence" title="Where your publication lives without asking us to stay up.">
         <p className="max-w-[60ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
-          Anyone can claim a page is real. Gutenberg lets your own browser
-          prove it. Every release carries a signature from its author and a
-          fingerprint on chain — and your browser checks both before showing
-          you a single word.
-        </p>
-
-        <ol className="mt-10 grid divide-y divide-border border-y border-border">
-          {PROOF_STEPS.map(({ index, label, detail }) => (
-            <li
-              key={index}
-              className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-5 py-6 sm:gap-10"
-            >
-              <span className="font-mono text-[12px] tabular text-muted-foreground">
-                {index}
-              </span>
-              <div className="grid gap-2">
-                <h3 className="text-[17px] font-medium leading-[1.3] tracking-[-0.005em] text-foreground sm:text-[18px]">
-                  {label}
-                </h3>
-                <p className="max-w-[62ch] text-[14.5px] leading-[1.68] text-foreground-soft">
-                  {detail}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-
-        <p className="mt-8 max-w-[60ch] text-[13.5px] leading-[1.7] text-muted-foreground">
-          We don&rsquo;t proxy releases. We don&rsquo;t re-host content. There
-          is nothing on our side you have to trust — including us.
-        </p>
-      </Section>
-
-      <Section eyebrow="03 / Permanence" title="Built to outlast any one of us.">
-        <p className="max-w-[60ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
-          A release isn&rsquo;t a webpage on a server someone can shut down.
-          It&rsquo;s three small, independent pieces that live on networks no
-          one company controls.
+          Your publication isn&rsquo;t one fragile website we could turn off.
+          It&rsquo;s split so no single outfit flips the switch alone.
         </p>
 
         <div className="mt-10">
           <ReleaseDiagram />
         </div>
 
+        <p className="mt-8 max-w-[60ch] text-[13.5px] leading-[1.7] text-muted-foreground">
+          Release pages reconcile fetched files with the signed manifest and
+          on-chain slot before rendering; hashes and keys are under Provenance
+          when you want them.
+        </p>
+
         <dl className="mt-8 grid divide-y divide-border border-y border-border text-[14.5px]">
           {[
             {
               k: 'manifest.json',
               t: 'The signed index',
-              v: "Lists every file in the release, what's in it, and who signed it. Small, human-readable, signed by the author.",
+              v: 'Your signed table of contents — paths, sizes, who signed the bundle.',
             },
             {
               k: 'ar://<txid>',
               t: 'The files themselves',
-              v: 'Every file lives on Arweave under its own content address. Your browser only fetches what you actually open.',
+              v: 'Your files at fixed addresses; clients fetch only what you open.',
             },
             {
               k: 'solana://release',
-              t: 'The on-chain record',
-              v: "Solana stores a permanent pointer at name + version: who published it, and what the manifest is supposed to look like.",
+              t: 'The public record',
+              v: 'The slot for name + version — who published and what the bundle must match.',
             },
           ].map((row) => (
             <div
@@ -289,9 +224,14 @@ export function LandingRoute() {
             </div>
           ))}
         </dl>
+
+        <p className="mt-8 max-w-[60ch] text-[13.5px] leading-[1.7] text-muted-foreground">
+          Narrow registry plumbing — not law, not moderation, not a verdict on
+          what belongs online.
+        </p>
       </Section>
 
-      <Section eyebrow="04 / FAQ" title="Things people ask.">
+      <Section eyebrow="03 / FAQ" title="Questions.">
         <dl className="grid divide-y divide-border border-y border-border">
           {FAQ.map(({ q, a }) => (
             <div
@@ -352,7 +292,7 @@ function StatsStrip() {
     label: string;
     href: string;
   }> = [
-    { key: 'releases', label: 'releases', href: '/browse' },
+    { key: 'releases', label: 'publications', href: '/browse' },
     { key: 'names', label: 'names', href: '/search' },
     { key: 'publishers', label: 'publishers', href: '/search' },
   ];
@@ -362,7 +302,7 @@ function StatsStrip() {
   return (
     <dl
       aria-label="Registry totals"
-      className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-3 text-[13px]"
+      className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 text-[13px] sm:mt-12"
     >
       {items.map((it, idx) => {
         const value = ready ? stats.data?.[it.key] ?? 0 : null;

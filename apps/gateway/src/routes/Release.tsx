@@ -17,7 +17,7 @@ export function ReleaseRoute() {
       <Container className="py-20 lg:py-28">
         <ErrorView
           title="That name doesn't look right"
-          message={`"${name ?? ''}" isn't a valid release name. Names use lowercase letters, numbers, dots, underscores, or hyphens.`}
+          message={`"${name ?? ''}" isn't a valid publication name. Names use lowercase letters, numbers, dots, underscores, or hyphens.`}
         />
       </Container>
     );
@@ -28,13 +28,13 @@ export function ReleaseRoute() {
       <Container className="py-20 lg:py-28">
         <ErrorView
           title="Missing the version"
-          message="Releases use the form name@version (e.g. gutenberg-demo@1.0.0)."
+          message="Publications use the form name@version (e.g. gutenberg-demo@1.0.0)."
         />
       </Container>
     );
   }
 
-  const base_path = `/r/${encodeURIComponent(name)}/${encodeURIComponent(version)}`;
+  const base_path = `/publication/${encodeURIComponent(name)}/${encodeURIComponent(version)}`;
   const current_path: `/${string}` | undefined = splat
     ? `/${splat}`
     : undefined;

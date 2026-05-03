@@ -52,7 +52,7 @@ function derive_status(health: ReturnType<typeof useIndexerHealth>): {
     return {
       tone: 'down',
       label: 'Indexer · offline',
-      title: "We can't reach the indexer. Recent releases won't refresh until it's back.",
+      title: "We can't reach the indexer. Recent publications won't refresh until it's back.",
     };
   }
 

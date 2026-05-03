@@ -11,6 +11,7 @@
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@fontsource-variable/geist": "^5.2.8",
     "@gutenberg/core": "workspace:*",
     "@irys/bundles": "^0.0.3",
     "@irys/web-upload": "^0.0.15",
@@ -28,6 +29,7 @@
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/react-query": "^5.100.6",
     "axios": "^1.15.2",
+    "boring-avatars": "^2.0.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",

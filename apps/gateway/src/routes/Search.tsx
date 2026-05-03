@@ -1,4 +1,4 @@
-import { ArrowUpRight, PackageSearch, Search as SearchIcon, X } from 'lucide-react';
+import { ArrowUpRight, Search as SearchIcon, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -49,7 +49,7 @@ export function SearchRoute() {
     q: debounced_query,
     limit: PAGE_SIZE,
     offset,
-    includes: 'releases',
+    includes: 'releases,publisher',
   });
 
   const results = search.data ?? [];
@@ -59,16 +59,18 @@ export function SearchRoute() {
   const showing_range_end = trimmed ? offset + results.length : 0;
 
   return (
-    <Container className="grid gap-10 pb-24 pt-10 lg:gap-12 lg:pb-32 lg:pt-14">
-      <header className="grid gap-3 lg:max-w-[62ch]">
+    <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
+      <header className="grid gap-3">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
           Registry search
         </p>
-        <h1 className="text-[1.875rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.25rem]">
-          Search packages by name.
-        </h1>
-        <p className="text-[15px] leading-[1.68] text-foreground-soft">
-          Same idea as a package registry: type part of a name, pick a match,
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <h1 className="text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
+            Search publications by name.
+          </h1>
+        </div>
+        <p className="max-w-[62ch] text-[15px] leading-[1.68] text-foreground-soft">
+          Same idea as a publication registry: type part of a name, pick a match,
           then open the latest or pin an exact version with{' '}
           <span className="font-mono text-[0.95em] tabular text-foreground">
             name@version
@@ -77,90 +79,57 @@ export function SearchRoute() {
         </p>
       </header>
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-start xl:grid-cols-[minmax(0,1fr)_248px] xl:gap-14">
-        <div className="grid gap-6">
-          <SearchInput value={query} on_change={set_query} />
+      <div className="grid gap-6">
+        <SearchInput value={query} on_change={set_query} />
 
-          {trimmed && !search.isError && !search.isLoading ? (
-            <p className="text-[12.5px] text-muted-foreground">
-              {results.length === 0 ? (
-                <>No hits on this page.</>
-              ) : (
-                <>
-                  Showing{' '}
-                  <span className="font-mono tabular text-foreground-soft">
-                    {showing_range_start}
-                  </span>
-                  –
-                  <span className="font-mono tabular text-foreground-soft">
-                    {showing_range_end}
-                  </span>{' '}
-                  for{' '}
-                  <span className="font-mono tabular text-foreground">{trimmed}</span>
-                </>
-              )}
-            </p>
-          ) : null}
-
-          <section className="grid gap-3">
-            {!trimmed ? (
-              <EmptyQuery />
-            ) : search.isLoading ? (
-              <ResultsSkeleton />
-            ) : search.isError ? (
-              <ErrorView
-                title="Search isn't responding"
-                message={api_error_message(search.error, "We can't reach the indexer right now. Try again in a moment.")}
-              />
-            ) : results.length === 0 ? (
-              <NoResults q={trimmed} />
+        {trimmed && !search.isError && !search.isLoading ? (
+          <p className="text-[12.5px] text-muted-foreground">
+            {results.length === 0 ? (
+              <>No hits on this page.</>
             ) : (
-              <ResultsList results={results} />
+              <>
+                Showing{' '}
+                <span className="font-mono tabular text-foreground-soft">
+                  {showing_range_start}
+                </span>
+                –
+                <span className="font-mono tabular text-foreground-soft">
+                  {showing_range_end}
+                </span>{' '}
+                for{' '}
+                <span className="font-mono tabular text-foreground">{trimmed}</span>
+              </>
             )}
-
-            {trimmed && !search.isError ? (
-              <Pagination
-                page={page + 1}
-                has_prev={page > 0}
-                has_next={has_next}
-                loading={search.isFetching}
-                on_prev={() => set_page((p) => Math.max(0, p - 1))}
-                on_next={() => set_page((p) => p + 1)}
-              />
-            ) : null}
-          </section>
-        </div>
-
-        <aside className="registry-command-shell hidden grid gap-4 self-start p-4 lg:grid">
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            Search tips
           </p>
-          <ul className="grid gap-3 text-[12.5px] leading-[1.62] text-foreground-soft">
-            <li>
-              Prefer short fragments — the indexer fuzzy-matches names the way
-              readers hunt for packages.
-            </li>
-            <li>
-              Row opens the{' '}
-              <span className="font-medium text-foreground">latest</span>{' '}
-              ship for that name. Publisher links stay put when you need the
-              signing key context.
-            </li>
-            <li>
-              Already know the version? Press{' '}
-              <span className="kbd">⌘K</span> / <span className="kbd">Ctrl K</span>{' '}
-              and paste{' '}
-              <span className="font-mono tabular text-foreground">name@version</span>.
-            </li>
-          </ul>
-          <Link
-            to="/browse"
-            className="inline-flex items-center gap-1 text-[12.5px] font-medium text-foreground underline-offset-4 hover:underline"
-          >
-            Browse the firehose
-            <ArrowUpRight className="size-3" strokeWidth={1.85} aria-hidden />
-          </Link>
-        </aside>
+        ) : null}
+
+        <section className="grid gap-3">
+          {!trimmed ? (
+            <EmptyQuery />
+          ) : search.isLoading ? (
+            <ResultsSkeleton />
+          ) : search.isError ? (
+            <ErrorView
+              title="Search isn't responding"
+              message={api_error_message(search.error, "We can't reach the indexer right now. Try again in a moment.")}
+            />
+          ) : results.length === 0 ? (
+            <NoResults q={trimmed} />
+          ) : (
+            <ResultsList results={results} />
+          )}
+
+          {trimmed && !search.isError ? (
+            <Pagination
+              page={page + 1}
+              has_prev={page > 0}
+              has_next={has_next}
+              loading={search.isFetching}
+              on_prev={() => set_page((p) => Math.max(0, p - 1))}
+              on_next={() => set_page((p) => p + 1)}
+            />
+          ) : null}
+        </section>
       </div>
     </Container>
   );
@@ -226,6 +195,7 @@ function ResultsList({ results }: { results: NameDto[] }) {
 
 function SearchResultRow({ item }: { item: NameDto }) {
   const navigate = useNavigate();
+  const publisher_address = item.publisher?.address;
   const releases = useMemo(
     () =>
       [...(item.releases ?? [])].sort((a, b) =>
@@ -240,7 +210,9 @@ function SearchResultRow({ item }: { item: NameDto }) {
       className={cn(
         'group grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-2 py-5 transition-colors hover:bg-surface/40',
       )}
-      onClick={() => void navigate(`/r/${encodeURIComponent(item.name)}`)}
+      onClick={() =>
+        void navigate(`/publication/${encodeURIComponent(item.name)}`)
+      }
     >
       <div className="grid min-w-0 gap-1.5 px-1 sm:px-2">
         <div className="flex min-w-0 items-baseline gap-2">
@@ -254,14 +226,18 @@ function SearchResultRow({ item }: { item: NameDto }) {
           ) : null}
         </div>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-muted-foreground">
-          <Link
-            to={`/p/${encodeURIComponent(item.publisher_id)}`}
-            onClick={(e) => e.stopPropagation()}
-            className="font-mono tabular text-foreground-soft hover:text-foreground hover:underline"
-            title={item.publisher_id}
-          >
-            {shorten(item.publisher_id, 4, 4)}
-          </Link>
+          {publisher_address ? (
+            <Link
+              to={`/p/${encodeURIComponent(publisher_address)}`}
+              onClick={(e) => e.stopPropagation()}
+              className="font-mono tabular text-foreground-soft hover:text-foreground hover:underline"
+              title={publisher_address}
+            >
+              {shorten(publisher_address, 4, 4)}
+            </Link>
+          ) : (
+            <span className="font-mono tabular text-muted-foreground">—</span>
+          )}
           {latest ? (
             <>
               <Dot />
@@ -270,7 +246,7 @@ function SearchResultRow({ item }: { item: NameDto }) {
           ) : null}
           <Dot />
           <span>
-            {releases.length} version{releases.length === 1 ? '' : 's'}
+            {releases.length} publication{releases.length === 1 ? '' : 's'}
           </span>
         </div>
       </div>
@@ -311,11 +287,11 @@ function ResultsSkeleton() {
 function EmptyQuery() {
   return (
     <div className="registry-command-shell grid place-items-center gap-3 px-6 py-14 text-center">
-      <PackageSearch className="size-5 text-muted-foreground" strokeWidth={1.6} aria-hidden />
+      <SearchIcon className="size-5 text-muted-foreground" strokeWidth={1.6} aria-hidden />
       <p className="text-[14px] text-foreground">Start typing to search the registry.</p>
       <p className="max-w-[42ch] text-[12.5px] leading-[1.65] text-muted-foreground">
-        Names behave like packages: the first publisher to claim a string keeps
-        it. Partial matches work — you don&rsquo;t need the full slug.
+        The first publisher to claim a name keeps it. Partial matches work — you
+        don&rsquo;t need the full slug.
       </p>
     </div>
   );
@@ -329,7 +305,7 @@ function NoResults({ q }: { q: string }) {
         <span className="font-mono tabular">{q}</span>.
       </p>
       <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
-        Check the spelling, or browse what's been shipped recently — the
+        Check the spelling, or browse what&apos;s been published recently — the
         author may not have published yet.
       </p>
     </div>

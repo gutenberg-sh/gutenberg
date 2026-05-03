@@ -11,11 +11,16 @@ import {
 } from '@/components/ReleaseRow';
 import { api_error_message } from '@/lib/api';
 import { useFeed } from '@/lib/queries';
+import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 20;
 
+/** Keep the refresh affordance visible even when the refetch finishes quickly. */
+const MIN_REFRESH_SPIN_MS = 420;
+
 export function BrowseRoute() {
   const [page, set_page] = useState(0);
+  const [manual_refresh, set_manual_refresh] = useState(false);
   const offset = page * PAGE_SIZE;
 
   const feed = useFeed({
@@ -26,12 +31,13 @@ export function BrowseRoute() {
 
   const releases = feed.data ?? [];
   const has_next = releases.length === PAGE_SIZE;
+  const refresh_locked = manual_refresh || feed.isFetching;
 
   return (
     <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
       <header className="grid gap-3">
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          New releases
+          New publications
         </p>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <h1 className="text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
@@ -39,12 +45,24 @@ export function BrowseRoute() {
           </h1>
           <button
             type="button"
-            onClick={() => void feed.refetch()}
-            className="inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
-            disabled={feed.isFetching}
+            aria-busy={manual_refresh}
+            onClick={() => {
+              set_manual_refresh(true);
+              void Promise.all([
+                feed.refetch(),
+                new Promise<void>((resolve) => {
+                  setTimeout(resolve, MIN_REFRESH_SPIN_MS);
+                }),
+              ]).finally(() => set_manual_refresh(false));
+            }}
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground disabled:cursor-not-allowed"
+            disabled={refresh_locked}
           >
             <RefreshCw
-              className={feed.isFetching ? 'size-3.5 animate-spin' : 'size-3.5'}
+              className={cn(
+                'size-3.5',
+                manual_refresh && 'motion-safe:animate-spin',
+              )}
               strokeWidth={1.85}
               aria-hidden
             />
@@ -52,8 +70,8 @@ export function BrowseRoute() {
           </button>
         </div>
         <p className="max-w-[62ch] text-[15px] leading-[1.68] text-foreground-soft">
-          Like npm&rsquo;s recent publishes feed — every ship is immutable.
-          Open any row and verification runs locally before you read a byte.
+          A living feed of new publications — each row is a signed, immutable
+          release. Open one to read it.
         </p>
       </header>
 
@@ -100,7 +118,7 @@ function EmptyFeed() {
       />
       <p className="text-[14px] text-foreground">Nothing here yet.</p>
       <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
-        Releases show up here the moment they&rsquo;re published. You could
+        Publications show up here the moment they&rsquo;re published. You could
         be the first.
       </p>
     </div>

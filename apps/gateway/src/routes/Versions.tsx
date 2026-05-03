@@ -18,7 +18,7 @@ export function VersionsRoute() {
       <Container className="py-20 lg:py-28">
         <ErrorView
           title="That name doesn't look right"
-          message={`"${name ?? ''}" isn't a valid release name. Names use lowercase letters, numbers, dots, underscores, or hyphens.`}
+          message={`"${name ?? ''}" isn't a valid publication name. Names use lowercase letters, numbers, dots, underscores, or hyphens.`}
         />
       </Container>
     );
@@ -44,7 +44,7 @@ function VersionsView({ name }: { name: string }) {
             {name}
           </h1>
           <Link
-            to={`/r/${encodeURIComponent(name)}`}
+            to={`/publication/${encodeURIComponent(name)}`}
             className="inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
           >
             Open latest
@@ -83,6 +83,8 @@ function Timeline({ name, versions }: { name: string; versions: ReleaseDto[] }) 
       />
       {versions.map((release, idx) => {
         const is_latest = idx === 0;
+        const publisher =
+          release.publisher?.address ?? release.publisher_id;
         return (
           <li key={release.id} className="relative grid pl-7">
             <span
@@ -94,7 +96,7 @@ function Timeline({ name, versions }: { name: string; versions: ReleaseDto[] }) 
               }
             />
             <Link
-              to={`/r/${encodeURIComponent(name)}/${encodeURIComponent(release.version)}`}
+              to={`/publication/${encodeURIComponent(name)}/${encodeURIComponent(release.version)}`}
               className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 border-b border-border py-4 transition-colors hover:bg-surface/40"
             >
               <div className="grid min-w-0 gap-1 px-1">
@@ -115,9 +117,14 @@ function Timeline({ name, versions }: { name: string; versions: ReleaseDto[] }) 
                   <span aria-hidden className="text-muted-foreground/50">·</span>
                   <span>{format_bytes(release.content_size_bytes)}</span>
                   <span aria-hidden className="text-muted-foreground/50">·</span>
-                  <span className="font-mono tabular">
-                    {shorten(release.address, 6, 6)}
-                  </span>
+                  <Link
+                    to={`/p/${encodeURIComponent(publisher)}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="font-mono tabular text-foreground-soft hover:text-foreground hover:underline"
+                    title={publisher}
+                  >
+                    {shorten(publisher, 6, 6)}
+                  </Link>
                 </div>
               </div>
               <ArrowUpRight
@@ -152,7 +159,7 @@ function EmptyVersions() {
       <GitBranch className="size-5 text-muted-foreground" strokeWidth={1.6} aria-hidden />
       <p className="text-[14px] text-foreground">No versions yet.</p>
       <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
-        Either this name doesn't exist, or it just shipped and we're still
+        Either this name doesn&apos;t exist, or it was just published and we&apos;re still
         catching up. Refresh in a moment.
       </p>
     </div>

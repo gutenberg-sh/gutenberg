@@ -3,80 +3,175 @@ import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 export function FileNav({
-  files,
+  pages,
+  assets,
   base_path,
   current_path,
+  entry_path,
 }: {
-  files: ReadonlyArray<`/${string}`>;
+  pages: ReadonlyArray<`/${string}`>;
+  assets: ReadonlyArray<`/${string}`>;
   base_path: string;
   current_path: `/${string}`;
+  entry_path: `/${string}`;
 }) {
-  if (files.length === 0) {
+  if (pages.length === 0 && assets.length === 0) {
     return null;
   }
 
   return (
     <nav
-      aria-label="Pages"
-      className="lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto"
+      aria-label="Publication files"
+      className="grid gap-6 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto"
     >
-      <p className="mb-3 flex items-baseline justify-between text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground/80">
-        <span>Markdown pages</span>
-        <span className="font-mono tabular text-muted-foreground/70 normal-case tracking-normal">
-          {files.length.toString().padStart(2, '0')}
-        </span>
-      </p>
-      <ul className="grid">
-        {files.map((path, idx) => {
-          const active = path === current_path;
-          const label = path === '/' ? 'index' : path.replace(/^\//, '');
-          const href = `${base_path}${encode_release_path(path)}`;
-          const number = (idx + 1).toString().padStart(2, '0');
+      {pages.length > 0 ? (
+        <section
+          className="grid gap-0"
+          aria-labelledby="file-nav-pages-heading"
+        >
+          <ExplorerHeading
+            id="file-nav-pages-heading"
+            title="Pages"
+            count={pages.length}
+          />
+          <ul className="grid">
+            {pages.map((path, idx) => (
+              <FileNavRow
+                key={path}
+                path={path}
+                index_label={(idx + 1).toString().padStart(2, '0')}
+                base_path={base_path}
+                current_path={current_path}
+                entry_path={entry_path}
+              />
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
-          return (
-            <li
-              key={path}
-              className="border-t border-border/60 last:border-b last:border-border/60"
-            >
-              <Link
-                to={href}
-                aria-current={active ? 'page' : undefined}
-                className={cn(
-                  'group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 py-2.5 transition-colors',
-                  active
-                    ? 'text-foreground'
-                    : 'text-foreground-soft hover:text-foreground',
-                )}
-              >
-                <span
-                  aria-hidden
-                  className={cn(
-                    'inline-block w-[18px] font-mono text-[10.5px] tabular',
-                    active
-                      ? 'text-accent'
-                      : 'text-muted-foreground/60 group-hover:text-foreground/70',
-                  )}
-                >
-                  {number}
-                </span>
-                <span className="truncate font-mono text-[12.5px] tabular">
-                  {label}
-                </span>
-                <span
-                  aria-hidden
-                  className={cn(
-                    'inline-block h-3 w-[2px] rounded-none transition-colors',
-                    active
-                      ? 'bg-accent'
-                      : 'bg-transparent group-hover:bg-foreground/30',
-                  )}
-                />
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      {assets.length > 0 ? (
+        <section
+          className="grid gap-0"
+          aria-labelledby="file-nav-assets-heading"
+        >
+          <ExplorerHeading
+            id="file-nav-assets-heading"
+            title="Assets"
+            count={assets.length}
+          />
+          <ul className="grid">
+            {assets.map((path, idx) => (
+              <FileNavRow
+                key={path}
+                path={path}
+                index_label={(idx + 1).toString().padStart(2, '0')}
+                base_path={base_path}
+                current_path={current_path}
+                entry_path={entry_path}
+              />
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </nav>
+  );
+}
+
+function ExplorerHeading({
+  id,
+  title,
+  count,
+}: {
+  id: string;
+  title: string;
+  count: number;
+}) {
+  return (
+    <p
+      id={id}
+      className="mb-3 flex items-baseline justify-between text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground/80"
+    >
+      <span>{title}</span>
+      <span className="font-mono tabular text-muted-foreground/70 normal-case tracking-normal">
+        {count.toString().padStart(2, '0')}
+      </span>
+    </p>
+  );
+}
+
+function FileNavRow({
+  path,
+  index_label,
+  base_path,
+  current_path,
+  entry_path,
+}: {
+  path: `/${string}`;
+  index_label: string;
+  base_path: string;
+  current_path: `/${string}`;
+  entry_path: `/${string}`;
+}) {
+  const active = path === current_path;
+  const is_entry = path === entry_path;
+  const label = path === '/' ? 'index' : path.replace(/^\//, '');
+  const href = `${base_path}${encode_release_path(path)}`;
+
+  return (
+    <li className="border-t border-border/60 last:border-b last:border-border/60">
+      <Link
+        to={href}
+        aria-current={active ? 'page' : undefined}
+        className={cn(
+          'group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 py-2.5 transition-colors',
+          active
+            ? 'text-foreground'
+            : 'text-foreground-soft hover:text-foreground',
+        )}
+      >
+        <span
+          aria-hidden
+          className={cn(
+            'inline-block w-[18px] font-mono text-[10.5px] tabular',
+            active
+              ? 'text-accent'
+              : 'text-muted-foreground/60 group-hover:text-foreground/70',
+          )}
+        >
+          {index_label}
+        </span>
+        <span className="flex min-w-0 items-center gap-2 font-mono text-[12.5px] tabular">
+          <span className="truncate">
+            {label}
+            {is_entry ? (
+              <span className="sr-only">, publication entry</span>
+            ) : null}
+          </span>
+          {is_entry ? (
+            <span
+              className={cn(
+                'shrink-0 rounded-none border border-border/70 px-1 py-px font-mono text-[9px] font-medium uppercase tracking-[0.14em]',
+                active
+                  ? 'border-accent/45 text-accent'
+                  : 'text-muted-foreground group-hover:text-foreground/80',
+              )}
+              aria-hidden
+            >
+              Entry
+            </span>
+          ) : null}
+        </span>
+        <span
+          aria-hidden
+          className={cn(
+            'inline-block h-3 w-[2px] rounded-none transition-colors',
+            active
+              ? 'bg-accent'
+              : 'bg-transparent group-hover:bg-foreground/30',
+          )}
+        />
+      </Link>
+    </li>
   );
 }
 

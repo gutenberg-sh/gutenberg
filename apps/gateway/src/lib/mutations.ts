@@ -4,7 +4,7 @@ import { query_keys } from '@/lib/queries';
 
 /**
  * Forces a refresh of all live indexer feeds. Useful after the user
- * publishes a release locally — the indexer needs a moment to ingest
+ * publishes a publication locally — the indexer needs a moment to ingest
  * the new on-chain event, and we want the UI to reflect it as soon
  * as it appears.
  *

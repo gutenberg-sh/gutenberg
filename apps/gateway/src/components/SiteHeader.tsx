@@ -33,7 +33,7 @@ export function SiteHeader() {
             aria-label="Gutenberg gateway, home"
             className="group inline-flex shrink-0 items-baseline outline-none transition-opacity focus-visible:opacity-80"
           >
-            <Wordmark className="text-[13px] text-foreground" />
+            <Wordmark className="text-[17px] text-foreground sm:text-[19px]" />
           </Link>
 
           <nav
@@ -48,15 +48,12 @@ export function SiteHeader() {
             <button
               type="button"
               onClick={() => set_lookup_open(true)}
-              aria-label="Search packages and releases"
+              aria-label="Search publications"
               className="registry-command-shell flex w-full max-w-xl items-center gap-2.5 px-3 py-2 text-left font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground"
             >
               <Search className="size-3.5 shrink-0" strokeWidth={1.85} aria-hidden />
-              <span className="min-w-0 flex-1 truncate">
-                &gt; query registry · spec{' '}
-                <span className="text-foreground-soft">
-                  name@version
-                </span>
+              <span className="min-w-0 flex-1 truncate text-foreground-soft">
+                name@version
               </span>
               <span className="hidden shrink-0 items-center gap-0.5 sm:flex">
                 <span className="kbd">{is_mac ? '⌘' : 'Ctrl'}</span>

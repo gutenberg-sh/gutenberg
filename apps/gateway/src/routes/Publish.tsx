@@ -219,10 +219,10 @@ function PublishSessionContent({
           Publish
         </p>
         <h1 className="text-[1.5rem] font-semibold leading-[1.1] tracking-[-0.03em] text-foreground sm:text-[1.9rem]">
-          Ship a version that never unpublishes.
+          Publish a version that never unpublishes.
         </h1>
         <p className="text-[13.5px] leading-[1.5] text-foreground-soft">
-          Connect your wallet, then use <strong className="font-medium text-foreground/90">Publish release</strong> to open
+          Connect your wallet, then use <strong className="font-medium text-foreground/90">Publish publication</strong> to open
           a confirmation with the full cost breakdown before you sign.
         </p>
       </header>
@@ -249,7 +249,7 @@ function Identity({ session }: { session: PublishSessionInput }) {
 
   return (
     <section
-      aria-label="Release you are about to ship"
+      aria-label="What you are publishing"
       className="grid gap-2.5 border border-dashed border-border/80 bg-surface/35 px-3.5 py-3 sm:gap-2 sm:px-4 sm:py-3.5"
     >
       <p className="font-mono text-[9.5px] uppercase tracking-[0.26em] text-muted-foreground/90">
@@ -386,7 +386,7 @@ function CostBreakdown({ precomputed }: { precomputed: PublishCostEstimates }) {
         Charged to your connected wallet. Covers Irys, Solana rent, and
         5,000-lamport base
         {solana.kind === 'success' && solana.data.creates_name
-          ? ' · first release for this name'
+          ? ' · first publication for this name'
           : ''}
         .
       </p>
@@ -666,7 +666,7 @@ function Action({
               Publishing
             </>
           ) : (
-            <>Publish release</>
+            <>Publish publication</>
           )}
         </Button>
       </div>
@@ -755,7 +755,7 @@ function Success({
   version: string;
 }) {
   const navigate = useNavigate();
-  const target = `/r/${encodeURIComponent(name)}/${encodeURIComponent(version)}`;
+  const target = `/publication/${encodeURIComponent(name)}/${encodeURIComponent(version)}`;
   const [seconds_left, set_seconds_left] = useState(REDIRECT_AFTER_SECONDS);
 
   useEffect(() => {
@@ -792,7 +792,21 @@ function Success({
       </div>
 
       <dl className="grid gap-2 border-t border-accent/20 pt-4 text-[12px] sm:grid-cols-2">
-        <Receipt label="Release" value={result.release_address} />
+        <div className="grid gap-0.5">
+          <dt className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+            Publisher
+          </dt>
+          <dd className="truncate font-mono text-[12px] tabular text-foreground">
+            <Link
+              to={`/p/${encodeURIComponent(result.publisher)}`}
+              className="hover:underline"
+              title={result.publisher}
+            >
+              {shorten(result.publisher, 10, 8)}
+            </Link>
+          </dd>
+        </div>
+        <Receipt label="Publication" value={result.release_address} />
         <Receipt label="Signature" value={result.signature} />
         <Receipt label="Manifest hash" value={result.manifest_hash} />
         <Receipt label="Manifest URI" value={result.manifest_uri} />
@@ -800,7 +814,7 @@ function Success({
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-accent/20 pt-4 text-[12.5px]">
         <p className="text-foreground-soft">
-          Taking you to your release in{' '}
+          Taking you to your publication in{' '}
           <span className="font-mono tabular text-foreground">
             {seconds_left}s
           </span>
@@ -932,7 +946,7 @@ function progress_message(event: PublishFlowEvent): string {
     case 'tx_sending':
       return 'Waiting for you to approve the Solana transaction…';
     case 'tx_confirmed':
-      return `Release confirmed on Solana (${truncate(event.signature, 16)})`;
+      return `Publication confirmed on Solana (${truncate(event.signature, 16)})`;
   }
 }
 

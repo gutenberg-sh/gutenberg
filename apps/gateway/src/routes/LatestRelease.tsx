@@ -44,7 +44,7 @@ export function LatestReleaseRoute() {
         if (!release) {
           set_state({
             status: 'error',
-            message: `No releases found for "${valid_name}".`,
+            message: `No publications found for "${valid_name}".`,
           });
           return;
         }
@@ -69,7 +69,7 @@ export function LatestReleaseRoute() {
       <Container className="py-20 lg:py-28">
         <ErrorView
           title="That name doesn't look right"
-          message={`"${name ?? ''}" isn't a valid release name. Names use lowercase letters, numbers, dots, underscores, or hyphens.`}
+          message={`"${name ?? ''}" isn't a valid publication name. Names use lowercase letters, numbers, dots, underscores, or hyphens.`}
         />
       </Container>
     );
@@ -79,7 +79,7 @@ export function LatestReleaseRoute() {
     return (
       <Navigate
         replace
-        to={`/r/${encodeURIComponent(name)}/${encodeURIComponent(state.version)}`}
+        to={`/publication/${encodeURIComponent(name)}/${encodeURIComponent(state.version)}`}
       />
     );
   }
@@ -114,7 +114,7 @@ export function LatestReleaseRoute() {
             {name}
           </h2>
           <p className="max-w-[60ch] text-[15px] leading-[1.68] text-foreground-soft">
-            Asking Solana for the most recent release of this name.
+            Asking Solana for the most recent publication of this name.
           </p>
         </div>
       </div>
