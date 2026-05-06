@@ -21,6 +21,8 @@
     "env:setup": "docker compose up -d --wait && pnpm indexer:db:apply",
     "env:teardown": "docker compose down",
     "env:reset": "docker compose down -v",
+    "stack:up": "docker compose --profile app up -d --build --wait",
+    "stack:down": "docker compose --profile app down",
     "solana:build": "pnpm --filter @gutenberg/solana run anchor:build",
     "solana:deploy": "pnpm --filter @gutenberg/solana run anchor:deploy",
     "solana:test": "pnpm --filter @gutenberg/solana run anchor:test",

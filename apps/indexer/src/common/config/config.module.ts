@@ -3,11 +3,8 @@ import {
   ConfigModule as NestConfigModule,
   ConfigService,
 } from '@nestjs/config';
-import { config as load_dotenv } from 'dotenv';
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
-
 import { env } from '../../env';
+import { load_env_file, resolve_env_file_path } from '../../env-file';
 
 import {
   BACKFILL_BATCH_SIZE,
@@ -19,18 +16,15 @@ import {
   SOLANA_WS_URL,
 } from './config.tokens';
 
-const env_file_path = [
-  resolve(process.cwd(), '.env'),
-  resolve(process.cwd(), '..', '..', '.env'),
-].find((path) => existsSync(path));
+load_env_file();
 
-load_dotenv({ path: env_file_path, quiet: true });
+const env_file_path = resolve_env_file_path();
 
 @Global()
 @Module({
   imports: [
     NestConfigModule.forRoot({
-      envFilePath: env_file_path,
+      ...(env_file_path ? { envFilePath: env_file_path } : {}),
       isGlobal: true,
       validate: (values: Record<string, unknown>) => {
         try {

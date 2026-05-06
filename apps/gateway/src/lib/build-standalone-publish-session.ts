@@ -8,7 +8,6 @@ import {
 } from '@gutenberg/core';
 
 import { env } from '@/env';
-import { irys_network_from_bundler_url } from '@/lib/irys-network-from-bundler';
 
 const STANDALONE_PUBLISH_ENTRY = '/index.md' as const;
 
@@ -56,9 +55,7 @@ export function build_standalone_publish_session(input: {
       program_id: GUTENBERG_REGISTRY_PROGRAM_ID,
     },
     rpc_url: env.VITE_GUTENBERG_SOLANA_RPC_URL,
-    irys_network: irys_network_from_bundler_url(
-      env.VITE_GUTENBERG_IRYS_GATEWAY,
-    ),
+    irys_network: env.VITE_GUTENBERG_IRYS_NETWORK,
     files,
   };
 }

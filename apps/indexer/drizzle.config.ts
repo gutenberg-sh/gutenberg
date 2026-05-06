@@ -1,14 +1,8 @@
-import { config as load_dotenv } from 'dotenv';
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
 import type { Config } from 'drizzle-kit';
 
-const env_file_path = [
-  resolve(process.cwd(), '.env'),
-  resolve(process.cwd(), '..', '..', '.env'),
-].find((path) => existsSync(path));
+import { load_env_file } from './src/env-file';
 
-load_dotenv({ path: env_file_path, quiet: true });
+load_env_file();
 
 export default {
   schema: './src/common/database/tables/*.sql.ts',

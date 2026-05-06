@@ -8,9 +8,10 @@ const env_schema = z.object({
     .string()
     .url()
     .transform((raw) => raw.replace(/\/$/, '')),
+  VITE_GUTENBERG_IRYS_NETWORK: z.enum(['mainnet', 'devnet']),
   VITE_GUTENBERG_ARWEAVE_MIRRORS: z
     .string()
-    .default('')
+    .min(1)
     .transform((raw, ctx) => {
       try {
         return parse_gateway_list(raw);
@@ -22,6 +23,9 @@ const env_schema = z.object({
 
         return z.NEVER;
       }
+    })
+    .refine((list) => list.length > 0, {
+      message: 'VITE_GUTENBERG_ARWEAVE_MIRRORS must list at least one mirror URL',
     }),
   VITE_GUTENBERG_EXPLORER_URL: z
     .string()
@@ -29,8 +33,7 @@ const env_schema = z.object({
     .refine((value) => value.includes('{address}'), {
       message:
         'VITE_GUTENBERG_EXPLORER_URL must contain the `{address}` placeholder',
-    })
-    .optional(),
+    }),
   VITE_GUTENBERG_INDEXER_URL: z
     .string()
     .url()

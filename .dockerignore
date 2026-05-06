@@ -1,0 +1,11 @@
+**/.DS_Store
+**/.git
+**/.gitignore
+**/node_modules
+**/dist
+**/.turbo
+.env
+.env.*
+!.env.production
+!.env.local
+**/*.md

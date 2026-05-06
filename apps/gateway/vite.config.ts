@@ -14,7 +14,8 @@ export default defineConfig({
       protocolImports: true,
     }),
   ],
-  envDir: path.resolve(__dirname, '../..'),
+  // Only load `.env` from `apps/` so repo-root `.env.local` (template) is not merged by Vite.
+  envDir: path.resolve(__dirname, '..'),
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

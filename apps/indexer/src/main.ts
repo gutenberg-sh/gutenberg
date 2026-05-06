@@ -7,7 +7,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 
 import { AppModule } from './app.module';
-import { CORS_CONFIG } from './cors.config';
+import { resolve_cors_options } from './cors.config';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -34,7 +34,12 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  app.enableCors(CORS_CONFIG[environment]);
+  app.enableCors(
+    resolve_cors_options(
+      environment,
+      config.getOrThrow<string>('GUTENBERG_INDEXER_CORS_ORIGINS'),
+    ),
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -46,7 +51,7 @@ async function bootstrap(): Promise<void> {
   app.enableShutdownHooks();
 
   const port = config.getOrThrow<number>('GUTENBERG_INDEXER_PORT');
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
   console.log(`Gutenberg indexer listening on port ${port}`);
 }

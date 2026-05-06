@@ -20,98 +20,52 @@ Whether you like it or not, governments and major outlets enforce a certain narr
 
 Gutenberg lets you publish freely, privately, and permanently: content is written to durable storage and registered on a public chain, signed by the author. Once published, no host, editor, or court can censor the original.
 
-## Prerequisites
+## Local by default
 
-- **Node.js** `>=22.12.0`
-- **pnpm** `>=10.28.2` (and `<11`, per `package.json` engines)
-- **Docker** — runs the local Solana validator and indexer Postgres
-- **Solana CLI** — wallet utilities and program interaction
-- **Anchor CLI** — build and deploy the registry program
+Publishing and reading should not depend on a company’s servers staying up, on their terms of service, or on their idea of who gets a login. Gutenberg is **local first**: you run the gateway and indexer on **your** machine, with your wallet and your RPC settings, and the network is only what you point it at; Solana and storage are public infrastructure, but **the app is yours**. That keeps verification, browsing, and the publish flow under your own roof, which is the same instinct as durable content on-chain: **you** decide how you participate.
 
-## Installing dependencies
+Nothing here assumes a hosted infrastructure. Clone the repo, copy an env file, and Docker brings the stack up beside you. When you are ready, the steps below walk you through exactly that.
 
-To install all workspace dependencies, run:
+## Run it yourself
 
-```bash
-pnpm install
-```
+**Prerequisites**
 
-## Environment
+1. **Git** and **this repository**:
+   ```bash
+   git clone https://github.com/leonmeka/gutenberg.git
+   cd gutenberg
+   ```
 
-Copy the example file and set values for the gateway (Vite), indexer, and your network:
+2. **Docker**:
 
-```bash
-cp .env.example .env
-```
+   - **macOS** ([Homebrew](https://brew.sh/)):
 
-The gateway reads **`VITE_*`** variables from `.env` at dev and build time. For local publishing against the validator, align `VITE_GUTENBERG_SOLANA_RPC_URL` with `GUTENBERG_INDEXER_SOLANA_RPC_URL` (see comments in `.env.example`).
+     ```bash
+     brew install --cask docker
+     ```
 
-## Local infrastructure
+     Open **Docker** from Applications once and wait until it reports that the engine is running.
 
-A single command brings up everything Gutenberg expects locally:
+   - **Linux**:
 
-```bash
-pnpm env:setup
-```
+     ```bash
+     curl -fsSL https://get.docker.com | sudo sh
+     ```
 
-To stop the containers (state is preserved across restarts):
+   - **Windows**: install [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) (includes Compose) and start it before running the commands below.
 
-```bash
-pnpm env:teardown
-```
-
-To wipe all local state (validator ledger and Postgres data):
+**Start the stack**:
 
 ```bash
-pnpm env:reset
+cp .env.production .env
+docker compose --profile app up -d --build --wait
 ```
 
-To fund your publisher, you can airdrop some SOL via:
+Open **http://localhost:8080**. Done!
 
-```bash
-solana airdrop 100 <RECIPIENT> -u http://127.0.0.1:8899
-```
+## Developers
 
-Build and deploy the Gutenberg registry program:
-
-```bash
-pnpm solana:build
-pnpm solana:deploy
-```
-
-## Gateway
-
-The gateway is the reader-facing web app and the **publisher UI**. It looks up releases on the registry, fetches manifests and files from durable storage, verifies signatures and content hashes in the browser, and exposes **`/publish`** to upload a bundle (folder, files, or zip), sign with your wallet, and register the release.
-
-```bash
-pnpm gateway:dev
-pnpm gateway:build
-pnpm gateway:preview
-```
-
-Use `examples/gutenberg-demo` as a sample tree: it includes **`/index.md`** at the root, which the publish flow requires.
-
-## Indexer
-
-The indexer is a service that turns the on-chain registry into a fast, searchable read API. Every record it returns can still be re-verified against the chain by the gateway, so the indexer is a convenience, not an authority.
-
-```bash
-pnpm indexer:db:apply
-pnpm indexer:dev
-```
-
-## Contributing
-
-Contributions are welcome. For larger changes, please open an issue first so the direction is agreed before you invest heavy time.
-
-**Workflow**
-
-1. Fork the repository and create a branch from the default branch.
-2. Keep pull requests focused: one logical change per PR is easier to review and revert.
-3. After `pnpm install`, run `pnpm gateway:build` and `pnpm gateway:lint` before submitting. Use `pnpm gateway:format` when you want ESLint/Prettier fixes applied in the gateway app.
-4. Describe what changed and why in the PR body; link related issues when applicable.
-
-If you are unsure whether something belongs in the gateway, the Solana program, or both, ask in an issue and we can narrow the scope.
+See **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
 ## License
 
