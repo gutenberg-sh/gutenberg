@@ -16,7 +16,7 @@
 
 ## Why Gutenberg?
 
-Whether you like it or not, governments and major outlets enforce a certain narrative. Work that contradicts it gets taken down, sued, or buried.
+Governments and large platforms steer most public narratives. Work that contradicts the preferred line gets taken down, sued, or buried.
 
 Gutenberg lets you publish freely, privately, and permanently: content is written to durable storage and registered on a public chain, signed by the author. Once published, no host, editor, or court can censor the original.
 
