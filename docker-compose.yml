@@ -1,6 +1,3 @@
-# Local development: Postgres, optional Solana test validator, indexer and gateway built from this repo.
-# End users run the pre-built `gutenberg` image (see README).
-
 services:
   postgres:
     image: postgres:16-alpine
