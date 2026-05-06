@@ -6,6 +6,5 @@
 **/.turbo
 .env
 .env.*
-!.env.production
 !.env.local
 **/*.md

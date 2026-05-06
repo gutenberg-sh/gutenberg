@@ -1,7 +1,5 @@
 {
   "name": "gutenberg",
-  "version": "0.0.1",
-  "private": true,
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -19,7 +17,7 @@
   },
   "scripts": {
     "stack:up": "docker compose --profile app --profile local-chain up -d --build --wait",
-    "stack:prepare": "docker compose --profile app up -d --wait && pnpm indexer:db:apply",
+    "stack:prepare": "docker compose --profile app up -d --wait",
     "stack:down": "docker compose down --remove-orphans",
     "stack:reset": "docker compose down -v --remove-orphans",
     "solana:build": "pnpm --filter @gutenberg/solana run anchor:build",

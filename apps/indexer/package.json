@@ -1,7 +1,5 @@
 {
   "name": "@gutenberg/indexer",
-  "version": "0.0.0",
-  "private": true,
   "type": "commonjs",
   "scripts": {
     "predev": "pnpm --filter @gutenberg/core run build",

@@ -26,11 +26,13 @@ From the repo root, with `.env` in place:
 pnpm stack:up
 ```
 
-That builds and runs Postgres, the indexer, the gateway, and the Solana test validator. 
+That builds and runs the all-in-one Gutenberg image (Postgres, indexer, gateway inside one container) and the Solana test validator.
 
 - Gateway: **http://localhost:8080**
-- indexer: **http://localhost:4000**
-- health check: **http://localhost:4000/health**.
+- Indexer API: **http://localhost:4000**
+- Health check: **http://localhost:4000/health**
+
+Database migrations run automatically when the container starts.
 
 Stop everything: `pnpm stack:down`. Wipe Postgres data and start clean: `pnpm stack:reset`, then `pnpm stack:up` again.
 

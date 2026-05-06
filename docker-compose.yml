@@ -1,26 +1,4 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: gutenberg-indexer-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${GUTENBERG_POSTGRES_DB:-gutenberg}
-      POSTGRES_USER: ${GUTENBERG_POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${GUTENBERG_POSTGRES_PASSWORD:-postgres}
-    ports:
-      - '${GUTENBERG_POSTGRES_PORT:-5432}:5432'
-    volumes:
-      - gutenberg-indexer-postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} || exit 1',
-        ]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   solana-validator:
     profiles: ['local-chain']
     image: ghcr.io/beeman/solana-test-validator:latest
@@ -42,46 +20,35 @@ services:
       retries: 30
       start_period: 30s
 
-  indexer-migrate:
+  gutenberg:
     profiles: ['app']
     build:
       context: .
       dockerfile: Dockerfile
-      target: indexer-migrate
-    image: gutenberg-indexer-migrate
-    container_name: gutenberg-indexer-migrate
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      GUTENBERG_INDEXER_DATABASE_URL: postgres://${GUTENBERG_POSTGRES_USER:-postgres}:${GUTENBERG_POSTGRES_PASSWORD:-postgres}@postgres:5432/${GUTENBERG_POSTGRES_DB:-gutenberg}
-
-  indexer:
-    profiles: ['app']
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: indexer
-    image: gutenberg-indexer
-    container_name: gutenberg-indexer
+      target: gutenberg
+      args:
+        VITE_GUTENBERG_SOLANA_RPC_URL: ${VITE_GUTENBERG_SOLANA_RPC_URL:-https://api.mainnet.solana.com}
+        VITE_GUTENBERG_IRYS_GATEWAY: ${VITE_GUTENBERG_IRYS_GATEWAY:-https://node1.irys.xyz}
+        VITE_GUTENBERG_IRYS_NETWORK: ${VITE_GUTENBERG_IRYS_NETWORK:-mainnet}
+        VITE_GUTENBERG_ARWEAVE_MIRRORS: ${VITE_GUTENBERG_ARWEAVE_MIRRORS:-https://arweave.net,https://ar-io.dev,https://g8way.io,https://permagate.io}
+        VITE_GUTENBERG_INDEXER_URL: ${VITE_GUTENBERG_INDEXER_URL:-http://127.0.0.1:4000}
+        VITE_GUTENBERG_EXPLORER_URL: ${VITE_GUTENBERG_EXPLORER_URL:-https://explorer.solana.com/address/{address}}
+    image: gutenberg
+    container_name: gutenberg
     restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-      indexer-migrate:
-        condition: service_completed_successfully
     ports:
-      - '${GUTENBERG_INDEXER_PORT:-4000}:${GUTENBERG_INDEXER_PORT:-4000}'
+      - '${GUTENBERG_GATEWAY_PORT:-8080}:80'
+      - '${GUTENBERG_INDEXER_PORT:-4000}:4000'
+    volumes:
+      - gutenberg-data:/var/lib/postgresql/data
     environment:
       GUTENBERG_INDEXER_NODE_ENV: ${GUTENBERG_INDEXER_NODE_ENV:-production}
       GUTENBERG_INDEXER_PORT: ${GUTENBERG_INDEXER_PORT:-4000}
-      GUTENBERG_INDEXER_DATABASE_URL: postgres://${GUTENBERG_POSTGRES_USER:-postgres}:${GUTENBERG_POSTGRES_PASSWORD:-postgres}@postgres:5432/${GUTENBERG_POSTGRES_DB:-gutenberg}
       GUTENBERG_INDEXER_SOLANA_RPC_URL: ${GUTENBERG_INDEXER_SOLANA_RPC_URL:-https://api.mainnet.solana.com}
       GUTENBERG_INDEXER_SOLANA_WS_URL: ${GUTENBERG_INDEXER_SOLANA_WS_URL:-wss://api.mainnet.solana.com}
       GUTENBERG_INDEXER_BACKFILL_BATCH_SIZE: ${GUTENBERG_INDEXER_BACKFILL_BATCH_SIZE:-1000}
       GUTENBERG_INDEXER_BACKFILL_TX_CONCURRENCY: ${GUTENBERG_INDEXER_BACKFILL_TX_CONCURRENCY:-5}
       GUTENBERG_INDEXER_CORS_ORIGINS: ${GUTENBERG_INDEXER_CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
-
     healthcheck:
       test:
         [
@@ -95,27 +62,5 @@ services:
       retries: 30
       start_period: 90s
 
-  gateway:
-    profiles: ['app']
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: gateway
-      args:
-        VITE_GUTENBERG_SOLANA_RPC_URL: ${VITE_GUTENBERG_SOLANA_RPC_URL:-https://api.mainnet.solana.com}
-        VITE_GUTENBERG_IRYS_GATEWAY: ${VITE_GUTENBERG_IRYS_GATEWAY:-https://node1.irys.xyz}
-        VITE_GUTENBERG_IRYS_NETWORK: ${VITE_GUTENBERG_IRYS_NETWORK:-mainnet}
-        VITE_GUTENBERG_ARWEAVE_MIRRORS: ${VITE_GUTENBERG_ARWEAVE_MIRRORS:-https://arweave.net,https://ar-io.dev,https://g8way.io,https://permagate.io}
-        VITE_GUTENBERG_INDEXER_URL: ${VITE_GUTENBERG_INDEXER_URL:-http://127.0.0.1:4000}
-        VITE_GUTENBERG_EXPLORER_URL: ${VITE_GUTENBERG_EXPLORER_URL:-https://explorer.solana.com/address/{address}}
-    image: gutenberg-gateway
-    container_name: gutenberg-gateway
-    restart: unless-stopped
-    depends_on:
-      indexer:
-        condition: service_healthy
-    ports:
-      - '${GUTENBERG_GATEWAY_PORT:-8080}:80'
-
 volumes:
-  gutenberg-indexer-postgres-data:
+  gutenberg-data:

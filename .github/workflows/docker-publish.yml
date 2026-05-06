@@ -35,18 +35,6 @@ jobs:
         VITE_GUTENBERG_ARWEAVE_MIRRORS=https://arweave.net,https://ar-io.dev,https://g8way.io,https://permagate.io
         VITE_GUTENBERG_INDEXER_URL=http://127.0.0.1:4000
         VITE_GUTENBERG_EXPLORER_URL=https://explorer.solana.com/address/{address}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - image: gutenberg
-            target: gutenberg
-          - image: gutenberg-indexer-migrate
-            target: indexer-migrate
-          - image: gutenberg-indexer
-            target: indexer
-          - image: gutenberg-gateway
-            target: gateway
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -65,7 +53,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/gutenberg
           tags: |
             type=raw,value=${{ github.sha }}
             type=raw,value=latest
@@ -75,11 +63,30 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          target: ${{ matrix.target }}
+          target: gutenberg
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=gutenberg-${{ matrix.image }}
-          cache-to: type=gha,mode=max,scope=gutenberg-${{ matrix.image }}
+          cache-from: type=gha,scope=gutenberg
+          cache-to: type=gha,mode=max,scope=gutenberg
           build-args: ${{ env.DOCKER_BUILD_ARGS }}
+
+  release:
+    needs: build-and-push
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@437e073e786973c6b6af97d9e445c41ae43b1d29 # v3.4.0
+        with:
+          tag_name: develop-${{ github.sha }}
+          name: develop ${{ github.sha }}
+          target_commitish: ${{ github.sha }}
+          prerelease: true
+          make_latest: false
+          generate_release_notes: true
+          body: |
+            **Image:** `ghcr.io/${{ github.repository_owner }}/gutenberg:${{ github.sha }}` (also `latest` on this branch).
