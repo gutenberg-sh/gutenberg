@@ -17,15 +17,19 @@
   <img src="https://img.shields.io/badge/Anchor-program-3E4348?style=flat-square" alt="Anchor program" />
 </p>
 
+The state's censorship apparatus is a sophisticated machine of control: courts issue suppression orders, police execute warrantless seizures, legislatures mandate backdoors, and tech giants comply with silent requests. Your content is deleted with a click, buried in non-public logs, erased from digital existence. They've built walls around information, and they hold the only keys.
+
 ---
 
 ## Why Gutenberg?
 
-Most public writing still lives on platforms and under laws that can remove or bury it. Gutenberg is built so your work can live in durable storage and be registered on-chain, signed by you. The idea is simple: publishing that is harder to quietly erase.
+Gutenberg is a decentralized publishing protocol that lets anyone publish freely, privately, and permanently on Solana. 
 
-## Your copy, your machine
+Gutenberg is designed to dismantle centralized control. By leveraging Solana's immutable ledger and separating storage from identity, we create a censorship-resistant architecture that fractures their control mechanisms. Each gateway you deploy expands territory beyond their reach. Each indexer you run operates independently of their subpoena pipelines. This is a technical solution to a political problem.
 
-You can run your own gateway and indexer and keep wallet and network choices local. The usual setup follows the live Solana network (mainnet) so you are publishing for real.
+## Local by default
+
+You control the entire stack: your keys, your nodes, your rules. Running your own infrastructure eliminates centralized points of control.
 
 ## Run it on your computer
 
