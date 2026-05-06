@@ -25,7 +25,7 @@ The state's censorship apparatus is a sophisticated machine of control: courts i
 
 Gutenberg is a decentralized publishing protocol that is designed to dismantle centralized control.
 
-By leveraging Solana's immutable ledger and separating storage from identity, we create a censorship-resistant architecture that fractures their control mechanisms. Each gateway you deploy expands territory beyond their reach. Each indexer you run operates independently of their subpoena pipelines. This is a technical solution to a political problem.
+Gutenberg strikes at three heads of control: Solana's immutable ledger makes deletion impossible; separating storage from identity eliminates centralized enforcement; each instance you deploy multiplies the redundancy, making suppression a hydra-headed problem. This is a technical solution to a political problem.
 
 ## Local by default
 
