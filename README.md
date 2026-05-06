@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.webp" width="100%" alt="Gutenberg — panoramic archive scene with title" />
+  <img src="assets/banner.webp" width="100%" alt="Gutenberg, panoramic archive scene with title" />
 </p>
 
 <h1 align="center">Gutenberg</h1>
@@ -25,37 +25,48 @@ Most public writing still lives on platforms and under laws that can remove or b
 
 ## Your copy, your machine
 
-You can run your own gateway and indexer and keep wallet and network choices local. The usual setup follows the live Solana network (mainnet) so you are publishing for real. If you are changing the code itself, see [CONTRIBUTING.md](CONTRIBUTING.md) for a fuller developer setup.
+You can run your own gateway and indexer and keep wallet and network choices local. The usual setup follows the live Solana network (mainnet) so you are publishing for real.
 
 ## Run it on your computer
 
-You will need **Git**, **Docker** (installed and running), and **Node.js** with **pnpm**. Exact versions and troubleshooting live in [CONTRIBUTING.md](CONTRIBUTING.md); match those before you start if anything fails.
+You will need **Git**, **Docker** (installed and running), and **Node.js** with **pnpm**. [CONTRIBUTING.md](CONTRIBUTING.md) lists exact versions, troubleshooting, a local stack for experiments (not mainnet publishing), and how to reset local Docker data.
 
-1. **Docker** — Install Docker for your system and open it once so it is running. The first launch may take a while while it downloads images.
+1. **Docker:** Install Docker for your system and open it once so it is running. The first launch may take a while while it downloads images.
 
-2. **Node and pnpm** — Install Node from [nodejs.org](https://nodejs.org/), then enable Corepack and the project’s pnpm version (paste this into a terminal):
+2. **Node and pnpm:** Install Node from [nodejs.org](https://nodejs.org/), then enable Corepack and the project’s pnpm version (paste this into a terminal):
 
 ```bash
+# Node and pnpm: enable Corepack, then activate the pnpm version this repo pins
 corepack enable
 corepack prepare pnpm@10.33.1 --activate
 ```
 
-3. **Get the project** — Clone the repository and open that folder in a terminal.
-
-4. **Configuration** — Copy the file named `.env.production` to `.env` in the project root (your editor can do this if you prefer not to use the command line).
-
-5. **Start** — From the project folder:
+3. **Get the project:** Clone the repository and open that folder in a terminal.
 
 ```bash
+# Get the project (use your fork’s URL if you cloned one)
+git clone https://github.com/leonmeka/gutenberg.git
+cd gutenberg
+```
+
+4. **Configuration:** Copy the file named `.env.production` to `.env` in the project root (your editor can do this if you prefer not to use the command line).
+
+```bash
+# Configuration: production-shaped defaults for a mainnet-backed local run
+cp .env.production .env
+```
+
+5. **Start:** From the project folder:
+
+```bash
+# Start: install dependencies, then bring up Docker (gateway, indexer, etc.)
 pnpm install
 pnpm stack:up
 ```
 
 By default this uses public mainnet services; you do not run your own validator in Docker. You can edit `.env` later if you want your own RPC or other endpoints.
 
-**Trying things out locally** (not for real publishing) is described in [CONTRIBUTING.md](CONTRIBUTING.md) under the local stack and `.env.local` flow.
-
-When the stack is up, open the app at **http://localhost:8080** and the indexer API at **http://localhost:4000**. If pages do not load, check that Docker is running. To clear local data and try again from scratch, use the stack reset steps in [CONTRIBUTING.md](CONTRIBUTING.md).
+When the stack is up, open the app at **http://localhost:8080** and the indexer API at **http://localhost:4000**. If pages do not load, check that Docker is running. To clear local data and try again from scratch, use the stack reset steps in that guide.
 
 ## License
 

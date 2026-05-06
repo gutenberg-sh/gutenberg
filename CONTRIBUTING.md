@@ -1,4 +1,4 @@
-This is the **developer flow**: local validator, Solana program work, env tweaks, and how we ship changes. **For the normal, mainnet-backed install**, follow the [README](README.md#run-it-yourself) first; come back here when you need a dev stack or you are opening a PR.
+This is the **developer flow**: local validator, Solana program work, env tweaks, and how we ship changes. **For the normal, mainnet-backed install**, follow the [README](README.md#run-it-on-your-computer) first; come back here when you need a dev stack or you are opening a PR.
 
 ## What you need
 
@@ -16,7 +16,7 @@ For day-to-day development you usually want the local validator and dev-style de
 
 | File | Role in the dev flow |
 |------|------------------------|
-| [`.env.local`](.env.local) | Local test validator, devnet-style Irys, local Postgres — **start here** |
+| [`.env.local`](.env.local) | Local test validator, devnet-style Irys, local Postgres. **Start here.** |
 | [`.env.production`](.env.production) | Same as the README’s mainnet run; use when you need to mirror production settings while hacking |
 
 ```bash
@@ -29,7 +29,7 @@ Comments in each file explain the variables.
 
 From the repo root, with `.env` in place.
 
-**Dev stack** (Postgres, gateway, indexer, bundled validator — what you use for program deploys and local RPC):
+**Dev stack** (Postgres, gateway, indexer, bundled validator for program deploys and local RPC):
 
 ```bash
 pnpm stack:up:local
@@ -42,7 +42,7 @@ cp .env.production .env   # if you are not already on production settings
 pnpm stack:up
 ```
 
-Gateway: **http://localhost:8080** — Indexer: **http://localhost:4000** — Quick check: **http://localhost:4000/health**.
+Gateway: **http://localhost:8080**. Indexer: **http://localhost:4000**. Quick check: **http://localhost:4000/health**.
 
 **Clean slate** (drops local Postgres data):
 
@@ -87,6 +87,6 @@ If you touched `apps/solana`, also run `pnpm solana:test`. Optional: `pnpm forma
 
 ## If something breaks
 
-- Nothing on localhost: Docker not running, or the stack still starting—wait a bit, then check `docker compose ps` from the repo root.
+- Nothing on localhost: Docker not running, or the stack still starting; wait a bit, then check `docker compose ps` from the repo root.
 - Wrong network after editing `.env`: `pnpm stack:down`, then `pnpm stack:up` or `pnpm stack:up:local` again.
 - Weird database state: use **Clean slate** above.
