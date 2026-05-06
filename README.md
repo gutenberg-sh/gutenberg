@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/banner.webp" width="100%" alt="Gutenberg — dark abstract tactical banner" />
+</p>
+
 <h1 align="center">Gutenberg</h1>
 
 <p align="center">
@@ -17,60 +21,41 @@
 
 ## Why Gutenberg?
 
-Governments and large platforms steer most public narratives. Work that contradicts the preferred line gets taken down, sued, or buried.
+Most public writing still lives on platforms and under laws that can remove or bury it. Gutenberg is built so your work can live in durable storage and be registered on-chain, signed by you. The idea is simple: publishing that is harder to quietly erase.
 
-Gutenberg lets you publish freely, privately, and permanently: content is written to durable storage and registered on a public chain, signed by the author. Once published, no host, editor, or court can censor the original.
+## Your copy, your machine
 
-## Local by default
+You can run your own gateway and indexer and keep wallet and network choices local. The usual setup follows the live Solana network (mainnet) so you are publishing for real. If you are changing the code itself, see [CONTRIBUTING.md](CONTRIBUTING.md) for a fuller developer setup.
 
-You run the gateway and indexer yourself; wallet and RPC settings are yours. The **canonical way to run Gutenberg** is against **Solana mainnet**: your indexer follows the live chain, and publishing uses mainnet Irys settings. That is what the default Docker flow below does. If you are **developing** the repo (local validator, program deploys, custom env), use **[CONTRIBUTING.md](CONTRIBUTING.md)** instead.
+## Run it on your computer
 
-## Run it yourself
+You will need **Git**, **Docker** (installed and running), and **Node.js** with **pnpm**. Exact versions and troubleshooting live in [CONTRIBUTING.md](CONTRIBUTING.md); match those before you start if anything fails.
 
-**You need:** Git, Docker running on your machine, Node 22.22.2 (see [.nvmrc](.nvmrc)), and pnpm 10.33.1.
+1. **Docker** — Install Docker for your system and open it once so it is running. The first launch may take a while while it downloads images.
 
-**Node 22.22.2:** Install the **22.22.2** release for your OS from the [Node.js download page](https://nodejs.org/en/download), or use a version manager. With [fnm](https://github.com/Schniz/fnm) or [nvm](https://github.com/nvm-sh/nvm), you can run `fnm install 22.22.2 && fnm use` (or `nvm install 22.22.2 && nvm use`) before cloning. After you clone and `cd` into this repo, `fnm install` / `nvm install` followed by `fnm use` / `nvm use` reads [.nvmrc](.nvmrc) and selects the same version.
-
-**pnpm (Corepack):** Node ships Corepack; enable it and activate the repo's pnpm version:
+2. **Node and pnpm** — Install Node from [nodejs.org](https://nodejs.org/), then enable Corepack and the project’s pnpm version (paste this into a terminal):
 
 ```bash
 corepack enable
 corepack prepare pnpm@10.33.1 --activate
 ```
 
-**Docker:** on macOS, `brew install --cask docker` then open the app once. On Linux, [Docker’s install script](https://docs.docker.com/engine/install/). On Windows, [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/). The first stack start can take a few minutes while images download.
+3. **Get the project** — Clone the repository and open that folder in a terminal.
 
-**Clone:**
+4. **Configuration** — Copy the file named `.env.production` to `.env` in the project root (your editor can do this if you prefer not to use the command line).
 
-```bash
-git clone https://github.com/leonmeka/gutenberg.git
-cd gutenberg
-```
-
-**Recommended: mainnet:** copy [`.env.production`](.env.production) to `.env`, then:
+5. **Start** — From the project folder:
 
 ```bash
 pnpm install
 pnpm stack:up
 ```
 
-This stack talks to public mainnet RPC and Irys; you do not run a validator in Docker. Adjust `.env` if you use your own RPC or endpoints.
+By default this uses public mainnet services; you do not run your own validator in Docker. You can edit `.env` later if you want your own RPC or other endpoints.
 
-**Optional: local test validator** (for development only; see [CONTRIBUTING.md](CONTRIBUTING.md)):
+**Trying things out locally** (not for real publishing) is described in [CONTRIBUTING.md](CONTRIBUTING.md) under the local stack and `.env.local` flow.
 
-```bash
-cp .env.local .env
-pnpm install
-pnpm stack:up:local
-```
-
-Open the app at **http://localhost:8080**. The indexer API is on **http://localhost:4000** (try **http://localhost:4000/health** in the browser or with curl).
-
-If ports stay dead, make sure Docker is actually running. To wipe local database data and start over: `pnpm stack:reset`, then bring the stack up again (see [CONTRIBUTING.md](CONTRIBUTING.md)).
-
-## Developers
-
-The **[CONTRIBUTING.md](CONTRIBUTING.md)** developer flow covers local chain setup, the registry program, env files, and pull requests.
+When the stack is up, open the app at **http://localhost:8080** and the indexer API at **http://localhost:4000**. If pages do not load, check that Docker is running. To clear local data and try again from scratch, use the stack reset steps in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
