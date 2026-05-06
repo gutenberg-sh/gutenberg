@@ -1,3 +1,8 @@
+import {
+  GUTENBERG_REGISTRY_PROGRAM_ID,
+  infer_chain_id,
+  type ChainId,
+} from '@gutenberg/core';
 import { Github } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -5,8 +10,20 @@ import { IndexerStatus } from '@/components/IndexerStatus';
 import { SolanaHorizontalLogo } from '@/components/SolanaHorizontalLogo';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Wordmark } from '@/components/Wordmark';
+import { env } from '@/env';
+import { explorer_address_url } from '@/lib/explorer';
+import { shorten } from '@/lib/format';
 
 const GUTENBERG_REPO_HREF = 'https://github.com/leonmeka/gutenberg';
+
+const FOOTER_CHAIN_ID = infer_chain_id(env.VITE_GUTENBERG_SOLANA_RPC_URL);
+const FOOTER_CLUSTER_LABEL = cluster_label(
+  FOOTER_CHAIN_ID,
+  env.VITE_GUTENBERG_SOLANA_RPC_URL,
+);
+const FOOTER_PROGRAM_EXPLORER = explorer_address_url(
+  GUTENBERG_REGISTRY_PROGRAM_ID,
+);
 
 export function SiteFooter() {
   return (
@@ -74,9 +91,44 @@ export function SiteFooter() {
             <IndexerStatus />
           </div>
         </div>
+
+        <div
+          aria-label="Deployment"
+          className="border-t border-border pt-4 font-mono text-[11px] leading-relaxed tracking-[0.02em] text-muted-foreground"
+        >
+          <p className="wrap-break-word">
+            <span className="text-foreground-soft">Cluster</span>{' '}
+            <span className="text-foreground">{FOOTER_CLUSTER_LABEL}</span>
+            <span aria-hidden className="mx-2 text-border">
+              ·
+            </span>
+            <span className="text-foreground-soft">Registry program</span>{' '}
+            <a
+              href={FOOTER_PROGRAM_EXPLORER}
+              target="_blank"
+              rel="noreferrer noopener"
+              title={GUTENBERG_REGISTRY_PROGRAM_ID}
+              className="text-foreground underline-offset-[3px] transition-colors hover:underline"
+            >
+              {shorten(GUTENBERG_REGISTRY_PROGRAM_ID, 5, 5)}
+            </a>
+          </p>
+        </div>
       </div>
     </footer>
   );
+}
+
+function cluster_label(chain_id: ChainId, rpc_url: string): string {
+  const key = chain_id.replace(/^solana:/, '');
+  if (key === 'unknown') {
+    try {
+      return new URL(rpc_url).hostname;
+    } catch {
+      return 'Unknown';
+    }
+  }
+  return key.charAt(0).toUpperCase() + key.slice(1);
 }
 
 function FooterLink({
