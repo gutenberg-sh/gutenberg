@@ -64,9 +64,7 @@ pnpm install
 pnpm stack:up
 ```
 
-By default this uses public mainnet services; you do not run your own validator in Docker. You can edit `.env` later if you want your own RPC or other endpoints.
-
-When the stack is up, open the app at **http://localhost:8080** and the indexer API at **http://localhost:4000**. If pages do not load, check that Docker is running. To clear local data and try again from scratch, use the stack reset steps in that guide.
+When the stack is up, open the app at **http://localhost:8080** and the indexer API at **http://localhost:4000**. Done!
 
 ## License
 
