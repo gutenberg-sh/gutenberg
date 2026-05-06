@@ -1,4 +1,9 @@
-import { useMemo, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
+import {
+  useMemo,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 
@@ -85,7 +90,7 @@ export function SearchPublicationRow({ item }: { item: PublicationDto }) {
   const target = `/publication/${encodeURIComponent(item.registry_id)}`;
 
   const go_publication = () => {
-    navigate(target);
+    void navigate(target);
   };
 
   const on_row_key_down = (e: KeyboardEvent<HTMLDivElement>) => {

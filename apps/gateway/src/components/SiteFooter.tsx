@@ -62,7 +62,11 @@ export function SiteFooter() {
               rel="noreferrer noopener"
               className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
             >
-              <Github className="size-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
+              <Github
+                className="size-3.5 shrink-0"
+                strokeWidth={1.75}
+                aria-hidden
+              />
               GitHub
             </a>
           </nav>

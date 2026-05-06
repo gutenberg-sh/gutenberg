@@ -20,7 +20,7 @@ export function ReleaseRow({ release }: { release: ReleaseDto }) {
   const target = `/publication/${encodeURIComponent(registry_id)}/${encodeURIComponent(release.version)}`;
 
   const go_publication = () => {
-    navigate(target);
+    void navigate(target);
   };
 
   const on_row_key_down = (e: KeyboardEvent<HTMLDivElement>) => {

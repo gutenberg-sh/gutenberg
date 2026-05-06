@@ -25,7 +25,8 @@ const env_schema = z.object({
       }
     })
     .refine((list) => list.length > 0, {
-      message: 'VITE_GUTENBERG_ARWEAVE_MIRRORS must list at least one mirror URL',
+      message:
+        'VITE_GUTENBERG_ARWEAVE_MIRRORS must list at least one mirror URL',
     }),
   VITE_GUTENBERG_EXPLORER_URL: z
     .string()

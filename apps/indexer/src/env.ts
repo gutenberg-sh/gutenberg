@@ -19,13 +19,9 @@ export const env = z.object({
   GUTENBERG_INDEXER_CORS_ORIGINS: z
     .string()
     .min(1)
-    .refine(
-      (raw) => raw.split(',').some((entry) => entry.trim().length > 0),
-      {
-        message:
-          'GUTENBERG_INDEXER_CORS_ORIGINS must list at least one origin',
-      },
-    ),
+    .refine((raw) => raw.split(',').some((entry) => entry.trim().length > 0), {
+      message: 'GUTENBERG_INDEXER_CORS_ORIGINS must list at least one origin',
+    }),
 });
 
 export type Env = z.infer<typeof env>;

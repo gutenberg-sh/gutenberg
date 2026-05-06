@@ -109,8 +109,8 @@ export function PublishFlowPanel({
         }
         wallet_connected={Boolean(
           wallet.status === 'connected' &&
-            wallet_session?.signMessage &&
-            wallet_session?.signTransaction,
+          wallet_session?.signMessage &&
+          wallet_session?.signTransaction,
         )}
         run={run}
         on_publish={() => void on_publish()}
