@@ -17,7 +17,7 @@
   <img src="https://img.shields.io/badge/Anchor-program-3E4348?style=flat-square" alt="Anchor program" />
 </p>
 
-The state's censorship apparatus is a sophisticated machine of control: courts issue suppression orders, police execute warrantless seizures, legislatures mandate backdoors, and tech giants comply with silent requests. Your content is deleted with a click, buried in non-public logs, erased from digital existence. They've built walls around information, and they hold the only keys.
+The state's censorship apparatus is a sophisticated machine of control: courts issue suppression orders, police execute warrantless seizures, legislatures mandate backdoors, and tech giants comply with silent requests. They've built walls around information, and they hold the only keys.
 
 ---
 
