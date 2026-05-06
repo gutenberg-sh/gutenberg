@@ -23,9 +23,9 @@ The state's censorship apparatus is a sophisticated machine of control: courts i
 
 ## Why Gutenberg?
 
-Gutenberg is a decentralized publishing protocol that lets anyone publish freely, privately, and permanently on Solana. 
+Gutenberg is a decentralized publishing protocol that is designed to dismantle centralized control.
 
-Gutenberg is designed to dismantle centralized control. By leveraging Solana's immutable ledger and separating storage from identity, we create a censorship-resistant architecture that fractures their control mechanisms. Each gateway you deploy expands territory beyond their reach. Each indexer you run operates independently of their subpoena pipelines. This is a technical solution to a political problem.
+By leveraging Solana's immutable ledger and separating storage from identity, we create a censorship-resistant architecture that fractures their control mechanisms. Each gateway you deploy expands territory beyond their reach. Each indexer you run operates independently of their subpoena pipelines. This is a technical solution to a political problem.
 
 ## Local by default
 
