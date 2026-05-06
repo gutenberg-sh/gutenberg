@@ -37,10 +37,9 @@ You will need **Git**, **Docker** (installed and running), and **Node.js** with 
 
 1. **Docker:** Install Docker for your system and open it once so it is running. The first launch may take a while while it downloads images.
 
-2. **Node and pnpm:** Install Node from [nodejs.org](https://nodejs.org/), then enable Corepack and the project’s pnpm version (paste this into a terminal):
+2. **Node and pnpm:** Install Node from [nodejs.org](https://nodejs.org/), then enable Corepack and the project’s pnpm version:
 
 ```bash
-# Node and pnpm: enable Corepack, then activate the pnpm version this repo pins
 corepack enable
 corepack prepare pnpm@10.33.1 --activate
 ```
@@ -48,27 +47,24 @@ corepack prepare pnpm@10.33.1 --activate
 3. **Get the project:** Clone the repository and open that folder in a terminal.
 
 ```bash
-# Get the project (use your fork’s URL if you cloned one)
 git clone https://github.com/leonmeka/gutenberg.git
 cd gutenberg
 ```
 
-4. **Configuration:** Copy the file named `.env.production` to `.env` in the project root (your editor can do this if you prefer not to use the command line).
+4. **Configuration:** Copy the file named `.env.production` to `.env` in the project root.
 
 ```bash
-# Configuration: production-shaped defaults for a mainnet-backed local run
 cp .env.production .env
 ```
 
 5. **Start:** From the project folder:
 
 ```bash
-# Start: install dependencies, then bring up Docker (gateway, indexer, etc.)
 pnpm install
 pnpm stack:up
 ```
 
-When the stack is up, open the app at **http://localhost:8080** and the indexer API at **http://localhost:4000**. Done!
+When the stack is up, open the app at **http://localhost:8080** and the indexer API at **http://localhost:4000**.
 
 ## License
 
