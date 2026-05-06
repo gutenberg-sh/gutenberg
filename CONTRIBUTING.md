@@ -1,60 +1,42 @@
-This is the **developer flow**: local validator, Solana program work, env tweaks, and how we ship changes. **For the normal, mainnet-backed install**, follow the [README](README.md#run-it-on-your-computer) first; come back here when you need a dev stack or you are opening a PR.
+# Contributing
 
-## What you need
+Contributions are welcome. For substantial changes, open an issue first so we can agree on direction before you invest a lot of time.
 
-Docker, Node 22.22.2, pnpm 10.33.1 (see the README for Corepack). Solana and Anchor CLI when you build or deploy the registry program on the local validator.
+## Prerequisites
 
-## Install
+- **Docker** (for the local stack in `docker-compose.yml`)
+- **Node.js** 22.22.2 and **pnpm** 10.33.1 (see the [README](README.md) for Corepack)
+- **Solana CLI** and **Anchor** when you work on `apps/solana`
+
+## Clone and install
 
 ```bash
+git clone https://github.com/leonmeka/gutenberg.git
+cd gutenberg
 pnpm install
 ```
 
-## Environment (developer)
+Copy [`.env.local`](.env.local) to `.env` in the repo root (defaults for the bundled test validator and local Postgres). The comments in `.env.local` describe each variable.
 
-For day-to-day development you usually want the local validator and dev-style defaults:
+## Local Development
 
-| File | Role in the dev flow |
-|------|------------------------|
-| [`.env.local`](.env.local) | Local test validator, devnet-style Irys, local Postgres. **Start here.** |
-| [`.env.production`](.env.production) | Same as the README’s mainnet run; use when you need to mirror production settings while hacking |
+From the repo root, with `.env` in place:
 
 ```bash
-cp .env.local .env
-```
-
-Comments in each file explain the variables.
-
-## Docker (developer)
-
-From the repo root, with `.env` in place.
-
-**Dev stack** (Postgres, gateway, indexer, bundled validator for program deploys and local RPC):
-
-```bash
-pnpm stack:up:local
-```
-
-**Mainnet-style stack** (no bundled validator; same shape as the README canonical run, useful to double-check behavior against mainnet):
-
-```bash
-cp .env.production .env   # if you are not already on production settings
 pnpm stack:up
 ```
 
-Gateway: **http://localhost:8080**. Indexer: **http://localhost:4000**. Quick check: **http://localhost:4000/health**.
+That builds and runs Postgres, the indexer, the gateway, and the Solana test validator. 
 
-**Clean slate** (drops local Postgres data):
+- Gateway: **http://localhost:8080**
+- indexer: **http://localhost:4000**
+- health check: **http://localhost:4000/health**.
 
-```bash
-pnpm stack:reset
-```
+Stop everything: `pnpm stack:down`. Wipe Postgres data and start clean: `pnpm stack:reset`, then `pnpm stack:up` again.
 
-Then start the stack again with the command you need.
+## Solana program (`apps/solana`)
 
-## Registry program (local)
-
-Use the dev stack: `.env` from `.env.local`, then `pnpm stack:up:local` so `http://127.0.0.1:8899` is up. Fund your deploy wallet and deploy:
+With the stack up and RPC at `http://127.0.0.1:8899`:
 
 ```bash
 solana airdrop 5 "$(solana address -k ~/.config/solana/id.json)" -u http://127.0.0.1:8899
@@ -71,9 +53,7 @@ solana airdrop 5 <PUBKEY> -u http://127.0.0.1:8899
 
 ## Pull requests
 
-Contributions are welcome. For big changes, please open an issue first.
-
-Keep PRs small and focused. Before you open one, run the same steps as [CI](.github/workflows/ci.yml): install, build core, gateway, and indexer, then lint:
+Keep changes small and focused. Before you open a PR, run the same checks as [CI](.github/workflows/ci.yml):
 
 ```bash
 pnpm install
@@ -83,10 +63,6 @@ pnpm indexer:build
 pnpm lint
 ```
 
-If you touched `apps/solana`, also run `pnpm solana:test`. Optional: `pnpm format`. Describe what changed and why in the PR; link issues if any.
+If you changed `apps/solana`, also run `pnpm solana:test`. Formatting is optional: `pnpm format`.
 
-## If something breaks
-
-- Nothing on localhost: Docker not running, or the stack still starting; wait a bit, then check `docker compose ps` from the repo root.
-- Wrong network after editing `.env`: `pnpm stack:down`, then `pnpm stack:up` or `pnpm stack:up:local` again.
-- Weird database state: use **Clean slate** above.
+In the PR description, explain what changed and why; link related issues when they exist.

@@ -55,3 +55,45 @@ CMD ["node", "dist/src/main.js"]
 FROM nginx:1.27-alpine AS gateway
 COPY docker/gateway/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=build-gateway /app/apps/gateway/dist /usr/share/nginx/html
+
+FROM node:22-bookworm-slim AS gutenberg
+ARG PNPM_VERSION=10.33.1
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql \
+    postgresql-client \
+    nginx \
+    tini \
+    util-linux \
+    ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
+
+COPY --from=indexer-migrate /app /app-migrate
+COPY --from=indexer-deploy /app/deploy /app
+COPY docker/gateway/default.conf /etc/nginx/sites-available/default
+RUN rm -f /etc/nginx/sites-enabled/default \
+  && ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+COPY --from=build-gateway /app/apps/gateway/dist /usr/share/nginx/html
+
+COPY docker/gutenberg/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+WORKDIR /app
+
+ENV PGDATA=/var/lib/postgresql/data \
+    POSTGRES_USER=postgres \
+    POSTGRES_PASSWORD=postgres \
+    POSTGRES_DB=gutenberg \
+    NODE_ENV=production \
+    GUTENBERG_INDEXER_NODE_ENV=production \
+    GUTENBERG_INDEXER_PORT=4000 \
+    GUTENBERG_INDEXER_SOLANA_RPC_URL=https://api.mainnet.solana.com \
+    GUTENBERG_INDEXER_SOLANA_WS_URL=wss://api.mainnet.solana.com \
+    GUTENBERG_INDEXER_BACKFILL_BATCH_SIZE=1000 \
+    GUTENBERG_INDEXER_BACKFILL_TX_CONCURRENCY=5 \
+    GUTENBERG_INDEXER_CORS_ORIGINS=http://localhost:8080,http://127.0.0.1:8080
+
+EXPOSE 80 4000
+
+ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/entrypoint.sh"]

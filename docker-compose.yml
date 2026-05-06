@@ -1,3 +1,6 @@
+# Local development: Postgres, optional Solana test validator, indexer and gateway built from this repo.
+# End users run the pre-built `gutenberg` image (see README).
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -48,7 +51,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: indexer-migrate
-    image: gutenberg-indexer-migrate:local
+    image: gutenberg-indexer-migrate
     container_name: gutenberg-indexer-migrate
     depends_on:
       postgres:
@@ -62,7 +65,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: indexer
-    image: gutenberg-indexer:local
+    image: gutenberg-indexer
     container_name: gutenberg-indexer
     restart: unless-stopped
     depends_on:
@@ -76,8 +79,8 @@ services:
       GUTENBERG_INDEXER_NODE_ENV: ${GUTENBERG_INDEXER_NODE_ENV:-production}
       GUTENBERG_INDEXER_PORT: ${GUTENBERG_INDEXER_PORT:-4000}
       GUTENBERG_INDEXER_DATABASE_URL: postgres://${GUTENBERG_POSTGRES_USER:-postgres}:${GUTENBERG_POSTGRES_PASSWORD:-postgres}@postgres:5432/${GUTENBERG_POSTGRES_DB:-gutenberg}
-      GUTENBERG_INDEXER_SOLANA_RPC_URL: ${GUTENBERG_INDEXER_SOLANA_RPC_URL:-https://api.mainnet-beta.solana.com}
-      GUTENBERG_INDEXER_SOLANA_WS_URL: ${GUTENBERG_INDEXER_SOLANA_WS_URL:-wss://api.mainnet-beta.solana.com}
+      GUTENBERG_INDEXER_SOLANA_RPC_URL: ${GUTENBERG_INDEXER_SOLANA_RPC_URL:-https://api.mainnet.solana.com}
+      GUTENBERG_INDEXER_SOLANA_WS_URL: ${GUTENBERG_INDEXER_SOLANA_WS_URL:-wss://api.mainnet.solana.com}
       GUTENBERG_INDEXER_BACKFILL_BATCH_SIZE: ${GUTENBERG_INDEXER_BACKFILL_BATCH_SIZE:-1000}
       GUTENBERG_INDEXER_BACKFILL_TX_CONCURRENCY: ${GUTENBERG_INDEXER_BACKFILL_TX_CONCURRENCY:-5}
       GUTENBERG_INDEXER_CORS_ORIGINS: ${GUTENBERG_INDEXER_CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
@@ -102,13 +105,13 @@ services:
       dockerfile: Dockerfile
       target: gateway
       args:
-        VITE_GUTENBERG_SOLANA_RPC_URL: ${VITE_GUTENBERG_SOLANA_RPC_URL:-https://api.mainnet-beta.solana.com}
+        VITE_GUTENBERG_SOLANA_RPC_URL: ${VITE_GUTENBERG_SOLANA_RPC_URL:-https://api.mainnet.solana.com}
         VITE_GUTENBERG_IRYS_GATEWAY: ${VITE_GUTENBERG_IRYS_GATEWAY:-https://node1.irys.xyz}
         VITE_GUTENBERG_IRYS_NETWORK: ${VITE_GUTENBERG_IRYS_NETWORK:-mainnet}
         VITE_GUTENBERG_ARWEAVE_MIRRORS: ${VITE_GUTENBERG_ARWEAVE_MIRRORS:-https://arweave.net,https://ar-io.dev,https://g8way.io,https://permagate.io}
         VITE_GUTENBERG_INDEXER_URL: ${VITE_GUTENBERG_INDEXER_URL:-http://127.0.0.1:4000}
         VITE_GUTENBERG_EXPLORER_URL: ${VITE_GUTENBERG_EXPLORER_URL:-https://explorer.solana.com/address/{address}}
-    image: gutenberg-gateway:local
+    image: gutenberg-gateway
     container_name: gutenberg-gateway
     restart: unless-stopped
     depends_on:

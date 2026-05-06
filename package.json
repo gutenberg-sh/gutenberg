@@ -18,11 +18,10 @@
     "pnpm": "10.33.1"
   },
   "scripts": {
-    "stack:up": "docker compose --profile app up -d --build --wait",
-    "stack:up:local": "docker compose --profile app --profile local-chain up -d --build --wait",
-    "stack:prepare": "docker compose up -d --wait && pnpm indexer:db:apply",
-    "stack:down": "docker compose down",
-    "stack:reset": "docker compose down -v",
+    "stack:up": "docker compose --profile app --profile local-chain up -d --build --wait",
+    "stack:prepare": "docker compose --profile app up -d --wait && pnpm indexer:db:apply",
+    "stack:down": "docker compose down --remove-orphans",
+    "stack:reset": "docker compose down -v --remove-orphans",
     "solana:build": "pnpm --filter @gutenberg/solana run anchor:build",
     "solana:deploy": "pnpm --filter @gutenberg/solana run anchor:deploy",
     "solana:test": "pnpm --filter @gutenberg/solana run anchor:test",

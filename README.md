@@ -10,10 +10,11 @@
 
 <p align="center">
   <a href="https://github.com/leonmeka/gutenberg/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/leonmeka/gutenberg/ci.yml?branch=develop&amp;style=flat-square&amp;logo=github&amp;label=CI" alt="CI status" /></a>
+  <a href="https://github.com/leonmeka/gutenberg/actions/workflows/docker-publish.yml"><img src="https://img.shields.io/github/actions/workflow/status/leonmeka/gutenberg/docker-publish.yml?branch=develop&amp;style=flat-square&amp;logo=github&amp;label=Docker%20images" alt="Docker images status" /></a>
   <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-22.22.2-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js" /></a>
   <a href="https://pnpm.io/"><img src="https://img.shields.io/badge/pnpm-10.33.1-f69220?style=flat-square&logo=pnpm&logoColor=white" alt="pnpm" /></a>
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Solana-program-9945FF?style=flat-square&logo=solana&logoColor=white" alt="Solana" />
+  <img src="https://img.shields.io/badge/Solana-program-9945FF?style=flat-square&logo=solana&logoColor=white" alt="Solana program" />
   <img src="https://img.shields.io/badge/Anchor-program-3E4348?style=flat-square" alt="Anchor program" />
 </p>
 
@@ -31,40 +32,31 @@ Gutenberg strikes at three heads of control: Solana's immutable ledger makes del
 
 You control the entire stack: your keys, your nodes, your rules. Running your own infrastructure eliminates centralized points of control.
 
-## Run it on your computer
+## Run the mainnet stack
 
-You will need **Git**, **Docker**, and **Node.js** with **pnpm**. [CONTRIBUTING.md](CONTRIBUTING.md) lists exact versions, troubleshooting, a local stack for experiments, and how to reset local Docker data.
+1. Install **Docker**: [Docker Desktop for Mac or Windows](https://www.docker.com/products/docker-desktop/). Install it, open it once, and leave it running.
 
-1. **Docker:** Install Docker for your system and open it once so it is running. The first launch may take a while while it downloads images.
-
-2. **Node and pnpm:** Install Node from [nodejs.org](https://nodejs.org/), then enable Corepack and the project’s pnpm version:
+2. Open **Terminal** (Mac) or **PowerShell** / **Command Prompt** (Windows), run:
 
 ```bash
-corepack enable
-corepack prepare pnpm@10.33.1 --activate
+docker pull ghcr.io/leonmeka/gutenberg:latest
+docker run -d --name gutenberg \
+  -p 8080:80 -p 4000:4000 \
+  -v gutenberg-pg:/var/lib/postgresql/data \
+  ghcr.io/leonmeka/gutenberg:latest
 ```
 
-3. **Get the project:** Clone the repository and open that folder in a terminal.
+3. Open **http://localhost:8080** in your browser. The API is at **http://localhost:4000**.
+
+To stop and remove the container:
 
 ```bash
-git clone https://github.com/leonmeka/gutenberg.git
-cd gutenberg
+docker stop gutenberg && docker rm gutenberg
 ```
 
-4. **Configuration:** Copy the file named `.env.production` to `.env` in the project root.
+## Contributing
 
-```bash
-cp .env.production .env
-```
-
-5. **Start:** From the project folder:
-
-```bash
-pnpm install
-pnpm stack:up
-```
-
-When the stack is up, open the app at **http://localhost:8080** and the indexer API at **http://localhost:4000**.
+To contribute or change the code, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

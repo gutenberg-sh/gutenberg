@@ -26,7 +26,7 @@ export function infer_chain_id(rpc_url: string): ChainId {
     return 'solana:testnet';
   }
 
-  if (host.includes('mainnet') || host === 'api.mainnet-beta.solana.com') {
+  if (host.includes('mainnet')) {
     return 'solana:mainnet';
   }
 
