@@ -47,7 +47,7 @@ git clone https://github.com/leonmeka/gutenberg.git
 cd gutenberg
 ```
 
-**Recommended — mainnet:** copy [`.env.production`](.env.production) to `.env`, then:
+**Recommended: mainnet:** copy [`.env.production`](.env.production) to `.env`, then:
 
 ```bash
 pnpm install
@@ -56,7 +56,7 @@ pnpm stack:up
 
 This stack talks to public mainnet RPC and Irys; you do not run a validator in Docker. Adjust `.env` if you use your own RPC or endpoints.
 
-**Optional — local test validator** (for development only; see [CONTRIBUTING.md](CONTRIBUTING.md)):
+**Optional: local test validator** (for development only; see [CONTRIBUTING.md](CONTRIBUTING.md)):
 
 ```bash
 cp .env.local .env
