@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/banner.webp" width="100%" alt="Gutenberg — dark abstract tactical banner" />
+  <img src="assets/banner.webp" width="100%" alt="Gutenberg — panoramic archive scene with title" />
 </p>
 
 <h1 align="center">Gutenberg</h1>
