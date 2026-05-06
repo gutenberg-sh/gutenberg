@@ -5,7 +5,27 @@ This document is for **developers**: contributors, registry program work, and st
 Contributions are welcome. For large changes, open an issue first so direction is agreed before heavy work.
 
 1. Fork, branch from default, keep PRs **focused** (one logical change is easier to review and revert).
-2. After **`pnpm install`**, run **`pnpm gateway:build`** and **`pnpm gateway:lint`** (and the matching scripts for other packages you touched, for example **`pnpm indexer:build`** / **`pnpm indexer:lint`**). Use **`pnpm format`** when you want auto-fixes across packages.
+2. Install, then run the builds and linters for the packages you changed. Gateway defaults:
+
+```bash
+pnpm install
+pnpm gateway:build
+pnpm gateway:lint
+```
+
+Indexer example:
+
+```bash
+pnpm indexer:build
+pnpm indexer:lint
+```
+
+Optional repo-wide formatting:
+
+```bash
+pnpm format
+```
+
 3. In the PR body, describe **what** changed and **why**; link issues when relevant.
 
 If you are unsure whether work belongs in the gateway, indexer, the Solana program, ask in an issue.
@@ -46,45 +66,32 @@ From the repository root.
 pnpm stack:up:local
 ```
 
-**Mainnet-style stack** (Postgres, indexer, gateway; RPC/WS from **`.env`**, typically public mainnet):
+**Production stack** (Postgres, indexer, gateway; RPC/WS pointing to mainnet):
 
 ```bash
 pnpm stack:up
 ```
 
-When the app stack is up and healthy, services listen on the host using your **`.env`** (defaults in parentheses):
+When the app stack is up and healthy, services listen on the host using your **`.env`**:
 
-- **Gateway** (UI): [http://localhost:8080](http://localhost:8080) (`GUTENBERG_GATEWAY_PORT`)
-- **Indexer** (HTTP API): [http://localhost:4000](http://localhost:4000) (`GUTENBERG_INDEXER_PORT`; health check: `/health`)
-
-With **`pnpm stack:up:local`**, the test validator is additionally at **HTTP** `127.0.0.1:8899` and **WebSocket** `ws://127.0.0.1:8900` (`GUTENBERG_SOLANA_RPC_PORT` / `GUTENBERG_SOLANA_WS_PORT`).
-
-Other **stack** scripts (Docker Compose):
-
-```bash
-pnpm stack:prepare   # Postgres (Compose default services), wait for health, then `pnpm indexer:db:apply`
-pnpm stack:down      # stop and remove containers for this Compose project
-pnpm stack:reset     # `stack:down` and remove volumes (Postgres + validator data)
-```
+- **Gateway** (UI): [http://localhost:8080](http://localhost:8080)
+- **Indexer** (REST API): [http://localhost:4000](http://localhost:4000)
 
 ## Registry program
 
-With **`local-chain`** and RPC/WS in **`.env`** pointing at **`127.0.0.1:8899`** / **`ws://127.0.0.1:8900`**:
+Deploy the program to the **local validator** that comes with the **development stack** above.
+
+Send a little SOL to the wallet you deploy with (by default the file `~/.config/solana/id.json`; change the path after `-k` if yours lives somewhere else), then deploy:
 
 ```bash
+solana airdrop 5 "$(solana address -k ~/.config/solana/id.json)" -u http://127.0.0.1:8899
+
 pnpm solana:build
 pnpm solana:deploy
 ```
 
-If you deploy under a **new** program id, update **`GUTENBERG_REGISTRY_PROGRAM_ID`** in [`packages/core/src/instruction.ts`](packages/core/src/instruction.ts), then rebuild gateway images.
-
-Fund a wallet on the local validator:
+Fund another address on the same validator:
 
 ```bash
-solana airdrop 100 <RECIPIENT> -u http://127.0.0.1:8899
+solana airdrop 5 <PUBKEY> -u http://127.0.0.1:8899
 ```
-
-## Services
-
-- **Gateway**: Reader and publisher UI: registry lookups, durable storage fetch, signature and hash checks, **`/publish`**.
-- **Indexer**: HTTP API over the on-chain registry; the gateway can still verify against the chain directly.
