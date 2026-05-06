@@ -44,9 +44,11 @@ docker run -d --name gutenberg \
   -p 8080:80 -p 4000:4000 \
   -v gutenberg-pg:/var/lib/postgresql/data \
   ghcr.io/leonmeka/gutenberg:latest
+u=http://localhost:8080
+open "$u" 2>/dev/null||xdg-open "$u" 2>/dev/null||cmd.exe /c start "$u"
 ```
 
-3. Open **http://localhost:8080** in your browser. The API is at **http://localhost:4000**.
+3. Open **http://localhost:8080** in your browser. Done!
 
 To stop and remove the container:
 
