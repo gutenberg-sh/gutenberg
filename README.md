@@ -24,7 +24,7 @@ Gutenberg lets you publish freely, privately, and permanently: content is writte
 
 Publishing and reading should not depend on a company’s servers staying up, on their terms of service, or on their idea of who gets a login. Gutenberg is local first. You run the **gateway** and **indexer** yourself; wallet, RPC, and chain targets are yours. 
 
-Nothing here assumes a hosted infrastructure. Clone the repo, copy [`.env.production`](.env.production) or [`.env.local`](.env.local), and Docker runs the stack next to you—commands in the next section.
+Nothing here assumes a hosted infrastructure. Clone the repo, copy [`.env.production`](.env.production) or [`.env.local`](.env.local), then use the **pnpm** scripts in the next section to run the stack via Docker Compose.
 
 ## Run it yourself
 
@@ -54,11 +54,14 @@ Nothing here assumes a hosted infrastructure. Clone the repo, copy [`.env.produc
 
    - **Windows**: install [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) (includes Compose) and start it before running the commands below.
 
+3. **pnpm** (workspace scripts wrap Docker Compose): follow [pnpm installation](https://pnpm.io/installation), or enable [Corepack](https://nodejs.org/api/corepack.html) if you already use a recent **Node.js**.
+
 **Start the stack**:
 
 ```bash
 cp .env.production .env
-docker compose --profile app up -d --build --wait
+pnpm install
+pnpm stack:up
 ```
 
 Open **http://localhost:8080**. Done!

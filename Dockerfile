@@ -43,15 +43,12 @@ FROM build-core-indexer AS indexer-migrate
 WORKDIR /app/apps/indexer
 CMD ["pnpm", "exec", "drizzle-kit", "migrate"]
 
-FROM build-core-indexer AS pruned
-RUN pnpm prune --prod
+FROM build-core-indexer AS indexer-deploy
+RUN pnpm --filter=@gutenberg/indexer deploy --prod --legacy /app/deploy
 
 FROM node:22-bookworm-slim AS indexer
 WORKDIR /app
-ARG PNPM_VERSION=10.33.1
-RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
-COPY --from=pruned /app /app
-WORKDIR /app/apps/indexer
+COPY --from=indexer-deploy /app/deploy /app
 ENV NODE_ENV=production
 CMD ["node", "dist/src/main.js"]
 
