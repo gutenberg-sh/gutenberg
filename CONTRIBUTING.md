@@ -2,7 +2,7 @@ This is the **developer flow**: local validator, Solana program work, env tweaks
 
 ## What you need
 
-Docker, Node 22.12+, pnpm 10.x (see the README for Corepack). Solana and Anchor CLI when you build or deploy the registry program on the local validator.
+Docker, Node 22.22.2, pnpm 10.33.1 (see the README for Corepack). Solana and Anchor CLI when you build or deploy the registry program on the local validator.
 
 ## Install
 
