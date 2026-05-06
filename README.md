@@ -22,9 +22,9 @@ Gutenberg lets you publish freely, privately, and permanently: content is writte
 
 ## Local by default
 
-Publishing and reading should not depend on a company’s servers staying up, on their terms of service, or on their idea of who gets a login. Gutenberg is **local first**: you run the gateway and indexer on **your** machine, with your wallet and your RPC settings, and the network is only what you point it at; Solana and storage are public infrastructure, but **the app is yours**. That keeps verification, browsing, and the publish flow under your own roof, which is the same instinct as durable content on-chain: **you** decide how you participate.
+Publishing and reading should not depend on a company’s servers staying up, on their terms of service, or on their idea of who gets a login. Gutenberg is local first. You run the **gateway** and **indexer** yourself; wallet, RPC, and chain targets are yours. 
 
-Nothing here assumes a hosted infrastructure. Clone the repo, copy an env file, and Docker brings the stack up beside you. When you are ready, the steps below walk you through exactly that.
+Nothing here assumes a hosted infrastructure. Clone the repo, copy [`.env.production`](.env.production) or [`.env.local`](.env.local), and Docker runs the stack next to you—commands in the next section.
 
 ## Run it yourself
 
