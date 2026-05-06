@@ -14,8 +14,8 @@
   "packageManager": "pnpm@10.33.1",
   "type": "module",
   "engines": {
-    "node": ">=22.12.0",
-    "pnpm": ">=10.28.2 <11.0.0"
+    "node": "22.22.2",
+    "pnpm": "10.33.1"
   },
   "scripts": {
     "stack:up": "docker compose --profile app up -d --build --wait",
@@ -50,7 +50,7 @@
     "eslint": "10.2.1",
     "eslint-config-prettier": "10.1.8",
     "prettier": "3.8.3",
-    "typescript": "^5",
+    "typescript": "5",
     "typescript-eslint": "8.59.1"
   }
 }
