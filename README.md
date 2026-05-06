@@ -22,53 +22,50 @@ Gutenberg lets you publish freely, privately, and permanently: content is writte
 
 ## Local by default
 
-Publishing and reading should not depend on a company’s servers staying up, on their terms of service, or on their idea of who gets a login. Gutenberg is local first. You run the **gateway** and **indexer** yourself; wallet, RPC, and chain targets are yours. 
-
-Nothing here assumes a hosted infrastructure. Clone the repo, copy [`.env.production`](.env.production) or [`.env.local`](.env.local), then use the **pnpm** scripts in the next section to run the stack via Docker Compose.
+You run the gateway and indexer yourself; wallet and RPC settings are yours. The **canonical way to run Gutenberg** is against **Solana mainnet**: your indexer follows the live chain, and publishing uses mainnet Irys settings. That is what the default Docker flow below does. If you are **developing** the repo (local validator, program deploys, custom env), use **[CONTRIBUTING.md](CONTRIBUTING.md)** instead.
 
 ## Run it yourself
 
-**Prerequisites**
-
-1. **Git** and **this repository**:
-   ```bash
-   git clone https://github.com/leonmeka/gutenberg.git
-   cd gutenberg
-   ```
-
-2. **Docker**:
-
-   - **macOS** ([Homebrew](https://brew.sh/)):
-
-     ```bash
-     brew install --cask docker
-     ```
-
-     Open **Docker** from Applications once and wait until it reports that the engine is running.
-
-   - **Linux**:
-
-     ```bash
-     curl -fsSL https://get.docker.com | sudo sh
-     ```
-
-   - **Windows**: install [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) (includes Compose) and start it before running the commands below.
-
-3. **pnpm** (workspace scripts wrap Docker Compose): follow [pnpm installation](https://pnpm.io/installation), or enable [Corepack](https://nodejs.org/api/corepack.html) if you already use a recent **Node.js**.
-
-**Start the stack**:
+**You need:** Git, Docker running on your machine, Node 22.12+, and pnpm 10.x. Quick pnpm setup with Corepack:
 
 ```bash
-cp .env.production .env
+corepack enable
+corepack prepare pnpm@10.33.1 --activate
+```
+
+**Docker:** on macOS, `brew install --cask docker` then open the app once. On Linux, [Docker’s install script](https://docs.docker.com/engine/install/). On Windows, [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/). The first stack start can take a few minutes while images download.
+
+**Clone:**
+
+```bash
+git clone https://github.com/leonmeka/gutenberg.git
+cd gutenberg
+```
+
+**Recommended — mainnet:** copy [`.env.production`](.env.production) to `.env`, then:
+
+```bash
 pnpm install
 pnpm stack:up
 ```
 
-Open **http://localhost:8080**. Done!
+This stack talks to public mainnet RPC and Irys; you do not run a validator in Docker. Adjust `.env` if you use your own RPC or endpoints.
+
+**Optional — local test validator** (for development only; see [CONTRIBUTING.md](CONTRIBUTING.md)):
+
+```bash
+cp .env.local .env
+pnpm install
+pnpm stack:up:local
+```
+
+Open the app at **http://localhost:8080**. The indexer API is on **http://localhost:4000** (try **http://localhost:4000/health** in the browser or with curl).
+
+If ports stay dead, make sure Docker is actually running. To wipe local database data and start over: `pnpm stack:reset`, then bring the stack up again (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ## Developers
 
-See **[CONTRIBUTING.md](CONTRIBUTING.md)**.
+The **[CONTRIBUTING.md](CONTRIBUTING.md)** developer flow covers local chain setup, the registry program, env files, and pull requests.
 
 ## License
 

@@ -1,87 +1,60 @@
-This document is for **developers**: contributors, registry program work, and stack customization. For a first-time **mainnet** run with Docker, start with the [README](README.md#run-it-yourself).
+This is the **developer flow**: local validator, Solana program work, env tweaks, and how we ship changes. **For the normal, mainnet-backed install**, follow the [README](README.md#run-it-yourself) first; come back here when you need a dev stack or you are opening a PR.
 
-## Pull requests
+## What you need
 
-Contributions are welcome. For large changes, open an issue first so direction is agreed before heavy work.
+Docker, Node 22.12+, pnpm 10.x (see the README for Corepack). Solana and Anchor CLI when you build or deploy the registry program on the local validator.
 
-1. Fork, branch from default, keep PRs **focused** (one logical change is easier to review and revert).
-2. Install, then run the builds and linters for the packages you changed. Gateway defaults:
-
-```bash
-pnpm install
-pnpm gateway:build
-pnpm gateway:lint
-```
-
-Indexer example:
-
-```bash
-pnpm indexer:build
-pnpm indexer:lint
-```
-
-Optional repo-wide formatting:
-
-```bash
-pnpm format
-```
-
-3. In the PR body, describe **what** changed and **why**; link issues when relevant.
-
-If you are unsure whether work belongs in the gateway, indexer, the Solana program, ask in an issue.
-
-## Prerequisites
-
-- **Docker**: Postgres, indexer, gateway (mainnet-style defaults unless you switch env).
-- **Node.js** `>=22.12.0` and **pnpm** `>=10.28.2` (`<11`): installs, lint, and builds before a PR.
-- **Solana CLI** and **Anchor CLI**: only when you build or deploy the registry program against a **local** validator.
-
-## Install dependencies
+## Install
 
 ```bash
 pnpm install
 ```
 
-## Environment
+## Environment (developer)
 
-Tracked files (pick one, copy to **`.env`** at the repo root):
+For day-to-day development you usually want the local validator and dev-style defaults:
 
-| File | Use case |
-|------|----------|
-| [`.env.local`](.env.local) | Bundled test validator (`127.0.0.1:8899`), devnet Irys, local Postgres. |
-| [`.env.production`](.env.production) | Public mainnet RPC / WS, mainnet Irys, local Postgres for the indexer. |
+| File | Role in the dev flow |
+|------|------------------------|
+| [`.env.local`](.env.local) | Local test validator, devnet-style Irys, local Postgres — **start here** |
+| [`.env.production`](.env.production) | Same as the README’s mainnet run; use when you need to mirror production settings while hacking |
 
 ```bash
 cp .env.local .env
-# cp .env.production .env   
 ```
 
-## Run with Docker
+Comments in each file explain the variables.
 
-From the repository root.
+## Docker (developer)
 
-**Development stack** (Postgres, indexer, gateway, and the bundled test validator):
+From the repo root, with `.env` in place.
+
+**Dev stack** (Postgres, gateway, indexer, bundled validator — what you use for program deploys and local RPC):
 
 ```bash
 pnpm stack:up:local
 ```
 
-**Production stack** (Postgres, indexer, gateway; RPC/WS pointing to mainnet):
+**Mainnet-style stack** (no bundled validator; same shape as the README canonical run, useful to double-check behavior against mainnet):
 
 ```bash
+cp .env.production .env   # if you are not already on production settings
 pnpm stack:up
 ```
 
-When the app stack is up and healthy, services listen on the host using your **`.env`**:
+Gateway: **http://localhost:8080** — Indexer: **http://localhost:4000** — Quick check: **http://localhost:4000/health**.
 
-- **Gateway** (UI): [http://localhost:8080](http://localhost:8080)
-- **Indexer** (REST API): [http://localhost:4000](http://localhost:4000)
+**Clean slate** (drops local Postgres data):
 
-## Registry program
+```bash
+pnpm stack:reset
+```
 
-Deploy the program to the **local validator** that comes with the **development stack** above.
+Then start the stack again with the command you need.
 
-Send a little SOL to the wallet you deploy with (by default the file `~/.config/solana/id.json`; change the path after `-k` if yours lives somewhere else), then deploy:
+## Registry program (local)
+
+Use the dev stack: `.env` from `.env.local`, then `pnpm stack:up:local` so `http://127.0.0.1:8899` is up. Fund your deploy wallet and deploy:
 
 ```bash
 solana airdrop 5 "$(solana address -k ~/.config/solana/id.json)" -u http://127.0.0.1:8899
@@ -90,8 +63,30 @@ pnpm solana:build
 pnpm solana:deploy
 ```
 
-Fund another address on the same validator:
+Fund another address:
 
 ```bash
 solana airdrop 5 <PUBKEY> -u http://127.0.0.1:8899
 ```
+
+## Pull requests
+
+Contributions are welcome. For big changes, please open an issue first.
+
+Keep PRs small and focused. Before you open one, run the same steps as [CI](.github/workflows/ci.yml): install, build core, gateway, and indexer, then lint:
+
+```bash
+pnpm install
+pnpm core:build
+pnpm gateway:build
+pnpm indexer:build
+pnpm lint
+```
+
+If you touched `apps/solana`, also run `pnpm solana:test`. Optional: `pnpm format`. Describe what changed and why in the PR; link issues if any.
+
+## If something breaks
+
+- Nothing on localhost: Docker not running, or the stack still starting—wait a bit, then check `docker compose ps` from the repo root.
+- Wrong network after editing `.env`: `pnpm stack:down`, then `pnpm stack:up` or `pnpm stack:up:local` again.
+- Weird database state: use **Clean slate** above.
