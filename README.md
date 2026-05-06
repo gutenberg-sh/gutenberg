@@ -33,7 +33,7 @@ You control the entire stack: your keys, your nodes, your rules. Running your ow
 
 ## Run it on your computer
 
-You will need **Git**, **Docker** (installed and running), and **Node.js** with **pnpm**. [CONTRIBUTING.md](CONTRIBUTING.md) lists exact versions, troubleshooting, a local stack for experiments (not mainnet publishing), and how to reset local Docker data.
+You will need **Git**, **Docker**, and **Node.js** with **pnpm**. [CONTRIBUTING.md](CONTRIBUTING.md) lists exact versions, troubleshooting, a local stack for experiments, and how to reset local Docker data.
 
 1. **Docker:** Install Docker for your system and open it once so it is running. The first launch may take a while while it downloads images.
 
