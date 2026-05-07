@@ -20,13 +20,13 @@
 
 ---
 
-> Modern censorship is coordinated and systemic: courts issue takedowns, infrastructure providers remove access, platforms enforce quiet requests, and centralized systems define narratives. When publishing is governed by authoritive entities, freedom of speech is surpressed.
+> Modern censorship is coordinated and systemic: courts issue takedowns, infrastructure providers remove access, platforms enforce quiet requests, and centralized systems define narratives. When publishing is governed by au entities, freedom of speech is surpressed.
 
 ## Local sovereignty
 
-Gutenberg starts from one premise: publishing should not require institutional permission. Control stays with the operator who runs the instance, so publishing decisions are not delegated to a platform, a hosting intermediary, or a central authority.
+Gutenberg starts from one premise: publishing should not require institutional permission. Control stays with the individual, so publishing decisions are not delegated to a platform, a hosting intermediary, or a central authority.
 
-This baseline gives publishers operational sovereignty over keys, policy, and availability, creating the conditions required for independent publication.
+This baseline gives everyone operational sovereignty, creating the conditions required for independent publication.
 
 ## Protocol design
 
@@ -36,7 +36,7 @@ The result is a publishing system where suppressing information requires coordin
 
 ## Getting Started
 
-This quick start launches your own Gutenberg instance on your computer. Think of it as starting your own independent publishing environment, where you can create and manage content without relying on a centralized platform.
+This quick start launches your own Gutenberg instance on your computer. Think of it as starting your own independent publishing environment, where you can create and manage content without relying on anyone else.
 
 You do not need to configure blockchain infrastructure yourself for this step. The goal is simply to get Gutenberg running locally so you can explore the interface and understand how local publishing works in practice.
 
