@@ -5,11 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import { PublisherAddressLink } from '@/components/PublisherAddressLink';
 import { format_bytes, format_relative_time, shorten } from '@/lib/format';
 import type { ReleaseDto } from '@/lib/queries';
+import { registry_feed_x } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 /** Shared list container: horizontal rules only (matches browse / publisher / search). */
 export function PublicationList({ children }: { children: ReactNode }) {
-  return <div className="divide-y divide-border">{children}</div>;
+  return <div className="divide-y divide-border/30">{children}</div>;
 }
 
 export function ReleaseRow({ release }: { release: ReleaseDto }) {
@@ -52,7 +53,7 @@ export function ReleaseRow({ release }: { release: ReleaseDto }) {
       onKeyDown={on_row_key_down}
       onAuxClick={on_row_aux_click}
     >
-      <div className="grid min-w-0 gap-1.5 px-1 sm:px-2">
+      <div className="grid min-w-0 gap-1.5 px-3 sm:px-4">
         <div className="flex min-w-0 items-baseline gap-2">
           <span className="truncate text-[15px] font-medium tracking-[-0.005em] text-foreground group-hover:underline">
             {registry_id}
@@ -85,7 +86,7 @@ export function ReleaseRow({ release }: { release: ReleaseDto }) {
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-3 px-1 sm:px-2">
+      <div className="flex shrink-0 items-center gap-3 px-3 sm:px-4">
         <span
           className="font-mono text-[11.5px] tabular text-muted-foreground"
           title={new Date(release.published_at).toISOString()}
@@ -112,26 +113,31 @@ function Dot() {
 
 export function ReleaseListHeader() {
   return (
-    <div className="hidden grid-cols-[minmax(0,1fr)_auto] gap-x-6 border-b border-border pb-2 text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground sm:grid">
-      <div className="px-2">Registry ID</div>
-      <div className="px-2 text-right tabular-nums">Published</div>
+    <div
+      className={cn(
+        registry_feed_x,
+        'hidden grid-cols-[minmax(0,1fr)_auto] gap-x-6 border-b border-border/25 bg-elevated/20 py-2.5 text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground sm:grid sm:py-3',
+      )}
+    >
+      <div className="min-w-0">Registry ID</div>
+      <div className="text-right tabular-nums">Published</div>
     </div>
   );
 }
 
 export function ReleaseListSkeleton({ rows = 6 }: { rows?: number }) {
   return (
-    <div className="divide-y divide-border" aria-busy aria-live="polite">
+    <div className="divide-y divide-border/30" aria-busy aria-live="polite">
       {Array.from({ length: rows }).map((_, idx) => (
         <div
           key={idx}
           className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 py-4"
         >
-          <div className="grid gap-2 px-2">
-            <div className="h-4 w-2/3 max-w-[16rem] motion-safe:animate-pulse rounded-none bg-muted" />
-            <div className="h-3 w-1/3 max-w-40 motion-safe:animate-pulse rounded-none bg-muted/70" />
+          <div className="grid gap-2 px-3 sm:px-4">
+            <div className="h-4 w-2/3 max-w-[16rem] motion-safe:animate-pulse rounded-lg bg-muted" />
+            <div className="h-3 w-1/3 max-w-40 motion-safe:animate-pulse rounded-lg bg-muted/70" />
           </div>
-          <div className="h-3 w-20 motion-safe:animate-pulse rounded-none bg-muted/70 px-2" />
+          <div className="h-3 w-20 motion-safe:animate-pulse rounded-lg bg-muted/70 px-3 sm:px-4" />
         </div>
       ))}
     </div>

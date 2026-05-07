@@ -20,7 +20,7 @@ export function App() {
   return (
     <div
       className="relative flex min-h-dvh w-full min-w-0 flex-col bg-transparent"
-      data-surface="tactical-telemetry"
+      data-surface="manuscript"
     >
       <FilmGrain />
       <SiteHeader />

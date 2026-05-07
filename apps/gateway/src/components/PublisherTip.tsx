@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import { PublisherAvatar } from '@/components/PublisherAvatar';
 import { Button } from '@/components/ui/button';
 import { explorer_transaction_url } from '@/lib/explorer';
+import { overlay_panel, overlay_scrim } from '@/lib/overlay-surface';
 import { shorten } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
@@ -182,14 +183,18 @@ export function PublisherTip({
       {open
         ? createPortal(
             <div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="publisher-tip-title"
-              className="fixed inset-0 z-60 flex items-end justify-center bg-background/88 p-0 sm:items-center sm:p-4"
+              role="presentation"
+              className={cn(overlay_scrim, 'z-60')}
               onClick={() => try_close_dialog()}
             >
               <div
-                className="relative flex max-h-[min(88dvh,520px)] w-full max-w-[380px] flex-col border-2 border-border bg-card shadow-[0_24px_48px_-24px_rgba(0,0,0,0.35)] sm:max-h-[85dvh]"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="publisher-tip-title"
+                className={cn(
+                  overlay_panel,
+                  'max-h-[min(88dvh,520px)] max-w-[380px] sm:max-h-[85dvh]',
+                )}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between border-b border-border px-3 py-2 sm:px-4">
@@ -205,7 +210,7 @@ export function PublisherTip({
                     size="icon"
                     aria-label="Close"
                     disabled={isSending}
-                    className="shrink-0 rounded-none border-border text-muted-foreground hover:border-foreground/35 hover:text-foreground disabled:opacity-40"
+                    className="shrink-0 rounded-lg border-border text-muted-foreground hover:border-foreground/35 hover:text-foreground disabled:opacity-40"
                     onClick={() => try_close_dialog()}
                   >
                     <X className="size-4" strokeWidth={1.75} aria-hidden />
@@ -233,7 +238,7 @@ export function PublisherTip({
                   {show_success ? (
                     <div className="grid gap-5 px-3 py-6 sm:px-4">
                       <div className="grid place-items-center gap-3">
-                        <div className="grid size-12 place-items-center rounded-full border-2 border-accent/40 bg-accent/10">
+                        <div className="grid size-12 place-items-center rounded-full border border-accent/40 bg-accent/10">
                           <Check
                             className="size-6 text-accent"
                             strokeWidth={2}
@@ -338,7 +343,7 @@ export function PublisherTip({
                         </div>
                       </div>
 
-                      <div className="mb-3 rounded-none border border-border bg-muted/25 px-3 py-4">
+                      <div className="mb-3 rounded-lg border border-border bg-muted/25 px-3 py-4">
                         <label
                           htmlFor="publisher-tip-amount"
                           className="sr-only"
@@ -392,7 +397,7 @@ export function PublisherTip({
                                   set_amount_input(label);
                                 }}
                                 className={cn(
-                                  'min-h-9 rounded-none px-1.5 py-2 font-mono text-[13px] font-semibold tabular-nums transition-[border-color,background-color,color,transform] duration-200 ease-out',
+                                  'min-h-9 rounded-lg px-1.5 py-2 font-mono text-[13px] font-semibold tabular-nums transition-[border-color,background-color,color,transform] duration-200 ease-out',
                                   'hover:border-border-strong hover:bg-surface/50 active:translate-y-px',
                                   chip_focus,
                                   active
@@ -407,7 +412,7 @@ export function PublisherTip({
                         </div>
                       </div>
 
-                      <div className="mb-1 flex items-center gap-2.5 rounded-none border border-border bg-surface/30 px-2.5 py-2">
+                      <div className="mb-1 flex items-center gap-2.5 rounded-lg border border-border bg-surface/30 px-2.5 py-2">
                         <Wallet
                           className="size-3.5 shrink-0 text-muted-foreground"
                           strokeWidth={1.75}

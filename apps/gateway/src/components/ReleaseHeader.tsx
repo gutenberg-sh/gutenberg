@@ -42,7 +42,7 @@ export function ReleaseHeader({ release }: { release: VerifiedRelease }) {
             {manifest.registry_id}
           </Link>
           <span className="ml-2.5 inline-flex translate-y-[-0.03em] align-middle">
-            <span className="rounded-none border border-border-strong bg-surface px-2.5 py-1 font-mono text-[14px] font-normal tabular leading-none text-foreground sm:text-[15px]">
+            <span className="rounded-lg border border-border-strong bg-surface px-2.5 py-1 font-mono text-[14px] font-normal tabular leading-none text-foreground sm:text-[15px]">
               {manifest.version}
             </span>
           </span>
@@ -111,7 +111,7 @@ function Chip({
   title?: string;
 }) {
   const base = cn(
-    'inline-flex items-center gap-1.5 rounded-none border px-2.5 py-1 text-[11.5px] font-medium tracking-tight',
+    'inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11.5px] font-medium tracking-tight',
     variant === 'accent'
       ? 'border-accent/30 bg-accent/10 text-accent'
       : 'border-border bg-surface/50 text-foreground-soft',
@@ -187,7 +187,7 @@ export function ProvenancePanel({
           </p>
         </header>
 
-        <div className="rounded-none border border-border/90 bg-surface/45 p-3 shadow-[inset_0_1px_0_oklch(1_0_0/5%)] sm:p-4 lg:p-5 dark:bg-surface/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/6%)]">
+        <div className="rounded-lg border border-border/90 bg-surface/45 p-3 shadow-[inset_0_1px_0_oklch(1_0_0/5%)] sm:p-4 lg:p-5 dark:bg-surface/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/6%)]">
           <div className="grid w-full gap-5">
             <ProofGroup
               title="Registry"
@@ -404,7 +404,7 @@ function ExplorerLink({ href, label }: { href: string; label: string }) {
       rel="noreferrer noopener"
       aria-label={`View ${label} on block explorer`}
       title="View on block explorer"
-      className="inline-flex size-6 items-center justify-center rounded-none text-muted-foreground transition-colors hover:bg-surface hover:text-foreground active:translate-y-px"
+      className="inline-flex size-6 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-surface hover:text-foreground active:translate-y-px"
     >
       <ExternalLink className="size-3" strokeWidth={1.85} aria-hidden />
     </a>
@@ -444,7 +444,7 @@ function CopyButton({
           .catch(() => set_copied(false));
       }}
       className={cn(
-        'rounded-none text-muted-foreground hover:bg-surface hover:text-foreground',
+        'rounded-lg text-muted-foreground hover:bg-surface hover:text-foreground',
         inline ? 'size-5' : 'size-6',
       )}
     >

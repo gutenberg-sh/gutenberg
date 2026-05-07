@@ -14,6 +14,7 @@ import {
 } from '@/components/ReleaseRow';
 import { format_relative_time, shorten } from '@/lib/format';
 import type { PublicationDto } from '@/lib/queries';
+import { registry_data_card, registry_feed_x } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 type PublicationFeedSectionProps = {
@@ -37,8 +38,13 @@ export function PublicationFeedFooter({
   children: ReactNode;
 }) {
   return (
-    <div className="grid gap-3 border-t border-border pt-4">
-      <div className="min-w-0 px-1 font-mono text-[11px] tabular leading-relaxed text-muted-foreground sm:px-2">
+    <div
+      className={cn(
+        registry_feed_x,
+        'grid gap-4 border-t border-border/25 bg-elevated/15 pb-5 pt-5 sm:pb-6 sm:pt-5',
+      )}
+    >
+      <div className="min-w-0 text-[12px] font-medium tabular-nums leading-relaxed text-muted-foreground">
         {summary}
       </div>
       <div className="min-w-0">{children}</div>
@@ -62,15 +68,17 @@ export function PublicationFeedSection({
     <section
       aria-label={aria_label}
       aria-busy={loading || undefined}
-      className={cn('grid min-w-0 gap-0', className)}
+      className={cn('grid min-w-0', className)}
     >
-      {show_column_headers ? <ReleaseListHeader /> : null}
-      {loading ? (
-        <ReleaseListSkeleton rows={skeleton_rows} />
-      ) : (
-        <div className="min-w-0">{children}</div>
-      )}
-      {footer ? <div className="min-w-0">{footer}</div> : null}
+      <div className={cn(registry_data_card, 'grid min-w-0 gap-0')}>
+        {show_column_headers ? <ReleaseListHeader /> : null}
+        {loading ? (
+          <ReleaseListSkeleton rows={skeleton_rows} />
+        ) : (
+          <div className="min-w-0">{children}</div>
+        )}
+        {footer ? <div className="min-w-0">{footer}</div> : null}
+      </div>
     </section>
   );
 }
@@ -122,7 +130,7 @@ export function SearchPublicationRow({ item }: { item: PublicationDto }) {
       onKeyDown={on_row_key_down}
       onAuxClick={on_row_aux_click}
     >
-      <div className="grid min-w-0 gap-1.5 px-1 sm:px-2">
+      <div className="grid min-w-0 gap-1.5 px-3 sm:px-4">
         <div className="flex min-w-0 items-baseline gap-2">
           <span className="truncate text-[15px] font-medium tracking-[-0.005em] text-foreground group-hover:underline">
             {item.registry_id}
@@ -153,7 +161,7 @@ export function SearchPublicationRow({ item }: { item: PublicationDto }) {
           </span>
         </div>
       </div>
-      <div className="flex shrink-0 items-center gap-3 px-1 sm:px-2">
+      <div className="flex shrink-0 items-center gap-3 px-3 sm:px-4">
         {latest ? (
           <span
             className="font-mono text-[11.5px] tabular text-muted-foreground"

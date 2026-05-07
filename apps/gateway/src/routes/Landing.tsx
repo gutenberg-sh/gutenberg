@@ -5,6 +5,7 @@ import { LookupForm } from '@/components/LookupForm';
 import { RecentReleases } from '@/components/RecentReleases';
 import { format_count } from '@/lib/format';
 import { useIndexerStats } from '@/lib/queries';
+import { kbd_chrome, registry_command_shell } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
@@ -94,45 +95,48 @@ export function LandingRoute() {
   return (
     <div className="flex flex-col">
       <Container className="pb-16 pt-10 lg:pb-24 lg:pt-14">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-stretch lg:gap-16">
-          <div className="grid content-start gap-6 self-start lg:pt-2">
-            <h1 className="tactical-display text-[clamp(1.65rem,6vw,3.25rem)] leading-[1.14] tracking-[-0.042em] text-foreground sm:max-w-[20ch]">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-stretch lg:gap-16">
+          <div className="grid content-start gap-5 self-start sm:gap-6 lg:pt-2">
+            <h1 className="tactical-display text-[clamp(1.65rem,6vw,3.25rem)] text-foreground dark:text-primary sm:max-w-[24ch]">
               Publish work that stays public.
             </h1>
             <p className="max-w-[42ch] text-[14px] leading-relaxed text-foreground-soft sm:text-[15px] sm:leading-relaxed">
               Anyone can publish; once it&rsquo;s on the record, nobody can
               unpublish it.
             </p>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5">
               <Link
                 to="/publish"
-                className="inline-flex items-center rounded-none bg-primary px-4 py-2.5 text-[13px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px sm:px-5 sm:text-[14px]"
+                className="inline-flex w-full min-h-11 items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2.5 text-[13px] font-semibold leading-tight text-primary-foreground shadow-sm transition-[background-color,transform,box-shadow] duration-200 ease-out hover:bg-primary/90 hover:shadow active:translate-y-px active:scale-[0.99] sm:w-auto sm:px-5 sm:text-[14px]"
               >
                 Publish a release
               </Link>
               <Link
                 to="/browse"
-                className="registry-command-shell inline-flex items-center px-3.5 py-2 text-[13px] font-medium text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
+                className={cn(
+                  registry_command_shell,
+                  'inline-flex w-full min-h-11 items-center justify-center px-4 py-2.5 text-[13px] font-medium leading-tight text-foreground-soft transition-[color,border-color,background-color,box-shadow] duration-200 ease-out hover:border-border-strong hover:bg-elevated/50 hover:text-foreground sm:w-auto sm:px-5 sm:text-[14px]',
+                )}
               >
                 Browse publications
               </Link>
             </div>
           </div>
 
-          <div className="flex min-h-0 flex-col justify-center">
-            <div className="grid w-full gap-3">
-              <div className="flex items-baseline justify-between gap-3 px-1">
-                <p className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted-foreground">
+          <div className="flex min-h-0 flex-col justify-center lg:pt-0">
+            <div className="grid w-full gap-2.5 sm:gap-3">
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="text-xs font-medium tracking-wide text-muted-foreground">
                   Find a publication
                 </p>
-                <p className="hidden text-[11.5px] text-muted-foreground sm:block">
-                  <span className="kbd">⌘K</span> /{' '}
-                  <span className="kbd">Ctrl K</span> anywhere
+                <p className="hidden shrink-0 text-[11.5px] text-muted-foreground sm:block">
+                  <span className={kbd_chrome}>⌘K</span> /{' '}
+                  <span className={kbd_chrome}>Ctrl K</span> anywhere
                 </p>
               </div>
               <LookupForm
                 size="lg"
-                placeholder="registry_id or registry_id@version"
+                placeholder="registry id or id@version"
               />
             </div>
           </div>
@@ -179,7 +183,7 @@ export function LandingRoute() {
               key={row.k}
               className="grid items-baseline gap-4 py-4 sm:grid-cols-[180px_minmax(0,1fr)] sm:gap-10"
             >
-              <dt className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+              <dt className="text-sm font-semibold text-foreground-soft">
                 {row.k}
               </dt>
               <dd className="text-foreground leading-[1.68]">{row.v}</dd>
@@ -233,7 +237,7 @@ export function LandingRoute() {
                 <span className="font-mono text-[12.5px] tabular text-foreground">
                   {row.k}
                 </span>
-                <span className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                <span className="text-xs font-medium text-muted-foreground">
                   {row.t}
                 </span>
               </dt>
@@ -288,7 +292,7 @@ function Section({
     <Container as="section" className="border-t border-border py-20 lg:py-28">
       <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.5fr)] lg:gap-16">
         <div className="grid content-start gap-5 lg:sticky lg:top-24">
-          <p className="font-mono text-[10.5px] uppercase tracking-[0.28em] text-muted-foreground">
+          <p className="text-xs font-medium tracking-wide text-muted-foreground">
             {eyebrow}
           </p>
           <h2 className="tactical-display text-[clamp(1.25rem,4.5vw,2.5rem)] text-foreground">
@@ -317,56 +321,53 @@ function StatsStrip() {
   const ready = stats.isSuccess && !!stats.data;
 
   return (
-    <dl
+    <nav
       aria-label="Registry totals"
-      className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 text-[13px] sm:mt-12"
+      className="mt-8 border-t border-border/30 pt-8 sm:mt-10 sm:pt-10"
     >
-      {items.map((it, idx) => {
-        const value = ready ? (stats.data?.[it.key] ?? 0) : null;
-        return (
-          <Link
-            key={it.key}
-            to={it.href}
-            className="group inline-flex items-baseline gap-2"
-          >
-            <dt className="sr-only">{it.label}</dt>
-            <dd
-              className={cn(
-                'font-mono text-[20px] tabular leading-none text-foreground transition-colors group-hover:text-foreground sm:text-[22px]',
-                ready ? '' : 'text-muted-foreground/40',
-              )}
-            >
-              {ready ? format_count(value) : '···'}
-            </dd>
-            <span className="text-[12px] text-muted-foreground transition-colors group-hover:text-foreground-soft">
-              {it.label}
-            </span>
-            {idx < items.length - 1 ? (
-              <span aria-hidden className="ml-6 text-muted-foreground/30">
-                ·
-              </span>
-            ) : null}
-          </Link>
-        );
-      })}
-    </dl>
+      <ul className="grid grid-cols-3 divide-x divide-border/25 text-[13px]">
+        {items.map((it) => {
+          const value = ready ? (stats.data?.[it.key] ?? 0) : null;
+          return (
+            <li key={it.key} className="min-w-0">
+              <Link
+                to={it.href}
+                className="group flex min-h-[4.5rem] flex-col items-center justify-center gap-1 px-1.5 py-2 text-center sm:min-h-0 sm:gap-1.5 sm:px-3 sm:py-3"
+              >
+                <span
+                  className={cn(
+                    'text-[clamp(1.125rem,4.5vw,1.375rem)] font-semibold tabular-nums leading-none tracking-tight text-foreground transition-colors group-hover:text-foreground sm:text-[22px]',
+                    ready ? '' : 'text-muted-foreground/45',
+                  )}
+                >
+                  {ready ? format_count(value) : '···'}
+                </span>
+                <span className="px-0.5 text-center text-[10.5px] font-medium leading-tight text-muted-foreground transition-colors group-hover:text-foreground-soft sm:text-[12px] sm:leading-snug">
+                  {it.label}
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }
 
 function ReleaseDiagram() {
   return (
-    <div className="ring-hairline relative overflow-hidden rounded-none bg-card p-5 sm:p-7">
+    <div className="relative overflow-hidden rounded-xl border border-border/40 bg-card p-5 shadow-sm ring-1 ring-border/20 sm:p-7">
       <div className="mb-5 flex items-center justify-between gap-3">
         <span className="font-mono text-[11.5px] tabular text-foreground">
           gutenberg-demo<span className="text-muted-foreground">@</span>1.0.0
         </span>
-        <span className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <span className="text-xs font-medium text-muted-foreground">
           Schematic
         </span>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,0.85fr)] sm:items-stretch sm:gap-0">
-        <div className="grid content-between gap-3 rounded-none border border-border p-4">
+        <div className="grid content-between gap-3 rounded-lg border border-border bg-elevated/30 p-4">
           <div className="flex items-center justify-between">
             <span className="font-mono text-[11.5px] tabular text-foreground">
               files (per-file ar://)
@@ -391,7 +392,7 @@ function ReleaseDiagram() {
         </div>
 
         <div className="grid gap-3">
-          <div className="grid gap-2 rounded-none border border-border p-4">
+          <div className="grid gap-2 rounded-lg border border-border bg-elevated/30 p-4">
             <div className="flex items-center justify-between">
               <span className="font-mono text-[11.5px] tabular text-foreground">
                 manifest.json
@@ -421,8 +422,8 @@ function ReleaseDiagram() {
               <span className="text-foreground">sig</span>: ed25519:…
             </p>
           </div>
-          <div className="grid gap-1 rounded-none border border-border px-4 py-3">
-            <span className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <div className="grid gap-1 rounded-lg border border-border bg-elevated/30 px-4 py-3">
+            <span className="text-xs font-medium text-muted-foreground">
               Solana PDA
             </span>
             <span className="truncate font-mono text-[11.5px] tabular text-foreground">

@@ -86,7 +86,7 @@ function Chip({ link }: { link: ResolvedGatewayLink }) {
           ? `Canonical: open via ${host} (Irys)`
           : `Mirror: open via ${host}`
       }
-      className={`inline-flex cursor-pointer items-center gap-1 rounded-none border px-1.5 py-0 font-mono text-[10px] tabular transition-colors ${classes}`}
+      className={`inline-flex cursor-pointer items-center gap-1 rounded-lg border px-1.5 py-0 font-mono text-[10px] tabular transition-colors ${classes}`}
     >
       {host}
       <ExternalLink className="size-2.5" strokeWidth={1.85} aria-hidden />

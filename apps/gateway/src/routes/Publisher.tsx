@@ -17,6 +17,12 @@ import { is_valid_publisher_address } from '@/lib/ed25519';
 import { explorer_address_url } from '@/lib/explorer';
 import { format_date_short } from '@/lib/format';
 import { usePublisher, usePublisherReleases } from '@/lib/queries';
+import {
+  registry_card_inset,
+  registry_empty_panel,
+  registry_feed_x,
+  registry_feed_y_gutter,
+} from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 25;
@@ -100,7 +106,7 @@ export function PublisherRoute() {
               target="_blank"
               rel="noreferrer noopener"
               className={cn(
-                'inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] font-medium text-foreground-soft',
+                'inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[12px] font-medium text-foreground-soft',
                 chip_pressable,
                 chip_focus,
               )}
@@ -118,7 +124,7 @@ export function PublisherRoute() {
         <div className="grid max-w-[62ch] gap-3 text-[15px] leading-[1.68] text-foreground-soft">
           {publisher.isLoading ? (
             <div
-              className="h-4 max-w-xs animate-pulse rounded-none bg-muted/70"
+              className="h-4 max-w-xs animate-pulse rounded-lg bg-muted/70"
               aria-hidden
             />
           ) : publisher.data ? (
@@ -178,28 +184,27 @@ export function PublisherRoute() {
         }
       >
         {releases.isError ? (
-          <ErrorView
-            title="Couldn't load this publisher's publications"
-            message={api_error_message(
-              releases.error,
-              "We can't reach the indexer right now. Try again in a moment.",
-            )}
-            back_to="/browse"
-          />
+          <div className={registry_card_inset}>
+            <ErrorView
+              title="Couldn't load this publisher's publications"
+              message={api_error_message(
+                releases.error,
+                "We can't reach the indexer right now. Try again in a moment.",
+              )}
+              back_to="/browse"
+            />
+          </div>
         ) : list.length === 0 ? (
-          <PublicationList>
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 py-10 px-1 sm:px-2">
-              <p className="text-[13px] text-muted-foreground">
+          <div className={cn(registry_feed_x, registry_feed_y_gutter)}>
+            <div className={registry_empty_panel}>
+              <p className="text-[14px] text-foreground">
                 No publications from this address.
               </p>
-              <span
-                className="text-right font-mono text-[11.5px] tabular text-muted-foreground"
-                aria-hidden
-              >
-                —
-              </span>
+              <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
+                When this publisher signs a release, it will show up here.
+              </p>
             </div>
-          </PublicationList>
+          </div>
         ) : (
           <PublicationList>
             {list.map((r) => (

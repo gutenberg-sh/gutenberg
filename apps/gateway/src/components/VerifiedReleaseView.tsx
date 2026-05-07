@@ -95,39 +95,39 @@ function ProvenancePanelSkeleton({ className }: { className?: string }) {
     <div className={cn('border-t border-border pt-6 lg:pt-8', className)}>
       <div className="grid w-full gap-4">
         <header className="grid w-full max-w-[65ch] gap-1.5 text-left">
-          <Skeleton className="h-[0.95rem] w-28 rounded-none" />
-          <Skeleton className="h-3 w-full max-w-sm rounded-none" />
+          <Skeleton className="h-[0.95rem] w-28 rounded-lg" />
+          <Skeleton className="h-3 w-full max-w-sm rounded-lg" />
         </header>
-        <div className="rounded-none border border-border/90 bg-surface/45 p-3 shadow-[inset_0_1px_0_oklch(1_0_0/5%)] sm:p-4 lg:p-5 dark:bg-surface/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/6%)]">
+        <div className="rounded-lg border border-border/90 bg-surface/45 p-3 shadow-[inset_0_1px_0_oklch(1_0_0/5%)] sm:p-4 lg:p-5 dark:bg-surface/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/6%)]">
           <div className="grid w-full gap-5">
             <div className="grid min-w-0 gap-2">
               <div className="grid gap-1 border-b border-border/50 pb-2">
-                <Skeleton className="h-3 w-20 rounded-none" />
-                <Skeleton className="h-2.5 w-32 rounded-none" />
+                <Skeleton className="h-3 w-20 rounded-lg" />
+                <Skeleton className="h-2.5 w-32 rounded-lg" />
               </div>
-              <Skeleton className="h-9 w-full rounded-none" />
-              <Skeleton className="h-9 w-full rounded-none" />
-              <Skeleton className="h-9 w-full rounded-none" />
+              <Skeleton className="h-9 w-full rounded-lg" />
+              <Skeleton className="h-9 w-full rounded-lg" />
+              <Skeleton className="h-9 w-full rounded-lg" />
             </div>
             <div className="grid min-w-0 gap-2 border-t border-border/45 pt-5">
               <div className="grid gap-1 border-b border-border/50 pb-2">
-                <Skeleton className="h-3 w-36 rounded-none" />
-                <Skeleton className="h-2.5 w-44 rounded-none" />
+                <Skeleton className="h-3 w-36 rounded-lg" />
+                <Skeleton className="h-2.5 w-44 rounded-lg" />
               </div>
-              <Skeleton className="h-9 w-full rounded-none" />
-              <Skeleton className="h-9 w-full rounded-none" />
+              <Skeleton className="h-9 w-full rounded-lg" />
+              <Skeleton className="h-9 w-full rounded-lg" />
             </div>
             <div className="grid min-w-0 gap-2 border-t border-border/45 pt-5">
               <div className="grid gap-1 border-b border-border/50 pb-2">
-                <Skeleton className="h-3 w-20 rounded-none" />
-                <Skeleton className="h-2.5 w-48 rounded-none" />
+                <Skeleton className="h-3 w-20 rounded-lg" />
+                <Skeleton className="h-2.5 w-48 rounded-lg" />
               </div>
-              <Skeleton className="h-9 w-full rounded-none" />
-              <Skeleton className="h-9 w-full rounded-none" />
+              <Skeleton className="h-9 w-full rounded-lg" />
+              <Skeleton className="h-9 w-full rounded-lg" />
               <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-border/40 pt-2">
-                <Skeleton className="h-3 w-28 rounded-none" />
-                <Skeleton className="h-3 w-32 rounded-none" />
-                <Skeleton className="h-3 w-32 rounded-none" />
+                <Skeleton className="h-3 w-28 rounded-lg" />
+                <Skeleton className="h-3 w-32 rounded-lg" />
+                <Skeleton className="h-3 w-32 rounded-lg" />
               </div>
             </div>
           </div>
@@ -140,25 +140,25 @@ function ProvenancePanelSkeleton({ className }: { className?: string }) {
 function ReleaseHeaderSkeleton() {
   return (
     <header className="grid gap-3" aria-hidden>
-      <Skeleton className="h-3 w-24 rounded-none" />
+      <Skeleton className="h-3 w-24 rounded-lg" />
 
       <div className="grid gap-4">
         <div className="flex min-h-13 flex-wrap items-baseline gap-x-2.5 gap-y-2 sm:min-h-[3.85rem] lg:min-h-[4.35rem]">
-          <Skeleton className="h-9 w-full max-w-[min(100%,22rem)] rounded-none sm:h-11 sm:max-w-[min(100%,28rem)]" />
-          <Skeleton className="h-7 w-16 rounded-none sm:h-7 sm:w-[4.5rem]" />
-          <Skeleton className="h-3 w-18 rounded-none sm:ml-1" />
+          <Skeleton className="h-9 w-full max-w-[min(100%,22rem)] rounded-lg sm:h-11 sm:max-w-[min(100%,28rem)]" />
+          <Skeleton className="h-7 w-16 rounded-lg sm:h-7 sm:w-[4.5rem]" />
+          <Skeleton className="h-3 w-18 rounded-lg sm:ml-1" />
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-x-2 gap-y-3">
-        <Skeleton className="h-[30px] w-19 rounded-none" />
-        <Skeleton className="h-[30px] w-26 rounded-none" />
+        <Skeleton className="h-[30px] w-19 rounded-lg" />
+        <Skeleton className="h-[30px] w-26 rounded-lg" />
       </div>
 
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <Skeleton className="h-[13px] w-30 rounded-none" />
-        <Skeleton className="h-[13px] w-22 rounded-none" />
-        <Skeleton className="h-[13px] w-24 rounded-none" />
+        <Skeleton className="h-[13px] w-30 rounded-lg" />
+        <Skeleton className="h-[13px] w-22 rounded-lg" />
+        <Skeleton className="h-[13px] w-24 rounded-lg" />
       </div>
     </header>
   );
@@ -166,23 +166,23 @@ function ReleaseHeaderSkeleton() {
 
 function PublicationAsideSkeleton() {
   return (
-    <div className="rounded-none border border-border bg-card p-4 shadow-[inset_0_1px_0_oklch(1_0_0/6%)] dark:shadow-[inset_0_1px_0_oklch(1_0_0/8%)]">
-      <Skeleton className="h-2.5 w-34 rounded-none" />
+    <div className="rounded-lg border border-border bg-card p-4 shadow-[inset_0_1px_0_oklch(1_0_0/6%)] dark:shadow-[inset_0_1px_0_oklch(1_0_0/8%)]">
+      <Skeleton className="h-2.5 w-34 rounded-lg" />
       <dl className="mt-4 grid gap-4 text-[13px]">
         <div className="grid gap-1">
-          <Skeleton className="h-2.5 w-24 rounded-none" />
-          <Skeleton className="h-4 w-32 rounded-none" />
+          <Skeleton className="h-2.5 w-24 rounded-lg" />
+          <Skeleton className="h-4 w-32 rounded-lg" />
         </div>
         <div className="grid gap-1">
-          <Skeleton className="h-2.5 w-16 rounded-none" />
-          <Skeleton className="h-4 w-full max-w-48 rounded-none" />
+          <Skeleton className="h-2.5 w-16 rounded-lg" />
+          <Skeleton className="h-4 w-full max-w-48 rounded-lg" />
         </div>
         <div className="grid gap-1">
-          <Skeleton className="h-2.5 w-30 rounded-none" />
-          <Skeleton className="h-4 w-20 rounded-none" />
+          <Skeleton className="h-2.5 w-30 rounded-lg" />
+          <Skeleton className="h-4 w-20 rounded-lg" />
         </div>
         <div className="border-t border-border pt-4">
-          <Skeleton className="h-4 w-36 rounded-none" />
+          <Skeleton className="h-4 w-36 rounded-lg" />
         </div>
       </dl>
     </div>
@@ -198,8 +198,8 @@ function FileNavSkeleton() {
       {[0, 1].map((section) => (
         <div key={section} className="grid gap-0">
           <div className="mb-3 flex items-baseline justify-between gap-3">
-            <Skeleton className="h-2.5 w-24 rounded-none" />
-            <Skeleton className="h-3 w-6 rounded-none" />
+            <Skeleton className="h-2.5 w-24 rounded-lg" />
+            <Skeleton className="h-3 w-6 rounded-lg" />
           </div>
           <ul className="grid">
             {[0, 1, 2].map((i) => (
@@ -208,7 +208,7 @@ function FileNavSkeleton() {
                 className="border-t border-border/60 last:border-b last:border-border/60"
               >
                 <div className="py-2.5">
-                  <Skeleton className="h-[13px] w-full max-w-44 rounded-none" />
+                  <Skeleton className="h-[13px] w-full max-w-44 rounded-lg" />
                 </div>
               </li>
             ))}
@@ -323,7 +323,7 @@ function PublicationAside({
   const publisher = m.publisher;
 
   return (
-    <div className="rounded-none border border-border bg-card p-4 shadow-[inset_0_1px_0_oklch(1_0_0/6%)] dark:shadow-[inset_0_1px_0_oklch(1_0_0/8%)]">
+    <div className="rounded-lg border border-border bg-card p-4 shadow-[inset_0_1px_0_oklch(1_0_0/6%)] dark:shadow-[inset_0_1px_0_oklch(1_0_0/8%)]">
       <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
         Publication details
       </p>

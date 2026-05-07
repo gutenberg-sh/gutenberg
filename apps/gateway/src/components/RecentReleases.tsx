@@ -9,6 +9,12 @@ import {
 } from '@/components/PublicationFeedSection';
 import { PublicationList, ReleaseRow } from '@/components/ReleaseRow';
 import { useFeed } from '@/lib/queries';
+import {
+  registry_empty_panel_compact,
+  registry_feed_x,
+  registry_feed_y_gutter,
+} from '@/lib/registry-surface';
+import { cn } from '@/lib/utils';
 
 export function RecentReleases({ limit = 8 }: { limit?: number }) {
   const [page, set_page] = useState(0);
@@ -97,8 +103,10 @@ export function RecentReleases({ limit = 8 }: { limit?: number }) {
 
 function Empty() {
   return (
-    <p className="rounded-none border border-dashed border-border px-6 py-8 text-center text-[12.5px] text-muted-foreground">
-      Nothing has been published yet. The first one is up for grabs.
-    </p>
+    <div className={cn(registry_feed_x, registry_feed_y_gutter)}>
+      <p className={registry_empty_panel_compact}>
+        Nothing has been published yet. The first one is up for grabs.
+      </p>
+    </div>
   );
 }

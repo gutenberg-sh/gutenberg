@@ -15,6 +15,14 @@ import { PublicationList } from '@/components/ReleaseRow';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { api_error_message } from '@/lib/api';
 import { usePublicationSearch } from '@/lib/queries';
+import {
+  registry_card_inset,
+  registry_data_card,
+  registry_empty_panel,
+  registry_feed_x,
+  registry_feed_y_gutter,
+} from '@/lib/registry-surface';
+import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 20;
 
@@ -131,13 +139,15 @@ export function SearchRoute() {
             }
           >
             {search.isError ? (
-              <ErrorView
-                title="Search isn't responding"
-                message={api_error_message(
-                  search.error,
-                  "We can't reach the indexer right now. Try again in a moment.",
-                )}
-              />
+              <div className={registry_card_inset}>
+                <ErrorView
+                  title="Search isn't responding"
+                  message={api_error_message(
+                    search.error,
+                    "We can't reach the indexer right now. Try again in a moment.",
+                  )}
+                />
+              </div>
             ) : results.length === 0 ? (
               <NoResults q={trimmed} />
             ) : (
@@ -165,7 +175,10 @@ function SearchInput({
     <div
       role="search"
       aria-label="Search the registry"
-      className="flex items-stretch overflow-hidden rounded-none border-2 border-border-strong/80 bg-card transition-colors focus-within:border-foreground/50"
+      className={cn(
+        registry_data_card,
+        'flex items-stretch transition-[border-color,box-shadow,background-color] duration-200 ease-out focus-within:border-primary/35 focus-within:ring-primary/20',
+      )}
     >
       <span
         aria-hidden
@@ -194,7 +207,7 @@ function SearchInput({
             size="icon"
             aria-label="Clear search"
             onClick={() => on_change('')}
-            className="rounded-none text-muted-foreground hover:bg-surface hover:text-foreground"
+            className="rounded-lg text-muted-foreground hover:bg-surface hover:text-foreground"
           >
             <X className="size-3.5" strokeWidth={1.85} aria-hidden />
           </Button>
@@ -206,26 +219,36 @@ function SearchInput({
 
 function EmptyQuery() {
   return (
-    <div className="registry-command-shell grid place-items-center gap-3 px-6 py-14 text-center">
-      <SearchIcon
-        className="size-5 text-muted-foreground"
-        strokeWidth={1.6}
-        aria-hidden
-      />
-      <p className="text-[14px] text-foreground">
-        Start typing to search the registry.
-      </p>
-      <p className="max-w-[42ch] text-[12.5px] leading-[1.65] text-muted-foreground">
-        The first publisher to register a registry id keeps it. Partial matches
-        work — you don&rsquo;t need the full slug.
-      </p>
+    <div className={registry_data_card}>
+      <div className={cn(registry_feed_x, registry_feed_y_gutter)}>
+        <div className={registry_empty_panel}>
+          <SearchIcon
+            className="size-5 text-muted-foreground"
+            strokeWidth={1.6}
+            aria-hidden
+          />
+          <p className="text-[14px] text-foreground">
+            Start typing to search the registry.
+          </p>
+          <p className="max-w-[42ch] text-[12.5px] leading-[1.65] text-muted-foreground">
+            The first publisher to register a registry id keeps it. Partial matches
+            work — you don&rsquo;t need the full slug.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
 
 function NoResults({ q }: { q: string }) {
   return (
-    <div className="grid place-items-center gap-3 rounded-none border border-dashed border-border px-6 py-14 text-center">
+    <div className={cn(registry_feed_x, registry_feed_y_gutter)}>
+      <div className={registry_empty_panel}>
+      <SearchIcon
+        className="size-5 text-muted-foreground"
+        strokeWidth={1.6}
+        aria-hidden
+      />
       <p className="text-[14px] text-foreground">
         Nothing matches <span className="font-mono tabular">{q}</span>.
       </p>
@@ -233,6 +256,7 @@ function NoResults({ q }: { q: string }) {
         Check the spelling, or browse what&apos;s been published recently — the
         author may not have published yet.
       </p>
+      </div>
     </div>
   );
 }

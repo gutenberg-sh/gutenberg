@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { format_relative_time, shorten } from '@/lib/format';
 import { usePublicationSearch, type PublicationDto } from '@/lib/queries';
+import { registry_data_card } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 const SUGGESTION_LIMIT = 8;
 
@@ -178,22 +179,23 @@ export function LookupForm({
       >
         <div
           className={cn(
-            'flex items-stretch overflow-hidden rounded-none border-2 border-border bg-card transition-colors',
+            registry_data_card,
+            'flex items-stretch transition-[border-color,box-shadow,background-color] duration-200 ease-out',
             has_error
-              ? 'border-destructive/70'
+              ? 'border-destructive/45 ring-destructive/20'
               : focused
-                ? 'border-foreground/35'
-                : 'border-border-strong/70',
+                ? 'border-primary/35 ring-primary/15'
+                : '',
           )}
         >
           <span
             aria-hidden
             className={cn(
-              'pointer-events-none flex select-none items-center text-muted-foreground',
-              lg ? 'pl-5 pr-2.5' : 'pl-3.5 pr-1.5',
+              'pointer-events-none flex shrink-0 select-none items-center text-muted-foreground',
+              lg ? 'pl-2.5 pr-1.5 sm:pl-4 sm:pr-2' : 'pl-3.5 pr-1.5',
             )}
           >
-            <Search className={lg ? 'size-4' : 'size-3.5'} strokeWidth={1.85} />
+            <Search className="size-3.5" strokeWidth={1.85} />
           </span>
 
           <input
@@ -227,7 +229,7 @@ export function LookupForm({
             required
             className={cn(
               'min-w-0 flex-1 bg-transparent font-mono tabular text-foreground placeholder:text-muted-foreground/55 focus:outline-none',
-              lg ? 'h-14 pr-2 text-[15px]' : 'h-11 pr-2 text-[13.5px]',
+              lg ? 'h-12 pr-2 text-[14px]' : 'h-11 pr-2 text-[13.5px]',
             )}
           />
 
@@ -237,18 +239,14 @@ export function LookupForm({
             className={cn(
               'shrink-0 gap-1.5 font-medium active:translate-y-px',
               lg
-                ? 'h-full min-h-14 self-stretch rounded-none border-l-2 border-border px-4 py-0 text-[13.5px]'
-                : 'mx-1 my-1 rounded-none px-3 text-[12.5px]',
+                ? 'h-full min-h-12 self-stretch rounded-none border-l border-border/30 px-2.5 py-0 text-[12.5px] sm:px-3.5 sm:text-[13px]'
+                : 'mx-1 my-1 rounded-lg px-3 text-[12.5px]',
             )}
           >
-            <span className="inline-flex min-w-[4.25rem] justify-center">
+            <span className="inline-flex min-w-[3.25rem] justify-center sm:min-w-[4.25rem]">
               {has_at ? 'Open' : 'Search'}
             </span>
-            <ArrowRight
-              className={lg ? 'size-3.5' : 'size-3'}
-              strokeWidth={2}
-              aria-hidden
-            />
+            <ArrowRight className="size-3" strokeWidth={2} aria-hidden />
           </Button>
         </div>
 
@@ -277,7 +275,12 @@ export function LookupForm({
             {search.isLoading ? (
               <SuggestionSkeleton />
             ) : search.isError ? (
-              <div className="rounded-none border-2 border-border bg-elevated px-4 py-3 text-[12px] text-muted-foreground">
+              <div
+                className={cn(
+                  registry_data_card,
+                  'px-4 py-3 text-[12px] text-muted-foreground',
+                )}
+              >
                 Search is offline. You can still open a release by typing{' '}
                 <span className="font-mono tabular text-foreground">
                   registry_id@version
@@ -285,7 +288,12 @@ export function LookupForm({
                 .
               </div>
             ) : empty_results ? (
-              <div className="flex items-center justify-between gap-3 rounded-none border-2 border-border bg-elevated px-4 py-3 text-[12.5px] text-muted-foreground">
+              <div
+                className={cn(
+                  registry_data_card,
+                  'flex items-center justify-between gap-3 px-4 py-3 text-[12.5px] text-muted-foreground',
+                )}
+              >
                 <span>
                   Nothing matches{' '}
                   <span className="font-mono tabular text-foreground">
@@ -309,7 +317,10 @@ export function LookupForm({
                 id={list_id}
                 ref={list_ref}
                 role="listbox"
-                className="grid max-h-[min(70vh,340px)] divide-y divide-border overflow-y-auto overscroll-contain rounded-none border-2 border-border bg-elevated"
+                className={cn(
+                  registry_data_card,
+                  'grid max-h-[min(70vh,340px)] divide-y divide-border/25 overflow-y-auto overscroll-contain',
+                )}
               >
                 {suggestions.map((item, idx) => (
                   <SuggestionItem
@@ -327,7 +338,7 @@ export function LookupForm({
                     variant="ghost"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => go_to_search(debounced_query)}
-                    className="h-auto w-full justify-between gap-2 rounded-none bg-surface/40 px-4 py-2.5 text-[12px] font-normal text-muted-foreground hover:bg-surface/80 hover:text-foreground"
+                    className="h-auto w-full justify-between gap-2 rounded-lg bg-surface/40 px-4 py-2.5 text-[12px] font-normal text-muted-foreground hover:bg-surface/80 hover:text-foreground"
                   >
                     <span>
                       See all results for{' '}
@@ -428,12 +439,15 @@ function SuggestionSkeleton() {
   return (
     <ul
       aria-hidden
-      className="grid divide-y divide-border overflow-hidden rounded-none border-2 border-border bg-elevated"
+      className={cn(
+        registry_data_card,
+        'grid divide-y divide-border/25 overflow-hidden',
+      )}
     >
       {Array.from({ length: 3 }).map((_, idx) => (
         <li key={idx} className="grid gap-1.5 px-4 py-3">
-          <div className="h-3.5 w-1/2 max-w-[12rem] animate-pulse rounded-none bg-muted" />
-          <div className="h-3 w-1/3 max-w-[10rem] animate-pulse rounded-none bg-muted/70" />
+          <div className="h-3.5 w-1/2 max-w-[12rem] animate-pulse rounded-lg bg-muted" />
+          <div className="h-3 w-1/3 max-w-[10rem] animate-pulse rounded-lg bg-muted/70" />
         </li>
       ))}
     </ul>

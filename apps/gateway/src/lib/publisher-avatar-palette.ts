@@ -33,32 +33,32 @@ function mix_hex(a: string, b: string, t: number): string {
   );
 }
 
-/** Deep purple (shadow end of the ramp). */
-const AVATAR_PURPLE_DARK = '#581c87';
-/** Soft lilac (highlight end of the ramp). */
-const AVATAR_PURPLE_LIGHT = '#e9d5ff';
+/** Deep umber (shadow end of the ramp). */
+const AVATAR_SHADE_DARK = '#2c2620';
+/** Parchment highlight (light end of the ramp). */
+const AVATAR_SHADE_LIGHT = '#e8dcc4';
 
 /**
- * Five colors for boring-avatars: purple-only ramp from deep violet to soft lilac.
- * Mid tones follow `--primary` at runtime (expected purple family).
+ * Five colors for boring-avatars: warm ramp from deep umber to parchment.
+ * Mid tones follow `--primary` at runtime (accent from the active theme).
  */
 export function publisher_avatar_palette(primary_hex: string): string[] {
   const p = parse_hex(primary_hex);
   if (!p) {
     return [
-      AVATAR_PURPLE_DARK,
-      '#6b21a8',
-      '#7c3aed',
-      '#c4b5fd',
-      AVATAR_PURPLE_LIGHT,
+      AVATAR_SHADE_DARK,
+      '#4a4036',
+      '#6b5e4d',
+      '#c9b89a',
+      AVATAR_SHADE_LIGHT,
     ];
   }
   const primary = rgb_to_hex(p.r, p.g, p.b);
   return [
-    AVATAR_PURPLE_DARK,
-    mix_hex(primary, AVATAR_PURPLE_DARK, 0.38),
+    AVATAR_SHADE_DARK,
+    mix_hex(primary, AVATAR_SHADE_DARK, 0.38),
     primary,
-    mix_hex(primary, AVATAR_PURPLE_LIGHT, 0.48),
-    AVATAR_PURPLE_LIGHT,
+    mix_hex(primary, AVATAR_SHADE_LIGHT, 0.48),
+    AVATAR_SHADE_LIGHT,
   ];
 }

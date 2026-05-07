@@ -4,6 +4,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { LookupDialog } from '@/components/LookupDialog';
 import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
 import { Wordmark } from '@/components/Wordmark';
+import { registry_command_shell } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 export function SiteHeader() {
@@ -23,7 +24,7 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b-2 border-border bg-background">
+      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/75">
         <div className="mx-auto flex w-full max-w-[1400px] items-center gap-2 px-4 py-2.5 sm:gap-3 sm:px-6 lg:gap-4 lg:px-10">
           <Link
             to="/"
@@ -37,31 +38,35 @@ export function SiteHeader() {
             to="/publish"
             className={({ isActive }) =>
               cn(
-                'registry-command-shell shrink-0 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] transition-colors sm:hidden',
+                registry_command_shell,
+                'shrink-0 px-3 py-1.5 text-[13px] font-medium transition-[color,background-color,border-color,box-shadow] duration-200 ease-out sm:hidden',
                 isActive
-                  ? 'border-primary/45 bg-primary/10 text-foreground'
-                  : 'text-muted-foreground hover:border-border-strong hover:text-foreground',
+                  ? 'border-primary/35 bg-primary/10 text-foreground'
+                  : 'text-muted-foreground hover:border-border-strong hover:bg-elevated/60 hover:text-foreground',
               )
             }
           >
-            [ publish ]
+            Publish
           </NavLink>
 
           <nav
             aria-label="Primary"
-            className="hidden items-center font-mono text-[10px] uppercase tracking-[0.2em] sm:flex"
+            className="hidden items-center gap-0.5 text-[13px] font-medium sm:flex"
           >
-            <HeaderLink to="/browse">[ browse ]</HeaderLink>
-            <HeaderLink to="/search">[ search ]</HeaderLink>
+            <HeaderLink to="/browse">Browse</HeaderLink>
+            <HeaderLink to="/search">Search</HeaderLink>
             <HeaderLink to="/publish" emphasis="high">
-              [ publish ]
+              Publish
             </HeaderLink>
           </nav>
 
           <div className="ms-auto flex shrink-0 items-center">
             <ConnectWalletButton
               variant="outline"
-              className="registry-command-shell h-9 shrink-0 px-2.5 text-[11px] font-mono uppercase tracking-[0.14em] hover:border-border-strong hover:bg-elevated sm:px-3 sm:text-[12px]"
+              className={cn(
+                registry_command_shell,
+                'h-9 shrink-0 px-3 text-[12px] font-medium transition-[color,background-color,border-color,box-shadow] duration-200 ease-out hover:border-border-strong hover:bg-elevated sm:px-3.5',
+              )}
             />
           </div>
         </div>
@@ -86,7 +91,7 @@ function HeaderLink({
       to={to}
       className={({ isActive }) =>
         cn(
-          'group relative px-2.5 py-1.5 transition-colors',
+          'group relative rounded-md px-3 py-2 transition-colors duration-200 ease-out',
           isActive
             ? 'text-foreground'
             : emphasis === 'high'
@@ -101,10 +106,10 @@ function HeaderLink({
           <span
             aria-hidden
             className={cn(
-              'pointer-events-none absolute inset-x-0 bottom-0 h-[2px] origin-center transition-all',
+              'pointer-events-none absolute inset-x-1 bottom-0.5 h-px origin-center rounded-full transition-all duration-200 ease-out',
               isActive
-                ? 'scale-x-100 bg-accent opacity-100'
-                : 'scale-x-0 bg-foreground/50 opacity-0 group-hover:scale-x-100 group-hover:opacity-100',
+                ? 'scale-x-100 bg-primary opacity-100'
+                : 'scale-x-0 bg-foreground/35 opacity-0 group-hover:scale-x-100 group-hover:opacity-100',
             )}
           />
         </>

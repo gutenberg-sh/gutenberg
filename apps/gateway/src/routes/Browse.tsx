@@ -12,6 +12,12 @@ import {
 import { PublicationList, ReleaseRow } from '@/components/ReleaseRow';
 import { api_error_message } from '@/lib/api';
 import { useFeed } from '@/lib/queries';
+import {
+  registry_card_inset,
+  registry_empty_panel,
+  registry_feed_x,
+  registry_feed_y_gutter,
+} from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 20;
@@ -120,13 +126,15 @@ export function BrowseRoute() {
         }
       >
         {feed.isError ? (
-          <ErrorView
-            title="Couldn't load the feed"
-            message={api_error_message(
-              feed.error,
-              "We can't reach the indexer right now. Try again in a moment.",
-            )}
-          />
+          <div className={registry_card_inset}>
+            <ErrorView
+              title="Couldn't load the feed"
+              message={api_error_message(
+                feed.error,
+                "We can't reach the indexer right now. Try again in a moment.",
+              )}
+            />
+          </div>
         ) : releases.length === 0 ? (
           <EmptyFeed />
         ) : (
@@ -143,7 +151,8 @@ export function BrowseRoute() {
 
 function EmptyFeed() {
   return (
-    <div className="grid place-items-center gap-3 rounded-none border border-dashed border-border px-6 py-16 text-center">
+    <div className={cn(registry_feed_x, registry_feed_y_gutter)}>
+      <div className={registry_empty_panel}>
       <Compass
         className="size-5 text-muted-foreground"
         strokeWidth={1.6}
@@ -154,6 +163,7 @@ function EmptyFeed() {
         Publications show up here the moment they&rsquo;re published. You could
         be the first.
       </p>
+      </div>
     </div>
   );
 }

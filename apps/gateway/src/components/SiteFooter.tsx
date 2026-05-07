@@ -3,7 +3,6 @@ import {
   infer_chain_id,
   type ChainId,
 } from '@gutenberg/core';
-import { Github } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { IndexerStatus } from '@/components/IndexerStatus';
@@ -27,7 +26,7 @@ const FOOTER_PROGRAM_EXPLORER = explorer_address_url(
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t-2 border-border bg-background">
+    <footer className="mt-auto border-t border-border/80 bg-background">
       <div className="mx-auto grid w-full max-w-[1400px] gap-8 px-4 py-10 sm:px-6 lg:px-10">
         <div className="grid gap-3">
           <Wordmark className="text-foreground" showSubmark={false} />
@@ -48,71 +47,64 @@ export function SiteFooter() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-4 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <div className="flex flex-row items-center justify-between gap-4 border-t border-border pt-8">
           <a
             href="https://solana.com"
             target="_blank"
             rel="noreferrer noopener"
             aria-label="Built on Solana — opens solana.com"
-            className="inline-flex w-fit items-center gap-3 text-muted-foreground transition-colors hover:text-foreground active:translate-y-px"
+            className="inline-flex min-w-0 items-center gap-3 text-muted-foreground transition-colors hover:text-foreground active:translate-y-px"
           >
-            <span className="font-mono text-[11px] uppercase tracking-[0.14em]">
+            <span className="shrink-0 text-[12px] font-medium text-muted-foreground">
               Built on
             </span>
             <SolanaHorizontalLogo className="h-[13px] w-auto shrink-0 text-foreground sm:h-[14px] md:h-[15px]" />
           </a>
-          <div className="flex w-full justify-start sm:w-auto sm:shrink-0 sm:justify-end">
+          <div className="shrink-0">
             <ThemeToggle />
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-6 sm:gap-y-0">
-          <nav
-            aria-label="Footer"
-            className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground"
+        <nav
+          aria-label="Footer"
+          className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-border pt-6 text-[13px] font-medium text-muted-foreground"
+        >
+          <FooterLink to="/browse">Browse</FooterLink>
+          <FooterLink to="/search">Search</FooterLink>
+          <a
+            href={GUTENBERG_REPO_HREF}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="transition-colors hover:text-foreground"
           >
-            <FooterLink to="/browse">Browse</FooterLink>
-            <FooterLink to="/search">Search</FooterLink>
-            <a
-              href={GUTENBERG_REPO_HREF}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
-            >
-              <Github
-                className="size-3.5 shrink-0"
-                strokeWidth={1.75}
-                aria-hidden
-              />
-              GitHub
-            </a>
-          </nav>
-          <div className="min-w-0 self-start sm:max-w-[min(100%,32rem)] sm:self-auto sm:shrink-0 sm:text-right">
-            <IndexerStatus />
-          </div>
-        </div>
+            GitHub
+          </a>
+        </nav>
 
         <div
           aria-label="Deployment"
-          className="border-t border-border pt-4 font-mono text-[11px] leading-relaxed tracking-[0.02em] text-muted-foreground"
+          className="flex flex-row flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border pt-4 text-[12px] leading-relaxed text-muted-foreground"
         >
-          <p className="wrap-break-word">
+          <p className="min-w-0 wrap-break-word">
             <span className="text-foreground-soft">Cluster</span>{' '}
             <span className="text-foreground">{FOOTER_CLUSTER_LABEL}</span>
             <span aria-hidden className="mx-2 text-border">
               ·
             </span>
-            <span className="text-foreground-soft">Registry program</span>{' '}
+            <span className="text-foreground-soft">Program</span>{' '}
             <a
               href={FOOTER_PROGRAM_EXPLORER}
               target="_blank"
               rel="noreferrer noopener"
               title={GUTENBERG_REGISTRY_PROGRAM_ID}
-              className="text-foreground underline-offset-[3px] transition-colors hover:underline"
+              className="font-mono text-[11px] text-foreground underline-offset-[3px] transition-colors hover:underline"
             >
               {shorten(GUTENBERG_REGISTRY_PROGRAM_ID, 5, 5)}
             </a>
           </p>
+          <div className="shrink-0">
+            <IndexerStatus />
+          </div>
         </div>
       </div>
     </footer>

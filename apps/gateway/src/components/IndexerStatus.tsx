@@ -8,14 +8,14 @@ export function IndexerStatus() {
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 font-mono text-[11px] tabular text-muted-foreground"
+      className="inline-flex items-center gap-1.5 text-[12px] font-medium tabular-nums text-muted-foreground"
       title={status.title}
     >
       <span className="relative inline-flex size-2 items-center justify-center">
         <span
           aria-hidden
           className={cn(
-            'absolute inline-flex size-2 rounded-none opacity-60',
+            'absolute inline-flex size-2 rounded-full opacity-60',
             status.tone === 'ok' &&
               'animate-ping bg-[var(--telemetry-green)]/70',
           )}
@@ -23,7 +23,7 @@ export function IndexerStatus() {
         <span
           aria-hidden
           className={cn(
-            'relative inline-flex size-1.5 rounded-none',
+            'relative inline-flex size-1.5 rounded-full',
             status.tone === 'ok' && 'bg-[var(--telemetry-green)]',
             status.tone === 'lag' && 'bg-amber-500',
             status.tone === 'down' && 'bg-destructive',

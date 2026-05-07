@@ -22,7 +22,7 @@ export function VerifyStatus({ steps }: { steps: readonly VerifyStep[] }) {
     <div className="grid gap-5">
       <div className="grid gap-2">
         <div className="flex items-baseline justify-between gap-3">
-          <p className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="text-xs font-medium tracking-wide text-muted-foreground">
             Verifying locally
           </p>
           <p className="text-[11px] font-mono tabular text-muted-foreground">
@@ -48,7 +48,7 @@ export function VerifyStatus({ steps }: { steps: readonly VerifyStep[] }) {
               key={step.id}
               aria-label={step.label}
               className={cn(
-                'h-1 rounded-none transition-colors duration-500 ease-out',
+                'h-1 rounded-full transition-colors duration-500 ease-out',
                 step.state === 'success' &&
                   (has_error ? 'bg-foreground/40' : 'bg-accent'),
                 step.state === 'running' &&
@@ -111,11 +111,11 @@ export function VerifyStatus({ steps }: { steps: readonly VerifyStep[] }) {
         >
           <span
             aria-hidden
-            className="inline-flex size-10 items-center justify-center rounded-none bg-accent text-accent-foreground shadow-[inset_0_1px_0_oklch(1_0_0/12%)] motion-safe:animate-verify-big-check-pop motion-reduce:animate-none dark:shadow-[inset_0_1px_0_oklch(1_0_0/14%)]"
+            className="inline-flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-[inset_0_1px_0_oklch(1_0_0/12%)] motion-safe:animate-verify-big-check-pop motion-reduce:animate-none dark:shadow-[inset_0_1px_0_oklch(1_0_0/14%)]"
           >
             <Check className="size-5" strokeWidth={2.5} aria-hidden />
           </span>
-          <p className="max-w-[36ch] text-center text-[10.5px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="max-w-[36ch] text-center text-xs font-medium tracking-wide text-muted-foreground">
             Publication verified locally
           </p>
         </div>
@@ -129,7 +129,7 @@ function StatusIcon({ id, state }: { id: string; state: VerifyStepState }) {
     return (
       <span
         aria-hidden
-        className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-none border border-border bg-background transition-[border-color,background-color] duration-300 ease-out"
+        className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-md border border-border bg-background transition-[border-color,background-color] duration-300 ease-out"
       />
     );
   }
@@ -150,7 +150,7 @@ function StatusIcon({ id, state }: { id: string; state: VerifyStepState }) {
       <span
         key={`${id}-ok`}
         aria-hidden
-        className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-none bg-accent text-accent-foreground motion-safe:animate-verify-check-pop motion-reduce:animate-none"
+        className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground motion-safe:animate-verify-check-pop motion-reduce:animate-none"
       >
         <Check className="size-3" strokeWidth={3} />
       </span>
@@ -161,7 +161,7 @@ function StatusIcon({ id, state }: { id: string; state: VerifyStepState }) {
     <span
       key={`${id}-err`}
       aria-hidden
-      className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-none bg-destructive text-destructive-foreground motion-safe:animate-verify-check-shake motion-reduce:animate-none"
+      className="mt-[2px] inline-flex size-4 shrink-0 items-center justify-center rounded-md bg-destructive text-destructive-foreground motion-safe:animate-verify-check-shake motion-reduce:animate-none"
     >
       <X className="size-3" strokeWidth={3} />
     </span>

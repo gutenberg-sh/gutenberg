@@ -19,6 +19,11 @@ import {
   type SolanaCostEstimate,
 } from '@/lib/publish-cost';
 import { type PublishFlowEvent, run_publish_flow } from '@/lib/publish-flow';
+import {
+  registry_data_card,
+  registry_data_card_accent,
+  registry_nested_panel,
+} from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 type RunState =
@@ -126,7 +131,10 @@ function Identity({ session }: { session: PublishSessionInput }) {
   return (
     <section
       aria-label="What you are publishing"
-      className="grid gap-2 border border-dashed border-border/80 bg-surface/35 px-3 py-2.5 sm:px-3.5 sm:py-3"
+      className={cn(
+        registry_data_card,
+        'grid gap-2 border-dashed bg-surface/35 px-3 py-2.5 sm:px-3.5 sm:py-3',
+      )}
     >
       <p className="font-mono text-[9.5px] uppercase tracking-[0.26em] text-muted-foreground/90">
         About to publish
@@ -262,7 +270,7 @@ function CostBreakdown({ precomputed }: { precomputed: PublishCostEstimates }) {
           <span className="text-[0.6em] text-foreground-soft">SOL</span>
         </p>
       </div>
-      <div className="grid divide-y divide-border">
+      <div className="grid divide-y divide-border/30">
         <CostLine
           label="Irys upload"
           state={irys}
@@ -366,9 +374,9 @@ function Action({
   return (
     <section
       aria-label="Publish action"
-      className="grid gap-4 rounded-none border border-border bg-card p-4 sm:p-5"
+      className={cn(registry_data_card, 'grid gap-4 p-4 sm:p-5')}
     >
-      <div className="border-b border-border/80 pb-4">
+      <div className="border-b border-border/25 pb-4">
         <p className="mb-2.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
           Cost summary
         </p>
@@ -394,12 +402,12 @@ function Action({
       ) : null}
 
       {failed ? (
-        <p className="rounded-none border border-destructive/40 bg-destructive/5 px-3 py-2 text-[12.5px] text-destructive">
+        <p className="rounded-lg border border-destructive/25 bg-destructive/5 px-3 py-2 text-[12.5px] text-destructive">
           {run.message}
         </p>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3.5">
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border/25 pt-3.5">
         {running ? (
           <Button variant="ghost" onClick={on_cancel}>
             Cancel
@@ -441,14 +449,14 @@ function CurrentStep({
           <span
             aria-hidden
             className={cn(
-              'absolute inline-flex size-2 rounded-none opacity-60',
+              'absolute inline-flex size-2 rounded-full opacity-60',
               active ? 'animate-ping bg-accent/60' : '',
             )}
           />
           <span
             aria-hidden
             className={cn(
-              'relative inline-flex size-1.5 rounded-none',
+              'relative inline-flex size-1.5 rounded-full',
               active ? 'bg-accent' : 'bg-muted-foreground/60',
             )}
           />
@@ -466,7 +474,7 @@ function CurrentStep({
         </span>
       </summary>
 
-      <ol className="grid gap-0.5 rounded-none border border-border bg-background px-2.5 py-2">
+      <ol className={cn(registry_nested_panel, 'grid gap-0.5')}>
         {events.map((event, idx) => (
           <li
             key={`${event.kind}-${idx}`}
@@ -513,10 +521,10 @@ function Success({
   return (
     <section
       aria-label="Published"
-      className="grid gap-3.5 rounded-none border border-accent/30 bg-accent/5 p-4 sm:p-5"
+      className={cn(registry_data_card_accent, 'grid gap-3.5 p-4 sm:p-5')}
     >
       <div className="flex items-center gap-2.5">
-        <span className="inline-flex size-7 items-center justify-center rounded-none bg-accent text-accent-foreground">
+        <span className="inline-flex size-7 items-center justify-center rounded-full bg-accent text-accent-foreground">
           <Check className="size-3.5" strokeWidth={2.4} aria-hidden />
         </span>
         <div className="grid gap-0.5">
@@ -533,7 +541,7 @@ function Success({
         </div>
       </div>
 
-      <dl className="grid gap-1.5 border-t border-accent/20 pt-3 text-[11.5px] sm:grid-cols-2">
+      <dl className="grid gap-1.5 border-t border-accent/15 pt-3 text-[11.5px] sm:grid-cols-2">
         <div className="grid gap-0.5">
           <dt className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
             Publisher
@@ -556,7 +564,7 @@ function Success({
         <Receipt label="Manifest URI" value={result.manifest_uri} />
       </dl>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-accent/20 pt-3 text-[12px]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-accent/15 pt-3 text-[12px]">
         <p className="text-foreground-soft">
           Taking you to your publication in{' '}
           <span className="font-mono tabular text-foreground">
@@ -566,7 +574,7 @@ function Success({
         </p>
         <Link
           to={target}
-          className="inline-flex items-center gap-1.5 rounded-none bg-primary px-3 py-1.5 text-[12.5px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-[12.5px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px"
         >
           Open now
           <ArrowUpRight className="size-3.5" strokeWidth={2} aria-hidden />

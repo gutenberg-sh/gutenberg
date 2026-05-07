@@ -99,9 +99,9 @@ export function MarkdownContent({
         'prose-a:text-foreground prose-a:underline-offset-[3px] prose-a:decoration-accent/60 hover:prose-a:decoration-accent',
         'prose-strong:text-foreground prose-strong:font-semibold',
         'prose-blockquote:border-l-2 prose-blockquote:border-accent prose-blockquote:bg-transparent prose-blockquote:not-italic prose-blockquote:pl-6 prose-blockquote:font-normal prose-blockquote:text-foreground/80',
-        'prose-pre:rounded-none prose-pre:border prose-pre:border-border prose-pre:bg-muted/60 prose-pre:text-[12.5px] prose-pre:leading-[1.65]',
-        'prose-code:rounded-none prose-code:border prose-code:border-border/70 prose-code:bg-muted/60 prose-code:px-1 prose-code:py-0.5 prose-code:font-mono prose-code:text-[0.85em] prose-code:before:content-none prose-code:after:content-none',
-        'prose-img:rounded-none prose-img:border prose-img:border-border/70',
+        'prose-pre:rounded-lg prose-pre:border prose-pre:border-border prose-pre:bg-muted/60 prose-pre:text-[12.5px] prose-pre:leading-[1.65]',
+        'prose-code:rounded-lg prose-code:border prose-code:border-border/70 prose-code:bg-muted/60 prose-code:px-1 prose-code:py-0.5 prose-code:font-mono prose-code:text-[0.85em] prose-code:before:content-none prose-code:after:content-none',
+        'prose-img:rounded-lg prose-img:border prose-img:border-border/70',
         'prose-hr:border-border/70',
       )}
     >

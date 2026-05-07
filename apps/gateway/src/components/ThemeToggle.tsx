@@ -42,7 +42,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={cycle}
-      className="rounded-none text-muted-foreground hover:bg-muted hover:text-foreground"
+      className="rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
       aria-label={label}
       title={label}
     >

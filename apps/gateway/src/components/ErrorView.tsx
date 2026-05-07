@@ -15,7 +15,7 @@ export function ErrorView({
 }) {
   return (
     <section role="alert" aria-live="polite" className="grid gap-5">
-      <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-destructive">
+      <p className="text-xs font-medium tracking-wide text-destructive">
         Halted
       </p>
       <h2 className="text-[26px] font-semibold leading-[1.16] tracking-tight text-foreground sm:text-[32px] lg:text-[38px]">
@@ -28,7 +28,7 @@ export function ErrorView({
       <div className="mt-2">
         <Link
           to={back_to}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-none border border-border px-3.5 py-2 text-[13px] font-medium text-foreground transition-colors hover:border-border-strong active:translate-y-px"
+          className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3.5 py-2 text-[13px] font-medium text-foreground transition-colors hover:border-border-strong active:translate-y-px"
         >
           <ArrowLeft className="size-3.5" strokeWidth={1.85} aria-hidden />
           Back

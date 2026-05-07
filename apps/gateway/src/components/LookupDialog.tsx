@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom';
 
 import { LookupForm } from '@/components/LookupForm';
 import { Button } from '@/components/ui/button';
+import { overlay_panel_lg, overlay_scrim } from '@/lib/overlay-surface';
+import { cn } from '@/lib/utils';
 
 export function LookupDialog({
   open,
@@ -37,15 +39,16 @@ export function LookupDialog({
 
   return createPortal(
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Open a release"
+      role="presentation"
       onClick={() => on_open_change(false)}
-      className="fixed inset-0 z-[60] flex items-start justify-center bg-background/92 p-4 pt-[18vh]"
+      className={cn(overlay_scrim, 'z-60')}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Open a release"
         onClick={(event) => event.stopPropagation()}
-        className="relative w-full max-w-2xl"
+        className={cn(overlay_panel_lg, 'pt-3')}
       >
         <Button
           type="button"
@@ -53,11 +56,11 @@ export function LookupDialog({
           size="icon"
           aria-label="Close"
           onClick={() => on_open_change(false)}
-          className="absolute -right-2 -top-2 z-10 size-7 rounded-none border-2 border-border bg-card text-muted-foreground hover:border-foreground/40 hover:text-foreground"
+          className="absolute right-3 top-3 z-10 size-7 rounded-lg border border-border bg-elevated/80 text-muted-foreground hover:border-foreground/40 hover:bg-elevated hover:text-foreground"
         >
           <X className="size-3.5" strokeWidth={1.85} aria-hidden />
         </Button>
-        <div className="mb-3 px-1">
+        <div className="mb-3 pr-10 pt-0.5">
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             Registry quick open
           </p>

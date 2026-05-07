@@ -45,7 +45,7 @@ function VersionsView({ registry_id }: { registry_id: string }) {
           </h1>
           <Link
             to={`/publication/${encodeURIComponent(registry_id)}`}
-            className="inline-flex items-center gap-1.5 rounded-none border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-[12px] text-foreground-soft transition-colors hover:border-border-strong hover:text-foreground"
           >
             Open latest release
             <ArrowUpRight className="size-3.5" strokeWidth={1.85} aria-hidden />
@@ -99,8 +99,8 @@ function Timeline({
               aria-hidden
               className={
                 is_latest
-                  ? 'absolute left-0 top-6 inline-flex size-2.5 items-center justify-center rounded-none bg-accent ring-4 ring-background'
-                  : 'absolute left-0 top-6 inline-flex size-2.5 items-center justify-center rounded-none bg-border ring-4 ring-background'
+                  ? 'absolute left-0 top-6 inline-flex size-2.5 items-center justify-center rounded-lg bg-accent ring-4 ring-background'
+                  : 'absolute left-0 top-6 inline-flex size-2.5 items-center justify-center rounded-lg bg-border ring-4 ring-background'
               }
             />
             <Link
@@ -113,7 +113,7 @@ function Timeline({
                     {release.version}
                   </span>
                   {is_latest ? (
-                    <span className="rounded-none border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.18em] text-accent">
+                    <span className="rounded-lg border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.18em] text-accent">
                       Latest
                     </span>
                   ) : null}
@@ -162,8 +162,8 @@ function Skeleton() {
     <div aria-busy aria-live="polite" className="grid gap-3 pl-7">
       {Array.from({ length: 5 }).map((_, idx) => (
         <div key={idx} className="grid gap-1 border-b border-border py-4">
-          <div className="h-4 w-24 animate-pulse rounded-none bg-muted" />
-          <div className="h-3 w-1/3 max-w-[14rem] animate-pulse rounded-none bg-muted/70" />
+          <div className="h-4 w-24 animate-pulse rounded-lg bg-muted" />
+          <div className="h-3 w-1/3 max-w-[14rem] animate-pulse rounded-lg bg-muted/70" />
         </div>
       ))}
     </div>
@@ -172,7 +172,7 @@ function Skeleton() {
 
 function EmptyVersions() {
   return (
-    <div className="grid place-items-center gap-3 rounded-none border border-dashed border-border px-6 py-14 text-center">
+    <div className="grid place-items-center gap-3 rounded-lg border border-dashed border-border px-6 py-14 text-center">
       <GitBranch
         className="size-5 text-muted-foreground"
         strokeWidth={1.6}

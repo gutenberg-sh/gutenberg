@@ -4,11 +4,11 @@ import { useLayoutEffect, useState } from 'react';
 import { publisher_avatar_palette } from '@/lib/publisher-avatar-palette';
 import { cn } from '@/lib/utils';
 
-const FALLBACK_PRIMARY = '#5b21b6';
+const FALLBACK_PRIMARY = '#5c4f3d';
 
 /**
  * Deterministic pixel avatar from the publisher signing key.
- * Palette follows `--primary` within a purple-only ramp.
+ * Palette follows `--primary` within a warm ramp.
  * @see https://boringavatars.com/
  */
 export function PublisherAvatar({
@@ -48,7 +48,7 @@ export function PublisherAvatar({
   return (
     <div
       className={cn(
-        'shrink-0 overflow-hidden bg-elevated ring-1 ring-border',
+        'shrink-0 overflow-hidden rounded-lg bg-elevated ring-1 ring-border',
         className,
       )}
       style={{ width: size, height: size }}

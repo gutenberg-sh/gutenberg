@@ -71,7 +71,7 @@ export function AssetView({
         <img
           src={blob_url}
           alt={path}
-          className="max-h-[72vh] w-full rounded-none border border-border bg-muted/30 object-contain"
+          className="max-h-[72vh] w-full rounded-lg border border-border bg-muted/30 object-contain"
         />
       </figure>
     );
@@ -90,7 +90,7 @@ export function AssetView({
       <div className="grid gap-3">
         <pre
           className={cn(
-            'max-h-[72vh] overflow-auto rounded-none border border-border bg-muted/40 p-4',
+            'max-h-[72vh] overflow-auto rounded-lg border border-border bg-muted/40 p-4',
             'font-mono text-[12.5px] leading-[1.65] tabular',
           )}
         >
@@ -113,7 +113,7 @@ export function AssetView({
         <a
           href={blob_url}
           download={filename}
-          className="inline-flex items-center gap-2 rounded-none border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-foreground transition-colors hover:border-border-strong active:translate-y-px"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2 text-[13px] font-medium text-foreground transition-colors hover:border-border-strong active:translate-y-px"
         >
           <Download className="size-3.5" strokeWidth={1.85} aria-hidden />
           Download

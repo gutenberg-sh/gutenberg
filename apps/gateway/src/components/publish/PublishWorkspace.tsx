@@ -22,6 +22,7 @@ import {
   pack_browser_file_selection,
   pack_zip_file,
 } from '@/lib/pack-files-for-publish';
+import { registry_data_card, registry_nested_panel } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 const MODE_COPY: Record<BrowserPackMode, { label: string; hint: string }> = {
@@ -313,9 +314,9 @@ export function PublishWorkspace() {
         <div className="grid gap-4">
           <section
             aria-labelledby="publish-source-title"
-            className="border border-border bg-card/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+            className={registry_data_card}
           >
-            <div className="border-b border-border/80 px-3 py-2 sm:px-4">
+            <div className="border-b border-border/25 bg-elevated/20 px-3 py-2 sm:px-4">
               <p
                 id="publish-source-title"
                 className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground"
@@ -330,7 +331,7 @@ export function PublishWorkspace() {
             <div
               role="tablist"
               aria-label="Bundle source type"
-              className="flex flex-wrap gap-1 border-b border-border/60 p-1.5 sm:px-2.5"
+              className="flex flex-wrap gap-1 border-b border-border/20 p-1.5 sm:px-2.5"
             >
               {(
                 [
@@ -346,10 +347,10 @@ export function PublishWorkspace() {
                   aria-selected={mode === key}
                   onClick={() => switch_mode(key)}
                   className={cn(
-                    'inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 border px-2.5 font-mono text-[10.5px] uppercase tracking-[0.14em] transition-colors sm:flex-none sm:px-3.5',
+                    'inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-md px-2.5 font-mono text-[10.5px] uppercase tracking-[0.14em] transition-[color,background-color,box-shadow] duration-200 ease-out sm:flex-none sm:px-3.5',
                     mode === key
-                      ? 'border-border-strong bg-elevated text-foreground'
-                      : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground-soft',
+                      ? 'bg-elevated/90 text-foreground shadow-sm ring-1 ring-primary/20'
+                      : 'text-muted-foreground hover:bg-elevated/40 hover:text-foreground-soft',
                   )}
                 >
                   <Icon
@@ -394,7 +395,7 @@ export function PublishWorkspace() {
                     type="button"
                     variant="outline"
                     size="lg"
-                    className="h-auto w-full justify-center gap-2 rounded-none border-2 border-dashed border-border py-5 text-[13px] font-medium active:translate-y-px"
+                    className="h-auto w-full justify-center gap-2 rounded-lg border border-dashed border-border/35 bg-elevated/20 py-5 text-[13px] font-medium transition-colors hover:border-border/50 hover:bg-elevated/35 active:translate-y-px"
                     onClick={on_pick_folder}
                   >
                     <FolderOpen
@@ -429,10 +430,10 @@ export function PublishWorkspace() {
                   onDragLeave={() => set_drag_active(false)}
                   onDrop={drop_zone_active ? on_drop : undefined}
                   className={cn(
-                    'grid gap-3 rounded-none border-2 border-dashed p-4 transition-colors sm:p-5',
+                    'grid gap-3 rounded-lg border border-dashed border-border/35 bg-background/25 p-4 transition-[border-color,background-color] duration-200 ease-out sm:p-5',
                     drop_zone_active && drag_active
-                      ? 'border-foreground/35 bg-muted/30'
-                      : 'border-border bg-background/20',
+                      ? 'border-primary/35 bg-muted/25'
+                      : 'hover:border-border/45',
                   )}
                 >
                   <div className="flex flex-col items-center gap-1.5 text-center">
@@ -456,7 +457,7 @@ export function PublishWorkspace() {
                     <Button
                       type="button"
                       variant="secondary"
-                      className="rounded-none active:translate-y-px"
+                      className="rounded-lg active:translate-y-px"
                       onClick={mode === 'zip' ? on_pick_zip : on_pick_files}
                     >
                       {mode === 'zip' ? 'Choose zip' : 'Choose files'}
@@ -465,7 +466,7 @@ export function PublishWorkspace() {
                       <Button
                         type="button"
                         variant="ghost"
-                        className="rounded-none text-muted-foreground hover:text-foreground"
+                        className="rounded-lg text-muted-foreground hover:text-foreground"
                         onClick={reset_sources}
                       >
                         Clear
@@ -483,7 +484,7 @@ export function PublishWorkspace() {
 
               {pack_error ? (
                 <p
-                  className="mt-3 border border-destructive/35 bg-destructive/5 px-2.5 py-2 text-[12.5px] text-destructive"
+                  className="mt-3 rounded-lg border border-destructive/25 bg-destructive/5 px-2.5 py-2 text-[12.5px] text-destructive"
                   role="alert"
                 >
                   {pack_error}
@@ -491,7 +492,7 @@ export function PublishWorkspace() {
               ) : null}
 
               {packed_files && packed_files.length > 0 && !unpack_busy ? (
-                <div className="mt-3 border-t border-border/70 pt-3">
+                <div className="mt-3 border-t border-border/25 pt-3">
                   <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                     Bundle preview
                   </p>
@@ -505,11 +506,16 @@ export function PublishWorkspace() {
                       <dd>{format_bytes(total_bytes)}</dd>
                     </div>
                   </dl>
-                  <ul className="mt-2 max-h-[11.5rem] overflow-y-auto border border-border/60 bg-background/30 font-mono text-[10.5px] leading-snug text-foreground/85">
+                  <ul
+                    className={cn(
+                      registry_nested_panel,
+                      'mt-2 max-h-[11.5rem] overflow-y-auto font-mono text-[10.5px] leading-snug text-foreground/85',
+                    )}
+                  >
                     {packed_files.slice(0, 80).map((f) => (
                       <li
                         key={f.path}
-                        className="truncate border-b border-border/40 px-2 py-1 last:border-b-0"
+                        className="truncate border-b border-border/20 px-2 py-1 last:border-b-0"
                         title={f.path}
                       >
                         {f.path}
@@ -528,7 +534,7 @@ export function PublishWorkspace() {
         </div>
 
         <aside className="grid gap-4 lg:sticky lg:top-20">
-          <section className="border border-border bg-card/50 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:p-4">
+          <section className={cn(registry_data_card, 'p-3 sm:p-4')}>
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
               Release details
             </p>
@@ -542,7 +548,7 @@ export function PublishWorkspace() {
                   placeholder="river-notes"
                   autoComplete="off"
                   spellCheck={false}
-                  className="rounded-none font-mono text-[13px]"
+                  className="rounded-lg font-mono text-[13px]"
                 />
                 <p className="text-[11px] leading-snug text-muted-foreground">
                   Lowercase letters, numbers, dots, underscores, hyphens. First
@@ -557,7 +563,7 @@ export function PublishWorkspace() {
                   onChange={(e) => set_version(e.target.value)}
                   placeholder="1.0.0"
                   autoComplete="off"
-                  className="rounded-none font-mono text-[13px]"
+                  className="rounded-lg font-mono text-[13px]"
                 />
               </div>
               <p className="text-[11px] leading-snug text-muted-foreground">
@@ -612,7 +618,7 @@ function PublishComposerFooter({
     <div className="mt-6 grid gap-3 lg:mt-8">
       {composed.kind === 'invalid' ? (
         <p
-          className="border border-destructive/40 bg-destructive/5 px-3 py-2 text-[12.5px] text-destructive"
+          className="rounded-lg border border-destructive/25 bg-destructive/5 px-3 py-2 text-[12.5px] text-destructive"
           role="alert"
         >
           {composed.message}
