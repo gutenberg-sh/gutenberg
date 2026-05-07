@@ -62,12 +62,6 @@ While exploring, you can run Gutenberg without a wallet. For signing on-chain ac
 
 A wallet is your cryptographic identity in the Solana ecosystem. If you do not have one yet, install [Phantom](https://phantom.app/), [Solflare](https://solflare.com/), or another Solana wallet, follow the onboarding flow to create a wallet, and securely back up your recovery phrase.
 
-To stop and remove the container:
-
-```bash
-docker stop gutenberg && docker rm gutenberg
-```
-
 ## Contributing
 
 To contribute or change the code, see [CONTRIBUTING.md](CONTRIBUTING.md).
