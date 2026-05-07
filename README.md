@@ -18,9 +18,9 @@
   <img src="https://img.shields.io/badge/Anchor-program-3E4348?style=flat-square" alt="Anchor program" />
 </p>
 
-Modern censorship is coordinated and systematic: courts issue takedowns, infrastructure providers remove access, platforms enforce quiet requests, and centralized systems enforce strict narratives. When publishing depends on a few gatekeepers, access to information can disappear overnight.
-
 ---
+
+> Modern censorship is coordinated and systemic: courts issue takedowns, infrastructure providers remove access, platforms enforce quiet requests, and centralized systems define narratives. When publishing is governed by authoritive entities, freedom of speech is surpressed.
 
 ## Local sovereignty
 
