@@ -383,8 +383,8 @@ function StatsStrip({ embedded = false }: { embedded?: boolean }) {
 
 function ReleaseDiagram() {
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border/40 bg-card p-5 shadow-sm ring-1 ring-border/20 sm:p-7">
-      <div className="mb-5 flex items-center justify-between gap-3">
+    <div className="relative overflow-hidden rounded-xl border border-border/55 bg-muted/35 p-5 sm:p-7 dark:border-border/70 dark:bg-card/25">
+      <div className="mb-5 flex items-center justify-between gap-3 border-b border-border/35 pb-4 dark:border-border/50">
         <span className="font-mono text-[11.5px] tabular text-foreground">
           gutenberg-demo<span className="text-muted-foreground">@</span>1.0.0
         </span>
@@ -394,7 +394,7 @@ function ReleaseDiagram() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,0.85fr)] sm:items-stretch sm:gap-0">
-        <div className="grid content-between gap-3 rounded-lg border border-border bg-elevated/30 p-4">
+        <div className="grid content-between gap-3 rounded-lg border border-border/50 bg-background/55 p-4 dark:border-border/55 dark:bg-elevated/25">
           <div className="flex items-center justify-between">
             <span className="font-mono text-[11.5px] tabular text-foreground">
               files (per-file ar://)
@@ -419,7 +419,7 @@ function ReleaseDiagram() {
         </div>
 
         <div className="grid gap-3">
-          <div className="grid gap-2 rounded-lg border border-border bg-elevated/30 p-4">
+          <div className="grid gap-2 rounded-lg border border-border/50 bg-background/55 p-4 dark:border-border/55 dark:bg-elevated/25">
             <div className="flex items-center justify-between">
               <span className="font-mono text-[11.5px] tabular text-foreground">
                 manifest.json
@@ -449,7 +449,7 @@ function ReleaseDiagram() {
               <span className="text-foreground">sig</span>: ed25519:…
             </p>
           </div>
-          <div className="grid gap-1 rounded-lg border border-border bg-elevated/30 px-4 py-3">
+          <div className="grid gap-1 rounded-lg border border-border/50 bg-background/55 px-4 py-3 dark:border-border/55 dark:bg-elevated/25">
             <span className="text-xs font-medium text-muted-foreground">
               Solana PDA
             </span>

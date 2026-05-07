@@ -12,6 +12,8 @@ import { Wordmark } from '@/components/Wordmark';
 import { env } from '@/env';
 import { explorer_address_url } from '@/lib/explorer';
 import { shorten } from '@/lib/format';
+import { registry_shell_x } from '@/lib/registry-surface';
+import { cn } from '@/lib/utils';
 
 const GUTENBERG_REPO_HREF = 'https://github.com/leonmeka/gutenberg';
 
@@ -27,7 +29,12 @@ const FOOTER_PROGRAM_EXPLORER = explorer_address_url(
 export function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-border/55 bg-surface dark:border-border/80 dark:bg-background">
-      <div className="mx-auto grid w-full max-w-[1332px] gap-8 px-6 py-10 sm:px-6 lg:px-10">
+      <div
+        className={cn(
+          'mx-auto grid w-full max-w-[1332px] gap-8 py-10',
+          registry_shell_x,
+        )}
+      >
         <div className="grid gap-3">
           <Wordmark className="text-foreground" showSubmark={false} />
           <p className="max-w-[44ch] text-[12.5px] leading-[1.65] text-foreground-soft">

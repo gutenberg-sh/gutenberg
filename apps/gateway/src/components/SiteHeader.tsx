@@ -2,19 +2,19 @@ import { Link, NavLink } from 'react-router-dom';
 
 import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
 import { Wordmark } from '@/components/Wordmark';
-import { registry_command_shell } from '@/lib/registry-surface';
+import { registry_command_shell, registry_shell_x } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/55 bg-surface dark:border-border/80 dark:bg-background">
-        <div className="mx-auto flex w-full max-w-[1332px] items-center gap-2 px-6 py-2.5 sm:gap-3 sm:px-6 lg:gap-4 lg:px-10">
+        <div className={cn('mx-auto flex w-full max-w-[1332px] items-center gap-2 py-2.5 sm:gap-3 lg:gap-4', registry_shell_x)}>
           <Link
             to="/"
-            aria-label="Gutenberg gateway, home"
+            aria-label="Gutenberg, home"
             className="group inline-flex shrink-0 items-baseline outline-none transition-opacity focus-visible:opacity-80"
           >
-            <Wordmark className="text-[17px] text-foreground sm:text-[19px]" />
+            <Wordmark className="text-[17px] text-foreground sm:text-[19px]" showSubmark={false} />
           </Link>
 
           <nav

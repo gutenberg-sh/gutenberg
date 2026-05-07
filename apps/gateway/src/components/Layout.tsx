@@ -1,3 +1,4 @@
+import { registry_shell_x } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 export function Container({
@@ -12,7 +13,8 @@ export function Container({
   return (
     <As
       className={cn(
-        'mx-auto w-full max-w-[1332px] px-6 sm:px-6 lg:px-10',
+        'mx-auto w-full max-w-[1332px]',
+        registry_shell_x,
         className,
       )}
     >

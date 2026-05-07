@@ -11,6 +11,12 @@ export const registry_data_card_accent =
 /** Horizontal inset aligned with feed rows / header. */
 export const registry_feed_x = 'px-3 sm:px-4';
 
+/**
+ * Max-width shell gutters (Container, site header, site footer).
+ * Slightly wider padding on small screens so copy sits inside the vertical frame rails.
+ */
+export const registry_shell_x = 'px-8 sm:px-6 lg:px-10';
+
 /** Feed list shell — top/bottom rules only, no card elevation. */
 export const registry_feed_shell = 'grid min-w-0 gap-0 border-y border-border';
 
