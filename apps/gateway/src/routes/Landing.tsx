@@ -94,7 +94,7 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
 export function LandingRoute() {
   return (
     <div className="flex flex-col">
-      <Container className="pb-20 pt-14 sm:pb-24 sm:pt-18 lg:pb-28 lg:pt-22">
+      <Container className="pb-20 pt-14 sm:pb-24 sm:pt-18 lg:pb-14 lg:pt-22">
         <div className="grid gap-9 lg:gap-11">
           <div className="grid gap-10 lg:min-h-[min(36svh,480px)] lg:grid-cols-[minmax(0,1.12fr)_minmax(0,0.92fr)] lg:items-start lg:gap-x-16 lg:gap-y-8">
             <div className="grid max-w-xl content-start gap-6 self-start sm:max-w-none">
@@ -156,7 +156,7 @@ export function LandingRoute() {
               </div>
             </div>
 
-            <div className="grid w-full gap-2.5 sm:gap-3 lg:pt-2">
+            <div className="grid w-full gap-2.5 sm:gap-3 lg:self-center">
               <p className="text-xs font-medium tracking-wide text-muted-foreground">
                 Find a publication
               </p>
