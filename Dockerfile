@@ -12,7 +12,8 @@ COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/core/package.json ./packages/core/
 COPY apps/indexer/package.json ./apps/indexer/
 COPY apps/gateway/package.json ./apps/gateway/
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
 
 FROM deps AS build-sources
 COPY tsconfig.json tsconfig.base.json ./

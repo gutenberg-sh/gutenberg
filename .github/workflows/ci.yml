@@ -25,16 +25,22 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build Core
         run: pnpm run core:build
 
-      - name: Build Gateway
-        run: pnpm run gateway:build
-
-      - name: Build Indexer
-        run: pnpm run indexer:build
+      - name: Build Gateway and Indexer
+        run: |
+          set -e
+          pnpm run gateway:build &
+          pnpm run indexer:build &
+          wait
 
       - name: Run Linter
-        run: pnpm run lint
+        run: |
+          set -e
+          pnpm --filter @gutenberg/core run lint &
+          pnpm --filter @gutenberg/gateway run lint &
+          pnpm --filter @gutenberg/indexer run lint &
+          wait
