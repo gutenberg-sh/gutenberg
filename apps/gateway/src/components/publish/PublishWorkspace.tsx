@@ -22,7 +22,10 @@ import {
   pack_browser_file_selection,
   pack_zip_file,
 } from '@/lib/pack-files-for-publish';
-import { registry_data_card, registry_nested_panel } from '@/lib/registry-surface';
+import {
+  registry_data_card,
+  registry_nested_panel,
+} from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 const MODE_COPY: Record<BrowserPackMode, { label: string; hint: string }> = {

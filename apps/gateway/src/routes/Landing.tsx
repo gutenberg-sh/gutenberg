@@ -134,10 +134,7 @@ export function LandingRoute() {
                   <span className={kbd_chrome}>Ctrl K</span> anywhere
                 </p>
               </div>
-              <LookupForm
-                size="lg"
-                placeholder="registry id or id@version"
-              />
+              <LookupForm size="lg" placeholder="registry id or id@version" />
             </div>
           </div>
         </div>

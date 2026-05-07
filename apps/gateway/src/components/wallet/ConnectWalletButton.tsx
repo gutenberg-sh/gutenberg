@@ -75,10 +75,7 @@ export function ConnectWalletButton({
                 role="dialog"
                 aria-modal="true"
                 aria-label="Choose wallet"
-                className={cn(
-                  overlay_panel,
-                  'p-4 sm:max-h-[min(80dvh,420px)]',
-                )}
+                className={cn(overlay_panel, 'p-4 sm:max-h-[min(80dvh,420px)]')}
                 onClick={(e) => e.stopPropagation()}
               >
                 <p className="mb-3 font-mono text-[10.5px] uppercase tracking-[0.2em] text-muted-foreground">
@@ -103,7 +100,9 @@ export function ConnectWalletButton({
                             height={24}
                           />
                         ) : null}
-                        <span className="min-w-0 flex-1 truncate">{c.name}</span>
+                        <span className="min-w-0 flex-1 truncate">
+                          {c.name}
+                        </span>
                       </Button>
                     </li>
                   ))}

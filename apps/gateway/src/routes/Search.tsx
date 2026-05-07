@@ -231,8 +231,8 @@ function EmptyQuery() {
             Start typing to search the registry.
           </p>
           <p className="max-w-[42ch] text-[12.5px] leading-[1.65] text-muted-foreground">
-            The first publisher to register a registry id keeps it. Partial matches
-            work — you don&rsquo;t need the full slug.
+            The first publisher to register a registry id keeps it. Partial
+            matches work — you don&rsquo;t need the full slug.
           </p>
         </div>
       </div>
@@ -244,18 +244,18 @@ function NoResults({ q }: { q: string }) {
   return (
     <div className={cn(registry_feed_x, registry_feed_y_gutter)}>
       <div className={registry_empty_panel}>
-      <SearchIcon
-        className="size-5 text-muted-foreground"
-        strokeWidth={1.6}
-        aria-hidden
-      />
-      <p className="text-[14px] text-foreground">
-        Nothing matches <span className="font-mono tabular">{q}</span>.
-      </p>
-      <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
-        Check the spelling, or browse what&apos;s been published recently — the
-        author may not have published yet.
-      </p>
+        <SearchIcon
+          className="size-5 text-muted-foreground"
+          strokeWidth={1.6}
+          aria-hidden
+        />
+        <p className="text-[14px] text-foreground">
+          Nothing matches <span className="font-mono tabular">{q}</span>.
+        </p>
+        <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
+          Check the spelling, or browse what&apos;s been published recently —
+          the author may not have published yet.
+        </p>
       </div>
     </div>
   );

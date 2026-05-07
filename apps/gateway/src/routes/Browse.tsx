@@ -153,16 +153,16 @@ function EmptyFeed() {
   return (
     <div className={cn(registry_feed_x, registry_feed_y_gutter)}>
       <div className={registry_empty_panel}>
-      <Compass
-        className="size-5 text-muted-foreground"
-        strokeWidth={1.6}
-        aria-hidden
-      />
-      <p className="text-[14px] text-foreground">Nothing here yet.</p>
-      <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
-        Publications show up here the moment they&rsquo;re published. You could
-        be the first.
-      </p>
+        <Compass
+          className="size-5 text-muted-foreground"
+          strokeWidth={1.6}
+          aria-hidden
+        />
+        <p className="text-[14px] text-foreground">Nothing here yet.</p>
+        <p className="max-w-[40ch] text-[12.5px] leading-[1.65] text-muted-foreground">
+          Publications show up here the moment they&rsquo;re published. You
+          could be the first.
+        </p>
       </div>
     </div>
   );
