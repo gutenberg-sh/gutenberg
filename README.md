@@ -20,7 +20,7 @@
 
 ---
 
-> [!WARNING]
+> [!IMPORTANT]
 > **Experimental.** The Gutenberg Solana on-chain program is **not deployed to Solana mainnet** yet. This project is under active development and has not yet hit a stable release.
 
 > Modern censorship is coordinated and systemic: courts issue takedowns, infrastructure providers remove access, platforms enforce quiet requests, and centralized systems define narratives. When publishing is governed by authoritive entities, freedom of speech is inherently surpressed.
