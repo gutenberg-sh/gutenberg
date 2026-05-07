@@ -6,7 +6,6 @@
     "dev": "nest start --watch",
     "prebuild": "pnpm --filter @gutenberg/core run build",
     "build": "nest build",
-    "start": "node dist/src/main.js",
     "db:migrate": "drizzle-kit generate",
     "db:apply": "drizzle-kit migrate",
     "format": "eslint . --fix --ignore-pattern 'dist/**' --ignore-pattern '*.json' && prettier --write .",

@@ -4,9 +4,9 @@ Contributions are welcome. For substantial changes, open an issue first so we ca
 
 ## Prerequisites
 
-- **Docker** (for the local stack in `docker-compose.yml`)
-- **Node.js** 22.22.2 and **pnpm** 10.33.1 (see the [README](README.md) for Corepack)
-- **Solana CLI** and **Anchor** when you work on `apps/solana`
+- **Docker**
+- **Node.js** 22.22.2 and **pnpm** 10.33.1
+- **Solana CLI** and **Anchor**
 
 ## Clone and install
 
@@ -16,41 +16,53 @@ cd gutenberg
 pnpm install
 ```
 
-Copy [`.env.local`](.env.local) to `.env` in the repo root (defaults for the bundled test validator and local Postgres). The comments in `.env.local` describe each variable.
+Copy [`.env.local`](.env.local) to `.env` in the repo root.
 
-## Local Development
+## Local development
 
-From the repo root, with `.env` in place:
+**Postgres and the Solana test validator run in Docker.** The gateway, indexer, and everything else run via pnpm on your machine (hot reload, normal debugging).
+
+### 1. Start infrastructure
+
+With `.env` in place:
 
 ```bash
 pnpm stack:up
 ```
 
-That builds and runs the all-in-one Gutenberg image (Postgres, indexer, gateway inside one container) and the Solana test validator.
+That starts Postgres (port **5432**) and the test validator (RPC **8899**, WebSocket **8900**) and waits until both are healthy.
 
-- Gateway: **http://localhost:8080**
+Stop containers: `pnpm stack:down`. To wipe the local Postgres volume and start clean: `pnpm stack:reset`, then `pnpm stack:up` again.
+
+### 2. Database migrations
+
+After the first `pnpm stack:up`, or whenever you pull migration changes:
+
+```bash
+pnpm indexer:db:apply
+```
+
+### 3. Run apps
+
+Use separate terminals (order does not matter after Postgres is up):
+
+```bash
+pnpm indexer:dev
+pnpm gateway:dev
+```
+
+- Gateway (Vite): **http://localhost:5173**
 - Indexer API: **http://localhost:4000**
-- Health check: **http://localhost:4000/health**
-
-Database migrations run automatically when the container starts.
-
-Stop everything: `pnpm stack:down`. Wipe Postgres data and start clean: `pnpm stack:reset`, then `pnpm stack:up` again.
 
 ## Solana program (`apps/solana`)
 
-With the stack up and RPC at `http://127.0.0.1:8899`:
+With `pnpm stack:up` running and RPC at `http://127.0.0.1:8899`:
 
 ```bash
 solana airdrop 5 "$(solana address -k ~/.config/solana/id.json)" -u http://127.0.0.1:8899
 
 pnpm solana:build
 pnpm solana:deploy
-```
-
-Fund another address:
-
-```bash
-solana airdrop 5 <PUBKEY> -u http://127.0.0.1:8899
 ```
 
 ## Pull requests

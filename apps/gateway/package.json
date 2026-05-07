@@ -5,7 +5,6 @@
     "dev": "vite",
     "prebuild": "pnpm --filter @gutenberg/core run build",
     "build": "tsc -b && vite build",
-    "preview": "vite preview",
     "format": "eslint . --fix --ignore-pattern 'dist/**' --ignore-pattern '*.json' && prettier --write .",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0"
   },

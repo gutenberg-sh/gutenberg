@@ -1,6 +1,28 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gutenberg-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${GUTENBERG_POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${GUTENBERG_POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${GUTENBERG_POSTGRES_DB:-gutenberg}
+    ports:
+      - '${GUTENBERG_POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - gutenberg-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-gutenberg}"',
+        ]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
   solana-validator:
-    profiles: ['local-chain']
     image: ghcr.io/beeman/solana-test-validator:latest
     container_name: gutenberg-solana-validator
     restart: unless-stopped
@@ -20,47 +42,5 @@ services:
       retries: 30
       start_period: 30s
 
-  gutenberg:
-    profiles: ['app']
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: gutenberg
-      args:
-        VITE_GUTENBERG_SOLANA_RPC_URL: ${VITE_GUTENBERG_SOLANA_RPC_URL:-https://api.mainnet.solana.com}
-        VITE_GUTENBERG_IRYS_GATEWAY: ${VITE_GUTENBERG_IRYS_GATEWAY:-https://node1.irys.xyz}
-        VITE_GUTENBERG_IRYS_NETWORK: ${VITE_GUTENBERG_IRYS_NETWORK:-mainnet}
-        VITE_GUTENBERG_ARWEAVE_MIRRORS: ${VITE_GUTENBERG_ARWEAVE_MIRRORS:-https://arweave.net,https://ar-io.dev,https://g8way.io,https://permagate.io}
-        VITE_GUTENBERG_INDEXER_URL: ${VITE_GUTENBERG_INDEXER_URL:-http://127.0.0.1:4000}
-        VITE_GUTENBERG_EXPLORER_URL: ${VITE_GUTENBERG_EXPLORER_URL:-https://explorer.solana.com/address/{address}}
-    image: gutenberg
-    container_name: gutenberg
-    restart: unless-stopped
-    ports:
-      - '${GUTENBERG_GATEWAY_PORT:-8080}:80'
-      - '${GUTENBERG_INDEXER_PORT:-4000}:4000'
-    volumes:
-      - gutenberg-data:/var/lib/postgresql/data
-    environment:
-      GUTENBERG_INDEXER_NODE_ENV: ${GUTENBERG_INDEXER_NODE_ENV:-production}
-      GUTENBERG_INDEXER_PORT: ${GUTENBERG_INDEXER_PORT:-4000}
-      GUTENBERG_INDEXER_SOLANA_RPC_URL: ${GUTENBERG_INDEXER_SOLANA_RPC_URL:-https://api.mainnet.solana.com}
-      GUTENBERG_INDEXER_SOLANA_WS_URL: ${GUTENBERG_INDEXER_SOLANA_WS_URL:-wss://api.mainnet.solana.com}
-      GUTENBERG_INDEXER_BACKFILL_BATCH_SIZE: ${GUTENBERG_INDEXER_BACKFILL_BATCH_SIZE:-1000}
-      GUTENBERG_INDEXER_BACKFILL_TX_CONCURRENCY: ${GUTENBERG_INDEXER_BACKFILL_TX_CONCURRENCY:-5}
-      GUTENBERG_INDEXER_CORS_ORIGINS: ${GUTENBERG_INDEXER_CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
-    healthcheck:
-      test:
-        [
-          'CMD',
-          'node',
-          '-e',
-          "const p=process.env.GUTENBERG_INDEXER_PORT||'4000';fetch('http://127.0.0.1:'+p+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-        ]
-      interval: 5s
-      timeout: 5s
-      retries: 30
-      start_period: 90s
-
 volumes:
-  gutenberg-data:
+  gutenberg-postgres-data:
