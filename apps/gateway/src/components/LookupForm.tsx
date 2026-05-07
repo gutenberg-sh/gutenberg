@@ -180,12 +180,12 @@ export function LookupForm({
         <div
           className={cn(
             registry_data_card,
-            'flex items-stretch transition-[border-color,box-shadow,background-color] duration-200 ease-out',
+            'flex items-stretch shadow-none transition-[border-color,box-shadow,background-color] duration-200 ease-out',
             has_error
-              ? 'border-destructive/45 ring-destructive/20'
+              ? 'border-destructive/55 ring-2 ring-destructive/30'
               : focused
-                ? 'border-primary/35 ring-primary/15'
-                : '',
+                ? 'border-primary/50 ring-2 ring-primary/35'
+                : 'border-border/55 ring-1 ring-border/25 dark:border-border/60 dark:ring-border/25',
           )}
         >
           <span

@@ -3,7 +3,11 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { ErrorView } from '@/components/ErrorView';
-import { Container } from '@/components/Layout';
+import {
+  RegistryPageLayout,
+  RegistryPageTitle,
+  registry_page_body_gap,
+} from '@/components/RegistryPageLayout';
 import { Button } from '@/components/ui/button';
 import { Pagination } from '@/components/Pagination';
 import {
@@ -17,8 +21,7 @@ import { api_error_message } from '@/lib/api';
 import { usePublicationSearch } from '@/lib/queries';
 import {
   registry_card_inset,
-  registry_data_card,
-  registry_empty_panel,
+  registry_empty_simple,
   registry_feed_x,
   registry_feed_y_gutter,
 } from '@/lib/registry-surface';
@@ -72,27 +75,25 @@ export function SearchRoute() {
   const showing_range_end = trimmed ? offset + results.length : 0;
 
   return (
-    <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
-      <header className="grid gap-3">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          Registry search
-        </p>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
-            Search publications by registry id.
-          </h1>
-        </div>
-        <p className="max-w-[62ch] text-[15px] leading-[1.68] text-foreground-soft">
-          Same idea as a publication registry: type part of a registry id, pick
-          a match, then open the latest release or jump to an exact version with{' '}
+    <RegistryPageLayout
+      eyebrow="Registry search"
+      title={
+        <RegistryPageTitle>
+          Search publications by registry id.
+        </RegistryPageTitle>
+      }
+      description={
+        <p>
+          Same idea as a publication registry: type part of a registry id, pick a
+          match, then open the latest release or jump to an exact version with{' '}
           <span className="font-mono text-[0.95em] tabular text-foreground">
             registry_id@version
           </span>{' '}
           from the header search.
         </p>
-      </header>
-
-      <div className="grid gap-6">
+      }
+    >
+      <div className={registry_page_body_gap}>
         <SearchInput value={query} on_change={set_query} />
 
         {!trimmed ? (
@@ -160,7 +161,7 @@ export function SearchRoute() {
           </PublicationFeedSection>
         )}
       </div>
-    </Container>
+    </RegistryPageLayout>
   );
 }
 
@@ -176,13 +177,14 @@ function SearchInput({
       role="search"
       aria-label="Search the registry"
       className={cn(
-        registry_data_card,
-        'flex items-stretch transition-[border-color,box-shadow,background-color] duration-200 ease-out focus-within:border-primary/35 focus-within:ring-primary/20',
+        registry_feed_x,
+        'flex items-stretch border-b border-border transition-colors duration-200 ease-out',
+        'focus-within:border-primary/50',
       )}
     >
       <span
         aria-hidden
-        className="pointer-events-none flex select-none items-center pl-5 pr-2.5 text-muted-foreground"
+        className="pointer-events-none flex select-none items-center pr-2.5 text-muted-foreground"
       >
         <SearchIcon className="size-4" strokeWidth={1.85} />
       </span>
@@ -219,22 +221,20 @@ function SearchInput({
 
 function EmptyQuery() {
   return (
-    <div className={registry_data_card}>
-      <div className={cn(registry_feed_x, registry_feed_y_gutter)}>
-        <div className={registry_empty_panel}>
-          <SearchIcon
-            className="size-5 text-muted-foreground"
-            strokeWidth={1.6}
-            aria-hidden
-          />
-          <p className="text-[14px] text-foreground">
-            Start typing to search the registry.
-          </p>
-          <p className="max-w-[42ch] text-[12.5px] leading-[1.65] text-muted-foreground">
-            The first publisher to register a registry id keeps it. Partial
-            matches work — you don&rsquo;t need the full slug.
-          </p>
-        </div>
+    <div className={cn(registry_feed_x, registry_feed_y_gutter)}>
+      <div className={registry_empty_simple}>
+        <SearchIcon
+          className="size-5 text-muted-foreground"
+          strokeWidth={1.6}
+          aria-hidden
+        />
+        <p className="text-[14px] text-foreground">
+          Start typing to search the registry.
+        </p>
+        <p className="max-w-[42ch] text-[12.5px] leading-[1.65] text-muted-foreground">
+          The first publisher to register a registry id keeps it. Partial
+          matches work — you don&rsquo;t need the full slug.
+        </p>
       </div>
     </div>
   );
@@ -243,7 +243,7 @@ function EmptyQuery() {
 function NoResults({ q }: { q: string }) {
   return (
     <div className={cn(registry_feed_x, registry_feed_y_gutter)}>
-      <div className={registry_empty_panel}>
+      <div className={registry_empty_simple}>
         <SearchIcon
           className="size-5 text-muted-foreground"
           strokeWidth={1.6}

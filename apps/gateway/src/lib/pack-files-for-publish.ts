@@ -68,15 +68,44 @@ function strip_uniform_directory_prefix(segments_list: string[][]): string[][] {
 
 export type BrowserPackMode = 'folder' | 'files' | 'zip';
 
+function relative_path_for_upload(
+  file: File,
+  relative_paths?: ReadonlyMap<File, string> | null,
+): string {
+  const mapped = relative_paths?.get(file);
+  if (mapped != null && mapped !== '') {
+    return mapped.replace(/\\/g, '/');
+  }
+  if (file.webkitRelativePath && file.webkitRelativePath.length > 0) {
+    return file.webkitRelativePath.replace(/\\/g, '/');
+  }
+  return file.name;
+}
+
+function selection_has_tree_paths(
+  files: File[],
+  relative_paths?: ReadonlyMap<File, string> | null,
+): boolean {
+  for (const file of files) {
+    if (relative_path_for_upload(file, relative_paths).includes('/')) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Turns a directory or loose file selection into session file rows.
  * Skips dotfiles and common junk folders (aligned with the prior release packer).
+ * Tree layout is inferred from slash-separated paths (`relative_paths`, or
+ * `webkitRelativePath` from a directory picker).
  */
 export async function pack_browser_file_selection(input: {
-  mode: Exclude<BrowserPackMode, 'zip'>;
   files: File[];
+  /** When set (e.g. from a folder drop), overrides path resolution per file. */
+  relative_paths?: ReadonlyMap<File, string> | null;
 }): Promise<PublishSessionFile[]> {
-  const { mode, files } = input;
+  const { files, relative_paths } = input;
 
   if (files.length === 0) {
     return [];
@@ -87,13 +116,8 @@ export async function pack_browser_file_selection(input: {
   const pending: { file: File; segments: string[] }[] = [];
 
   for (const file of files) {
-    let segments: string[];
-
-    if (mode === 'folder' && file.webkitRelativePath) {
-      segments = segments_from_relative_path(file.webkitRelativePath);
-    } else {
-      segments = segments_from_relative_path(file.name);
-    }
+    const rel = relative_path_for_upload(file, relative_paths ?? null);
+    const segments = segments_from_relative_path(rel);
 
     if (segments.length === 0 || should_skip_segments(segments)) {
       continue;
@@ -102,10 +126,11 @@ export async function pack_browser_file_selection(input: {
     pending.push({ file, segments });
   }
 
-  const normalized_segments =
-    mode === 'folder'
-      ? strip_uniform_directory_prefix(pending.map((p) => p.segments))
-      : pending.map((p) => p.segments);
+  const tree_pack = selection_has_tree_paths(files, relative_paths ?? null);
+
+  const normalized_segments = tree_pack
+    ? strip_uniform_directory_prefix(pending.map((p) => p.segments))
+    : pending.map((p) => p.segments);
 
   for (let i = 0; i < pending.length; i++) {
     const row = pending[i]!;

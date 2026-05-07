@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 
 import { FilmGrain } from '@/components/FilmGrain';
+import { PageFrameRails } from '@/components/PageFrameRails';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -22,6 +23,7 @@ export function App() {
       className="relative flex min-h-dvh w-full min-w-0 flex-col bg-transparent"
       data-surface="manuscript"
     >
+      <PageFrameRails />
       <FilmGrain />
       <SiteHeader />
       <main className="relative flex flex-1 flex-col bg-transparent">

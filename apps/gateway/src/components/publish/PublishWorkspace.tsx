@@ -1,52 +1,42 @@
 import type { PublishSessionFile } from '@gutenberg/core';
-import { Archive, FolderOpen, LayoutGrid, Upload } from 'lucide-react';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type InputHTMLAttributes,
-} from 'react';
+import { Upload } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { PublishFlowPanel } from '@/components/publish/PublishFlowPanel';
-import { Container } from '@/components/Layout';
+import {
+  RegistryPageLayout,
+  RegistryPageTitle,
+} from '@/components/RegistryPageLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { build_standalone_publish_session } from '@/lib/build-standalone-publish-session';
 import { format_bytes } from '@/lib/format';
 import {
-  type BrowserPackMode,
-  pack_browser_file_selection,
-  pack_zip_file,
-} from '@/lib/pack-files-for-publish';
+  collect_bundle_from_drop,
+  is_zip_file,
+} from '@/lib/collect-bundle-from-drop';
+import { pack_browser_file_selection, pack_zip_file } from '@/lib/pack-files-for-publish';
 import {
-  registry_data_card,
-  registry_nested_panel,
+  registry_feed_column_header_typography,
+  registry_feed_field_input,
+  registry_feed_publish_header_grid,
+  registry_feed_shell,
+  registry_feed_x,
 } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
-const MODE_COPY: Record<BrowserPackMode, { label: string; hint: string }> = {
-  folder: {
-    label: 'Folder',
-    hint: 'Uses your browser folder picker so relative paths match your project.',
-  },
-  files: {
-    label: 'Files',
-    hint: 'Drop or choose multiple files. Each file becomes /filename at the bundle root.',
-  },
-  zip: {
-    label: 'Zip',
-    hint: 'One .zip archive; we unpack in the browser — nothing is uploaded until you sign.',
-  },
-};
+const BUNDLE_SOURCE_HINT =
+  'Drop a project folder, loose files, or a .zip — or browse for files or a zip. Folders keep paths when dragged from your desktop; nothing uploads until you sign.';
 
 export function PublishWorkspace() {
   const [search_params] = useSearchParams();
-  const [mode, set_mode] = useState<BrowserPackMode>('folder');
   const [raw_files, set_raw_files] = useState<File[]>([]);
+  const [relative_paths, set_relative_paths] = useState<Map<
+    File,
+    string
+  > | null>(null);
   const [zip_file, set_zip_file] = useState<File | null>(null);
   const [packed_files, set_packed_files] = useState<
     PublishSessionFile[] | null
@@ -55,9 +45,7 @@ export function PublishWorkspace() {
   const [unpack_busy, set_unpack_busy] = useState(false);
   const [drag_active, set_drag_active] = useState(false);
 
-  const folder_input_ref = useRef<HTMLInputElement>(null);
-  const files_input_ref = useRef<HTMLInputElement>(null);
-  const zip_input_ref = useRef<HTMLInputElement>(null);
+  const bundle_input_ref = useRef<HTMLInputElement>(null);
 
   const [registry_id, set_registry_id] = useState(
     () => search_params.get('registry_id') ?? '',
@@ -68,19 +56,12 @@ export function PublishWorkspace() {
 
   const reset_sources = useCallback(() => {
     set_raw_files([]);
+    set_relative_paths(null);
     set_zip_file(null);
     set_packed_files(null);
     set_pack_error(null);
     set_unpack_busy(false);
   }, []);
-
-  const switch_mode = useCallback(
-    (next: BrowserPackMode) => {
-      set_mode(next);
-      reset_sources();
-    },
-    [reset_sources],
-  );
 
   const file_fingerprint = useMemo(
     () =>
@@ -94,11 +75,9 @@ export function PublishWorkspace() {
   );
 
   useEffect(() => {
-    if (mode === 'zip') {
+    if (zip_file) {
       return;
     }
-
-    const folder_or_files: 'folder' | 'files' = mode;
 
     if (raw_files.length === 0) {
       queueMicrotask(() => {
@@ -113,8 +92,8 @@ export function PublishWorkspace() {
     async function run() {
       try {
         const packed = await pack_browser_file_selection({
-          mode: folder_or_files,
           files: raw_files,
+          relative_paths: relative_paths ?? undefined,
         });
 
         if (cancelled) {
@@ -124,7 +103,7 @@ export function PublishWorkspace() {
         if (packed.length === 0) {
           set_packed_files(null);
           set_pack_error(
-            'Every path was skipped (hidden files only). Choose a different folder or files.',
+            'Every path was skipped (hidden files only). Choose different files or a folder.',
           );
           return;
         }
@@ -146,22 +125,14 @@ export function PublishWorkspace() {
     return () => {
       cancelled = true;
     };
-  }, [mode, raw_files, file_fingerprint]);
+  }, [zip_file, raw_files, file_fingerprint, relative_paths]);
 
   const zip_fingerprint = zip_file
     ? `${zip_file.name}\0${zip_file.size}\0${zip_file.lastModified}`
     : '';
 
   useEffect(() => {
-    if (mode !== 'zip' || !zip_file) {
-      if (mode !== 'zip') {
-        return;
-      }
-
-      queueMicrotask(() => {
-        set_packed_files(null);
-        set_pack_error(null);
-      });
+    if (!zip_file) {
       return;
     }
 
@@ -197,88 +168,60 @@ export function PublishWorkspace() {
     return () => {
       cancelled = true;
     };
-  }, [mode, zip_file, zip_fingerprint]);
+  }, [zip_file, zip_fingerprint]);
 
-  const on_pick_folder = useCallback(() => {
-    folder_input_ref.current?.click();
+  const on_pick_bundle = useCallback(() => {
+    bundle_input_ref.current?.click();
   }, []);
 
-  const on_pick_files = useCallback(() => {
-    files_input_ref.current?.click();
-  }, []);
-
-  const on_pick_zip = useCallback(() => {
-    zip_input_ref.current?.click();
-  }, []);
-
-  const on_folder_change = useCallback(
+  const on_bundle_change = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const list = e.target.files ? [...e.target.files] : [];
-      set_raw_files(list);
       e.target.value = '';
-    },
-    [],
-  );
+      set_pack_error(null);
 
-  const on_files_change = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const list = e.target.files ? [...e.target.files] : [];
-      set_raw_files(list);
-      e.target.value = '';
-    },
-    [],
-  );
-
-  const on_zip_change = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const f = e.target.files?.[0] ?? null;
-      set_zip_file(f);
-      e.target.value = '';
-    },
-    [],
-  );
-
-  const drop_zone_active = mode !== 'folder';
-
-  const on_drop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      set_drag_active(false);
-
-      if (mode === 'folder') {
-        return;
-      }
-
-      const dt = e.dataTransfer.files;
-
-      if (mode === 'zip') {
-        const z =
-          [...dt].find(
-            (f) =>
-              f.name.toLowerCase().endsWith('.zip') ||
-              f.type === 'application/zip' ||
-              f.type === 'application/x-zip-compressed',
-          ) ?? null;
-
-        if (!z) {
-          set_pack_error('Drop a single .zip archive here.');
-          return;
-        }
-
-        set_zip_file(z);
-        return;
-      }
-
-      const list = [...dt].filter((f) => f.size > 0 || f.type !== '');
       if (list.length === 0) {
-        set_pack_error('Drop one or more files (not empty folders).');
         return;
       }
 
+      if (list.length === 1 && is_zip_file(list[0]!)) {
+        set_zip_file(list[0]!);
+        set_raw_files([]);
+        set_relative_paths(null);
+        return;
+      }
+
+      set_zip_file(null);
       set_raw_files(list);
+      set_relative_paths(null);
     },
-    [mode],
+    [],
   );
+
+  const on_drop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    set_drag_active(false);
+
+    const result = await collect_bundle_from_drop(e.dataTransfer);
+
+    if (result.kind === 'reject') {
+      set_pack_error(result.message);
+      return;
+    }
+
+    set_pack_error(null);
+
+    if (result.kind === 'zip') {
+      set_zip_file(result.file);
+      set_raw_files([]);
+      set_relative_paths(null);
+      return;
+    }
+
+    set_zip_file(null);
+    set_raw_files(result.files);
+    set_relative_paths(result.relative_paths);
+  }, []);
 
   const total_bytes =
     packed_files?.reduce((acc, f) => acc + f.size_bytes, 0) ?? 0;
@@ -293,257 +236,191 @@ export function PublishWorkspace() {
   );
 
   return (
-    <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
-      <header className="grid gap-3">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          Publish
-        </p>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
-            Put a release on the record.
-          </h1>
-        </div>
-        <p className="max-w-[62ch] text-[15px] leading-[1.68] text-foreground-soft">
-          Add a folder, loose files, or a zip, set registry id and version, then
+    <RegistryPageLayout
+      eyebrow="Publish"
+      title={<RegistryPageTitle>Put a release on the record.</RegistryPageTitle>}
+      description={
+        <p>
+          Add files, a project folder, or a zip, set registry id and version, then
           connect your wallet. Entry is{' '}
           <span className="font-mono text-[0.95em] tabular text-foreground">
             /index.md
           </span>{' '}
           at the bundle root.
         </p>
-      </header>
-
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.12fr)_minmax(0,300px)] lg:items-start lg:gap-8">
-        <div className="grid gap-4">
-          <section
-            aria-labelledby="publish-source-title"
-            className={registry_data_card}
+      }
+    >
+      <section
+        aria-label="Publish bundle and release"
+        className={cn('grid min-w-0', registry_feed_shell)}
+      >
+        <div
+          className={cn(registry_feed_x, registry_feed_publish_header_grid)}
+        >
+          <div className={registry_feed_column_header_typography}>Source</div>
+          <div
+            className={cn(
+              registry_feed_column_header_typography,
+              'text-right sm:text-right',
+            )}
           >
-            <div className="border-b border-border/25 bg-elevated/20 px-3 py-2 sm:px-4">
-              <p
-                id="publish-source-title"
-                className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground"
-              >
-                Source bundle
-              </p>
-              <p className="mt-0.5 text-[12.5px] leading-snug text-foreground-soft">
-                {MODE_COPY[mode].hint}
-              </p>
-            </div>
+            Registry id · Version
+          </div>
+        </div>
+
+        <div className="grid min-w-0 grid-cols-1 divide-y divide-border/30 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,19rem)] lg:divide-x lg:divide-y-0">
+          <div className="min-w-0 divide-y divide-border/30">
+            <p
+              className={cn(
+                registry_feed_x,
+                'py-2.5 text-[12px] leading-snug text-muted-foreground',
+              )}
+            >
+              {BUNDLE_SOURCE_HINT}
+            </p>
+
+            <input
+              ref={bundle_input_ref}
+              type="file"
+              className="sr-only"
+              multiple
+              onChange={on_bundle_change}
+            />
 
             <div
-              role="tablist"
-              aria-label="Bundle source type"
-              className="flex flex-wrap gap-1 border-b border-border/20 p-1.5 sm:px-2.5"
+              role="region"
+              aria-label="Bundle upload"
+              onDragEnter={(e) => {
+                e.preventDefault();
+                set_drag_active(true);
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+              }}
+              onDragLeave={() => set_drag_active(false)}
+              onDrop={(e) => {
+                void on_drop(e);
+              }}
+              className={cn(
+                registry_feed_x,
+                'grid gap-4 py-4 transition-[background-color] duration-200 ease-out sm:py-5',
+                drag_active && 'bg-muted/15',
+              )}
             >
-              {(
-                [
-                  ['folder', FolderOpen],
-                  ['files', LayoutGrid],
-                  ['zip', Archive],
-                ] as const
-              ).map(([key, Icon]) => (
-                <button
-                  key={key}
+              <div className="flex flex-col items-center gap-1.5 text-center">
+                <Upload
+                  className="size-6 text-muted-foreground"
+                  strokeWidth={1.5}
+                  aria-hidden
+                />
+                <p className="text-[13px] font-medium text-foreground">
+                  Drop bundle here or browse
+                </p>
+                <p className="max-w-[44ch] text-[12px] leading-snug text-muted-foreground">
+                  One .zip unpacks in the browser. Multiple files map to the
+                  bundle root. Drag a folder from your desktop to keep paths.
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button
                   type="button"
-                  role="tab"
-                  aria-selected={mode === key}
-                  onClick={() => switch_mode(key)}
-                  className={cn(
-                    'inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-md px-2.5 font-mono text-[10.5px] uppercase tracking-[0.14em] transition-[color,background-color,box-shadow] duration-200 ease-out sm:flex-none sm:px-3.5',
-                    mode === key
-                      ? 'bg-elevated/90 text-foreground shadow-sm ring-1 ring-primary/20'
-                      : 'text-muted-foreground hover:bg-elevated/40 hover:text-foreground-soft',
-                  )}
+                  variant="outline"
+                  size="sm"
+                  className="text-[12px]"
+                  onClick={on_pick_bundle}
                 >
-                  <Icon
-                    className="size-3 shrink-0"
-                    strokeWidth={1.85}
-                    aria-hidden
-                  />
-                  {MODE_COPY[key].label}
-                </button>
-              ))}
-            </div>
-
-            <input
-              ref={folder_input_ref}
-              type="file"
-              className="sr-only"
-              multiple
-              {...({
-                webkitdirectory: '',
-              } as InputHTMLAttributes<HTMLInputElement>)}
-              onChange={on_folder_change}
-            />
-            <input
-              ref={files_input_ref}
-              type="file"
-              className="sr-only"
-              multiple
-              onChange={on_files_change}
-            />
-            <input
-              ref={zip_input_ref}
-              type="file"
-              className="sr-only"
-              accept=".zip,application/zip,application/x-zip-compressed"
-              onChange={on_zip_change}
-            />
-
-            <div className="p-3 sm:p-4">
-              {mode === 'folder' ? (
-                <div className="grid gap-3">
+                  Choose bundle
+                </Button>
+                {packed_files && packed_files.length > 0 ? (
                   <Button
                     type="button"
-                    variant="outline"
-                    size="lg"
-                    className="h-auto w-full justify-center gap-2 rounded-lg border border-dashed border-border/35 bg-elevated/20 py-5 text-[13px] font-medium transition-colors hover:border-border/50 hover:bg-elevated/35 active:translate-y-px"
-                    onClick={on_pick_folder}
+                    variant="ghost"
+                    size="sm"
+                    className="text-[12px] text-muted-foreground hover:text-foreground"
+                    onClick={reset_sources}
                   >
-                    <FolderOpen
-                      className="size-4"
-                      strokeWidth={1.85}
-                      aria-hidden
-                    />
-                    Choose project folder
+                    Clear
                   </Button>
-                  <p className="text-center font-mono text-[10.5px] leading-snug text-muted-foreground">
-                    Drag and drop cannot preserve folder paths reliably; the
-                    picker keeps your tree intact.
-                  </p>
-                </div>
-              ) : (
-                <div
-                  role={drop_zone_active ? 'region' : undefined}
-                  aria-label={drop_zone_active ? 'Drop files here' : undefined}
-                  onDragEnter={(e) => {
-                    if (!drop_zone_active) {
-                      return;
-                    }
-                    e.preventDefault();
-                    set_drag_active(true);
-                  }}
-                  onDragOver={(e) => {
-                    if (!drop_zone_active) {
-                      return;
-                    }
-                    e.preventDefault();
-                  }}
-                  onDragLeave={() => set_drag_active(false)}
-                  onDrop={drop_zone_active ? on_drop : undefined}
-                  className={cn(
-                    'grid gap-3 rounded-lg border border-dashed border-border/35 bg-background/25 p-4 transition-[border-color,background-color] duration-200 ease-out sm:p-5',
-                    drop_zone_active && drag_active
-                      ? 'border-primary/35 bg-muted/25'
-                      : 'hover:border-border/45',
-                  )}
-                >
-                  <div className="flex flex-col items-center gap-1.5 text-center">
-                    <Upload
-                      className="size-7 text-muted-foreground"
-                      strokeWidth={1.5}
-                      aria-hidden
-                    />
-                    <p className="text-[13px] font-medium text-foreground">
-                      {mode === 'zip'
-                        ? 'Drop a zip archive here'
-                        : 'Drop files here or browse'}
-                    </p>
-                    <p className="max-w-[40ch] text-[12px] leading-snug text-muted-foreground">
-                      {mode === 'zip'
-                        ? 'One archive only. Nested folders inside the zip are kept.'
-                        : 'Paths are flat at the root unless you switch to Folder or Zip.'}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap justify-center gap-1.5">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="rounded-lg active:translate-y-px"
-                      onClick={mode === 'zip' ? on_pick_zip : on_pick_files}
-                    >
-                      {mode === 'zip' ? 'Choose zip' : 'Choose files'}
-                    </Button>
-                    {packed_files && packed_files.length > 0 ? (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        className="rounded-lg text-muted-foreground hover:text-foreground"
-                        onClick={reset_sources}
-                      >
-                        Clear
-                      </Button>
-                    ) : null}
-                  </div>
-                </div>
-              )}
+                ) : null}
+              </div>
+            </div>
 
-              {unpack_busy ? (
-                <p className="mt-3 font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground">
+            {unpack_busy ? (
+              <div className={cn(registry_feed_x, 'py-2.5')}>
+                <p className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground">
                   Unpacking archive…
                 </p>
-              ) : null}
+              </div>
+            ) : null}
 
-              {pack_error ? (
+            {pack_error ? (
+              <div className={registry_feed_x}>
                 <p
-                  className="mt-3 rounded-lg border border-destructive/25 bg-destructive/5 px-2.5 py-2 text-[12.5px] text-destructive"
+                  className="border-b border-destructive/30 bg-destructive/5 py-2.5 text-[12.5px] text-destructive"
                   role="alert"
                 >
                   {pack_error}
                 </p>
-              ) : null}
+              </div>
+            ) : null}
 
-              {packed_files && packed_files.length > 0 && !unpack_busy ? (
-                <div className="mt-3 border-t border-border/25 pt-3">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    Bundle preview
+            {packed_files && packed_files.length > 0 && !unpack_busy ? (
+              <div className={cn(registry_feed_x, 'py-4')}>
+                <p
+                  className={cn(
+                    registry_feed_column_header_typography,
+                    'tracking-[0.2em]',
+                  )}
+                >
+                  Bundle preview
+                </p>
+                <dl className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[11.5px] tabular text-foreground-soft">
+                  <div>
+                    <dt className="sr-only">Files</dt>
+                    <dd>{packed_files.length} files</dd>
+                  </div>
+                  <div>
+                    <dt className="sr-only">Total size</dt>
+                    <dd>{format_bytes(total_bytes)}</dd>
+                  </div>
+                </dl>
+                <ul
+                  className="mt-2 max-h-46 divide-y divide-border/30 overflow-y-auto border-t border-border/40 font-mono text-[10.5px] leading-snug text-foreground/85"
+                >
+                  {packed_files.slice(0, 80).map((f) => (
+                    <li
+                      key={f.path}
+                      className="truncate py-1.5 sm:py-1"
+                      title={f.path}
+                    >
+                      {f.path}
+                    </li>
+                  ))}
+                </ul>
+                {packed_files.length > 80 ? (
+                  <p className="mt-2 text-[10.5px] text-muted-foreground">
+                    Showing 80 of {packed_files.length} paths.
                   </p>
-                  <dl className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[11.5px] tabular text-foreground-soft">
-                    <div>
-                      <dt className="sr-only">Files</dt>
-                      <dd>{packed_files.length} files</dd>
-                    </div>
-                    <div>
-                      <dt className="sr-only">Total size</dt>
-                      <dd>{format_bytes(total_bytes)}</dd>
-                    </div>
-                  </dl>
-                  <ul
-                    className={cn(
-                      registry_nested_panel,
-                      'mt-2 max-h-[11.5rem] overflow-y-auto font-mono text-[10.5px] leading-snug text-foreground/85',
-                    )}
-                  >
-                    {packed_files.slice(0, 80).map((f) => (
-                      <li
-                        key={f.path}
-                        className="truncate border-b border-border/20 px-2 py-1 last:border-b-0"
-                        title={f.path}
-                      >
-                        {f.path}
-                      </li>
-                    ))}
-                  </ul>
-                  {packed_files.length > 80 ? (
-                    <p className="mt-1.5 text-[10.5px] text-muted-foreground">
-                      Showing 80 of {packed_files.length} paths.
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
-          </section>
-        </div>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
 
-        <aside className="grid gap-4 lg:sticky lg:top-20">
-          <section className={cn(registry_data_card, 'p-3 sm:p-4')}>
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-              Release details
-            </p>
-            <div className="mt-3 grid gap-3">
-              <div className="grid gap-1.5">
-                <Label htmlFor="pub-registry-id">Registry ID</Label>
+          <div className="min-w-0 divide-y divide-border/30 lg:sticky lg:top-24 lg:self-start">
+            <div className={cn(registry_feed_x, 'py-2 sm:hidden')}>
+              <p className={registry_feed_column_header_typography}>Release</p>
+            </div>
+            <div className={cn(registry_feed_x, 'grid gap-6 py-4 sm:py-5')}>
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="pub-registry-id"
+                  className={cn(
+                    registry_feed_column_header_typography,
+                    'font-mono',
+                  )}
+                >
+                  Registry id
+                </Label>
                 <Input
                   id="pub-registry-id"
                   value={registry_id}
@@ -551,39 +428,49 @@ export function PublishWorkspace() {
                   placeholder="river-notes"
                   autoComplete="off"
                   spellCheck={false}
-                  className="rounded-lg font-mono text-[13px]"
+                  className={registry_feed_field_input}
                 />
                 <p className="text-[11px] leading-snug text-muted-foreground">
                   Lowercase letters, numbers, dots, underscores, hyphens. First
                   character must be a letter or digit.
                 </p>
               </div>
-              <div className="grid gap-1.5">
-                <Label htmlFor="pub-version">Version</Label>
+              <div className="grid gap-2">
+                <Label
+                  htmlFor="pub-version"
+                  className={cn(
+                    registry_feed_column_header_typography,
+                    'font-mono',
+                  )}
+                >
+                  Version
+                </Label>
                 <Input
                   id="pub-version"
                   value={version}
                   onChange={(e) => set_version(e.target.value)}
                   placeholder="1.0.0"
                   autoComplete="off"
-                  className="rounded-lg font-mono text-[13px]"
+                  className={registry_feed_field_input}
                 />
               </div>
               <p className="text-[11px] leading-snug text-muted-foreground">
                 Root must include <span className="font-mono">/index.md</span>.
               </p>
             </div>
-          </section>
-        </aside>
-      </div>
+          </div>
+        </div>
 
-      <PublishComposerFooter
-        bundle_fingerprint={bundle_fingerprint}
-        packed_files={packed_files}
-        registry_id={registry_id}
-        version={version}
-      />
-    </Container>
+        <div className="min-w-0 border-t border-border">
+          <PublishComposerFooter
+            bundle_fingerprint={bundle_fingerprint}
+            packed_files={packed_files}
+            registry_id={registry_id}
+            version={version}
+          />
+        </div>
+      </section>
+    </RegistryPageLayout>
   );
 }
 
@@ -618,10 +505,10 @@ function PublishComposerFooter({
   }, [packed_files, registry_id, version]);
 
   return (
-    <div className="mt-6 grid gap-3 lg:mt-8">
+    <div className={cn(registry_feed_x, 'grid gap-3 py-5 sm:py-6')}>
       {composed.kind === 'invalid' ? (
         <p
-          className="rounded-lg border border-destructive/25 bg-destructive/5 px-3 py-2 text-[12.5px] text-destructive"
+          className="border-b border-destructive/30 bg-destructive/5 py-2.5 text-[12.5px] text-destructive"
           role="alert"
         >
           {composed.message}

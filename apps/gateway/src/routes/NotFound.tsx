@@ -2,12 +2,8 @@ import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { Container } from '@/components/Layout';
-import { useIsApplePlatform } from '@/hooks/usePlatform';
-import { kbd_chrome } from '@/lib/registry-surface';
 
 export function NotFoundRoute() {
-  const is_mac = useIsApplePlatform();
-
   return (
     <Container as="section" className="grid gap-7 py-24 lg:py-32">
       <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
@@ -23,7 +19,7 @@ export function NotFoundRoute() {
         </code>
         . Double-check both, then try again from search.
       </p>
-      <div className="mt-2 flex items-center gap-3">
+      <div className="mt-2">
         <Link
           to="/"
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:translate-y-px"
@@ -31,11 +27,6 @@ export function NotFoundRoute() {
           <ArrowLeft className="size-3.5" strokeWidth={2} aria-hidden />
           Back to search
         </Link>
-        <span className="hidden items-center gap-1.5 text-[12px] text-muted-foreground sm:inline-flex">
-          or press
-          <span className={kbd_chrome}>{is_mac ? '⌘' : 'Ctrl'}</span>
-          <span className={kbd_chrome}>K</span>
-        </span>
       </div>
     </Container>
   );

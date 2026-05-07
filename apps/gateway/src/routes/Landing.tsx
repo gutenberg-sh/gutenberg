@@ -5,7 +5,7 @@ import { LookupForm } from '@/components/LookupForm';
 import { RecentReleases } from '@/components/RecentReleases';
 import { format_count } from '@/lib/format';
 import { useIndexerStats } from '@/lib/queries';
-import { kbd_chrome, registry_command_shell } from '@/lib/registry-surface';
+import { registry_command_shell } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
@@ -94,52 +94,78 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
 export function LandingRoute() {
   return (
     <div className="flex flex-col">
-      <Container className="pb-16 pt-10 lg:pb-24 lg:pt-14">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-stretch lg:gap-16">
-          <div className="grid content-start gap-5 self-start sm:gap-6 lg:pt-2">
-            <h1 className="tactical-display text-[clamp(1.65rem,6vw,3.25rem)] text-foreground dark:text-primary sm:max-w-[24ch]">
-              Publish work that stays public.
-            </h1>
-            <p className="max-w-[42ch] text-[14px] leading-relaxed text-foreground-soft sm:text-[15px] sm:leading-relaxed">
-              Anyone can publish; once it&rsquo;s on the record, nobody can
-              unpublish it.
-            </p>
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5">
-              <Link
-                to="/publish"
-                className="inline-flex w-full min-h-11 items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2.5 text-[13px] font-semibold leading-tight text-primary-foreground shadow-sm transition-[background-color,transform,box-shadow] duration-200 ease-out hover:bg-primary/90 hover:shadow active:translate-y-px active:scale-[0.99] sm:w-auto sm:px-5 sm:text-[14px]"
-              >
-                Publish a release
-              </Link>
-              <Link
-                to="/browse"
+      <Container className="pb-20 pt-14 sm:pb-24 sm:pt-18 lg:pb-28 lg:pt-22">
+        <div className="grid gap-9 lg:gap-11">
+          <div className="grid gap-10 lg:min-h-[min(36svh,480px)] lg:grid-cols-[minmax(0,1.12fr)_minmax(0,0.92fr)] lg:items-start lg:gap-x-16 lg:gap-y-8">
+            <div className="grid max-w-xl content-start gap-6 self-start sm:max-w-none">
+              <p className="text-xs font-medium tracking-wide text-muted-foreground">
+                Solana registry
+              </p>
+              <h1
                 className={cn(
-                  registry_command_shell,
-                  'inline-flex w-full min-h-11 items-center justify-center px-4 py-2.5 text-[13px] font-medium leading-tight text-foreground-soft transition-[color,border-color,background-color,box-shadow] duration-200 ease-out hover:border-border-strong hover:bg-elevated/50 hover:text-foreground sm:w-auto sm:px-5 sm:text-[14px]',
+                  'max-w-[min(24ch,90vw)] text-3xl font-medium leading-[108%] tracking-[-0.03em]',
+                  'text-foreground/88 [text-shadow:0_1px_0_rgba(255,255,255,0.32)]',
+                  'dark:text-foreground dark:[text-shadow:0_1px_0_#1f1f1f]',
+                  'md:text-[42px]',
                 )}
               >
-                Browse publications
-              </Link>
-            </div>
-          </div>
-
-          <div className="flex min-h-0 flex-col justify-center lg:pt-0">
-            <div className="grid w-full gap-2.5 sm:gap-3">
-              <div className="flex items-baseline justify-between gap-3">
-                <p className="text-xs font-medium tracking-wide text-muted-foreground">
-                  Find a publication
-                </p>
-                <p className="hidden shrink-0 text-[11.5px] text-muted-foreground sm:block">
-                  <span className={kbd_chrome}>⌘K</span> /{' '}
-                  <span className={kbd_chrome}>Ctrl K</span> anywhere
-                </p>
+                Publish work that stays public.
+              </h1>
+              <p
+                className={cn(
+                  'max-w-[min(40ch,22rem)] text-base font-medium leading-[138%] tracking-[-0.03em]',
+                  'text-muted-foreground md:text-lg',
+                )}
+              >
+                Anyone can publish; once it&rsquo;s on the record, nobody can
+                unpublish it.
+              </p>
+              <p className="max-w-md text-[11px] font-medium leading-snug tracking-wide text-muted-foreground sm:text-[12px]">
+                {['Signed release', 'On-chain record', 'Reader-verified'].map(
+                  (label, i) => (
+                    <span key={label} className="inline whitespace-nowrap">
+                      {i > 0 ? (
+                        <span
+                          aria-hidden
+                          className="select-none px-1.5 text-border-strong/55 sm:px-2"
+                        >
+                          ·
+                        </span>
+                      ) : null}
+                      {label}
+                    </span>
+                  ),
+                )}
+              </p>
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5">
+                <Link
+                  to="/publish"
+                  className="inline-flex w-full min-h-11 items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2.5 text-[13px] font-semibold leading-tight text-primary-foreground shadow-sm transition-[background-color,transform,box-shadow] duration-200 ease-out hover:bg-primary/90 hover:shadow active:translate-y-px active:scale-[0.99] sm:w-auto sm:px-5 sm:text-[14px]"
+                >
+                  Publish a release
+                </Link>
+                <Link
+                  to="/browse"
+                  className={cn(
+                    registry_command_shell,
+                    'inline-flex w-full min-h-11 items-center justify-center px-4 py-2.5 text-[13px] font-medium leading-tight text-foreground-soft transition-[color,border-color,background-color,box-shadow] duration-200 ease-out hover:border-border-strong hover:bg-elevated/50 hover:text-foreground sm:w-auto sm:px-5 sm:text-[14px]',
+                  )}
+                >
+                  Browse publications
+                </Link>
               </div>
+            </div>
+
+            <div className="grid w-full gap-2.5 sm:gap-3 lg:pt-2">
+              <p className="text-xs font-medium tracking-wide text-muted-foreground">
+                Find a publication
+              </p>
               <LookupForm size="lg" placeholder="registry id or id@version" />
             </div>
           </div>
-        </div>
 
-        <StatsStrip />
+          <StatsStrip embedded />
+        </div>
       </Container>
 
       <Container as="section" className="border-t border-border py-14 lg:py-20">
@@ -302,7 +328,7 @@ function Section({
   );
 }
 
-function StatsStrip() {
+function StatsStrip({ embedded = false }: { embedded?: boolean }) {
   const stats = useIndexerStats();
 
   const items: ReadonlyArray<{
@@ -320,7 +346,11 @@ function StatsStrip() {
   return (
     <nav
       aria-label="Registry totals"
-      className="mt-8 border-t border-border/30 pt-8 sm:mt-10 sm:pt-10"
+      className={cn(
+        embedded
+          ? 'border-t border-border/50 pt-8 sm:pt-9'
+          : 'mt-8 border-t border-border/30 pt-8 sm:mt-10 sm:pt-10',
+      )}
     >
       <ul className="grid grid-cols-3 divide-x divide-border/25 text-[13px]">
         {items.map((it) => {
@@ -329,7 +359,7 @@ function StatsStrip() {
             <li key={it.key} className="min-w-0">
               <Link
                 to={it.href}
-                className="group flex min-h-[4.5rem] flex-col items-center justify-center gap-1 px-1.5 py-2 text-center sm:min-h-0 sm:gap-1.5 sm:px-3 sm:py-3"
+                className="group flex min-h-18 flex-col items-center justify-center gap-1 px-1.5 py-2 text-center sm:min-h-0 sm:gap-1.5 sm:px-3 sm:py-3"
               >
                 <span
                   className={cn(

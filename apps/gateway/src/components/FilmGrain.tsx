@@ -5,11 +5,11 @@ import { useEffect, useRef, type CSSProperties } from 'react';
  * (Raising SCALE makes chunky blobs — that was wrong before.)
  */
 const SCALE = 1;
-const FPS = 14;
+const FPS = 8;
 /** Luminance swing around BASE_GRAY (keeps texture dark, not milky). */
 const NOISE_CONTRAST = 0.5;
 /** Center noise toward shadow gray so blended layer reads darker. */
-const BASE_GRAY = 66;
+const BASE_GRAY = 72;
 const REDUCED_MOTION_MS = 3200;
 
 /** Per WHATWG / Chromium, each `getRandomValues` call is limited to 65536 bytes. */
@@ -127,9 +127,9 @@ export function FilmGrain() {
       aria-hidden
       className="pointer-events-none fixed inset-0 z-45"
       style={{
-        opacity: 'var(--grain-opacity, 0.11)',
+        opacity: 'var(--grain-opacity, 0.04)',
         mixBlendMode:
-          'var(--grain-blend-mode, overlay)' as CSSProperties['mixBlendMode'],
+          'var(--grain-blend-mode, soft-light)' as CSSProperties['mixBlendMode'],
       }}
     >
       <canvas ref={canvas_ref} className="block h-full w-full" />

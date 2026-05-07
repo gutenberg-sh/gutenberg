@@ -1,31 +1,14 @@
-import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
-import { LookupDialog } from '@/components/LookupDialog';
 import { ConnectWalletButton } from '@/components/wallet/ConnectWalletButton';
 import { Wordmark } from '@/components/Wordmark';
 import { registry_command_shell } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 export function SiteHeader() {
-  const [lookup_open, set_lookup_open] = useState(false);
-
-  useEffect(() => {
-    function on_keydown(e: KeyboardEvent) {
-      const meta = e.metaKey || e.ctrlKey;
-      if (meta && (e.key === 'k' || e.key === 'K')) {
-        e.preventDefault();
-        set_lookup_open((current) => !current);
-      }
-    }
-    window.addEventListener('keydown', on_keydown);
-    return () => window.removeEventListener('keydown', on_keydown);
-  }, []);
-
   return (
-    <>
-      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/75">
-        <div className="mx-auto flex w-full max-w-[1400px] items-center gap-2 px-4 py-2.5 sm:gap-3 sm:px-6 lg:gap-4 lg:px-10">
+    <header className="sticky top-0 z-40 border-b border-border/55 bg-surface/92 backdrop-blur-md supports-backdrop-filter:bg-surface/85 dark:border-border/80 dark:bg-background/90 supports-backdrop-filter:dark:bg-background/75">
+        <div className="mx-auto flex w-full max-w-[1332px] items-center gap-2 px-6 py-2.5 sm:gap-3 sm:px-6 lg:gap-4 lg:px-10">
           <Link
             to="/"
             aria-label="Gutenberg gateway, home"
@@ -33,21 +16,6 @@ export function SiteHeader() {
           >
             <Wordmark className="text-[17px] text-foreground sm:text-[19px]" />
           </Link>
-
-          <NavLink
-            to="/publish"
-            className={({ isActive }) =>
-              cn(
-                registry_command_shell,
-                'shrink-0 px-3 py-1.5 text-[13px] font-medium transition-[color,background-color,border-color,box-shadow] duration-200 ease-out sm:hidden',
-                isActive
-                  ? 'border-primary/35 bg-primary/10 text-foreground'
-                  : 'text-muted-foreground hover:border-border-strong hover:bg-elevated/60 hover:text-foreground',
-              )
-            }
-          >
-            Publish
-          </NavLink>
 
           <nav
             aria-label="Primary"
@@ -71,9 +39,6 @@ export function SiteHeader() {
           </div>
         </div>
       </header>
-
-      <LookupDialog open={lookup_open} on_open_change={set_lookup_open} />
-    </>
   );
 }
 

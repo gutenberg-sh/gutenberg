@@ -12,7 +12,7 @@ export function Container({
   return (
     <As
       className={cn(
-        'mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-10',
+        'mx-auto w-full max-w-[1332px] px-6 sm:px-6 lg:px-10',
         className,
       )}
     >

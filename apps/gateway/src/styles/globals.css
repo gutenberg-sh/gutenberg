@@ -56,119 +56,120 @@
     Times, serif;
 }
 
-/* ─── Manuscript / parchment (light) — default & explicit `.light` ─────── */
+/* ─── Light — warm paper base; chrome (surface) sits off page (background) ─ */
 html,
 html.light {
-  --background: #f0ebe1;
-  --surface: #e8e2d6;
-  --card: #f3efe6;
-  --elevated: #faf6ed;
-  --foreground: #1c1814;
-  --foreground-soft: #4a433a;
-  --card-foreground: #1c1814;
-  --popover: #faf6ed;
-  --popover-foreground: #1c1814;
+  --background: #f1f0ec;
+  --surface: #e9e8e4;
+  --card: #faf9f7;
+  --elevated: #f5f4f1;
+  --foreground: #0a0a0a;
+  --foreground-soft: #525252;
+  --card-foreground: #0a0a0a;
+  --popover: #faf9f7;
+  --popover-foreground: #0a0a0a;
 
-  --primary: #5c4f3d;
-  --primary-foreground: #f5f0e6;
+  --primary: #171717;
+  --primary-foreground: #fafafa;
 
-  --secondary: #ddd6c9;
-  --secondary-foreground: #1c1814;
+  --secondary: #dedcd6;
+  --secondary-foreground: #0a0a0a;
 
-  --muted: #ddd6c9;
-  --muted-foreground: #6e665a;
+  --muted: #dedcd6;
+  --muted-foreground: #737373;
 
-  --accent: #5c4f3d;
-  --accent-foreground: #f5f0e6;
+  --accent: #171717;
+  --accent-foreground: #fafafa;
 
-  --destructive: #a82c28;
-  --destructive-foreground: #f5f0e6;
+  --destructive: #e13737;
+  --destructive-foreground: #fafafa;
 
-  --border: #cbc3b3;
-  --border-strong: #948a7a;
-  --input: #cbc3b3;
-  --ring: #7d704d;
+  --border: #cfcbc3;
+  --border-strong: #6b6b6b;
+  --input: #cfcbc3;
+  --ring: #a3a3a3;
 
-  --selection-bg: #c4a574;
-  --selection-fg: #1c1814;
-  --telemetry-green: #3d5a4a;
-  --command-shell-inset: inset 0 1px 0 rgba(255, 252, 245, 0.55);
-  --grain-opacity: 0.1;
-  --grain-blend-mode: multiply;
+  --selection-bg: #d4d4d4;
+  --selection-fg: #0a0a0a;
+  --telemetry-green: #45d09d;
+  --command-shell-inset: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  /* multiply disappears on near-white; soft-light + higher opacity reads as film */
+  --grain-opacity: 0.088;
+  --grain-blend-mode: soft-light;
 }
 
-/* ─── Chiaroscuro (dark) — explicit `.dark` ─────────────────────────────── */
+/* ─── Dark — MetEngine tokens (grey-925 page, #202020 / #090909 chrome) ─── */
 html.dark {
-  --background: #121110;
-  --surface: #1a1816;
-  --card: #1f1c19;
-  --elevated: #262220;
-  --foreground: #e8e0d4;
-  --foreground-soft: #a89b8c;
-  --card-foreground: #e8e0d4;
-  --popover: #1f1c19;
-  --popover-foreground: #e8e0d4;
+  --background: #121212;
+  --surface: #171717;
+  --card: #191919;
+  --elevated: #202020;
+  --foreground: #e8e8e8;
+  --foreground-soft: #7f7f7f;
+  --card-foreground: #e8e8e8;
+  --popover: #171717;
+  --popover-foreground: #e8e8e8;
 
-  --primary: #d4c4a8;
-  --primary-foreground: #141210;
+  --primary: #e8e8e8;
+  --primary-foreground: #363636;
 
-  --secondary: #2a2622;
-  --secondary-foreground: #e8e0d4;
+  --secondary: #262626;
+  --secondary-foreground: #e8e8e8;
 
-  --muted: #2a2622;
-  --muted-foreground: #8a8074;
+  --muted: #262626;
+  --muted-foreground: #737373;
 
-  --accent: #d4c4a8;
-  --accent-foreground: #141210;
+  --accent: #e8e8e8;
+  --accent-foreground: #363636;
 
-  --destructive: #c44a42;
-  --destructive-foreground: #f5f0e6;
+  --destructive: #e13737;
+  --destructive-foreground: #fafafa;
 
-  --border: #3a342d;
-  --border-strong: #4d453c;
-  --input: #3a342d;
-  --ring: #c9b99a;
+  --border: #202020;
+  --border-strong: #2c2c2c;
+  --input: #202020;
+  --ring: #525252;
 
-  --selection-bg: #9a8a72;
-  --selection-fg: #141210;
-  --telemetry-green: #6d8f6f;
-  --command-shell-inset: inset 0 1px 0 rgba(212, 196, 168, 0.07);
-  --grain-opacity: 0.085;
-  --grain-blend-mode: overlay;
+  --selection-bg: #404040;
+  --selection-fg: #e8e8e8;
+  --telemetry-green: #45d09d;
+  --command-shell-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --grain-opacity: 0.034;
+  --grain-blend-mode: soft-light;
 }
 
 /* ─── System dark when the user has not pinned light or dark —────────────── */
 @media (prefers-color-scheme: dark) {
   html:not(.light):not(.dark) {
-    --background: #121110;
-    --surface: #1a1816;
-    --card: #1f1c19;
-    --elevated: #262220;
-    --foreground: #e8e0d4;
-    --foreground-soft: #a89b8c;
-    --card-foreground: #e8e0d4;
-    --popover: #1f1c19;
-    --popover-foreground: #e8e0d4;
-    --primary: #d4c4a8;
-    --primary-foreground: #141210;
-    --secondary: #2a2622;
-    --secondary-foreground: #e8e0d4;
-    --muted: #2a2622;
-    --muted-foreground: #8a8074;
-    --accent: #d4c4a8;
-    --accent-foreground: #141210;
-    --destructive: #c44a42;
-    --destructive-foreground: #f5f0e6;
-    --border: #3a342d;
-    --border-strong: #4d453c;
-    --input: #3a342d;
-    --ring: #c9b99a;
-    --selection-bg: #9a8a72;
-    --selection-fg: #141210;
-    --telemetry-green: #6d8f6f;
-    --command-shell-inset: inset 0 1px 0 rgba(212, 196, 168, 0.07);
-    --grain-opacity: 0.085;
-    --grain-blend-mode: overlay;
+    --background: #121212;
+    --surface: #171717;
+    --card: #191919;
+    --elevated: #202020;
+    --foreground: #e8e8e8;
+    --foreground-soft: #7f7f7f;
+    --card-foreground: #e8e8e8;
+    --popover: #171717;
+    --popover-foreground: #e8e8e8;
+    --primary: #e8e8e8;
+    --primary-foreground: #363636;
+    --secondary: #262626;
+    --secondary-foreground: #e8e8e8;
+    --muted: #262626;
+    --muted-foreground: #737373;
+    --accent: #e8e8e8;
+    --accent-foreground: #363636;
+    --destructive: #e13737;
+    --destructive-foreground: #fafafa;
+    --border: #202020;
+    --border-strong: #2c2c2c;
+    --input: #202020;
+    --ring: #525252;
+    --selection-bg: #404040;
+    --selection-fg: #e8e8e8;
+    --telemetry-green: #45d09d;
+    --command-shell-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    --grain-opacity: 0.034;
+    --grain-blend-mode: soft-light;
   }
 }
 
@@ -258,8 +259,8 @@ html.dark {
 
 /*
  * Textural treatment:
- * - Ambient light wash on #root::before (upper-left key, soft falloff).
- * - Grain: FilmGrain canvas (fixed z 45) redraws random pixels each frame — not a panned tile.
+ * - Ambient wash on #root::before (very soft; keeps depth without heavy vignette).
+ * - Grain: FilmGrain canvas (fixed z 45) — low contrast, slow tick, soft-light blend.
  * - Modals use z-index above 45 so they sit above grain.
  */
 #root {
@@ -279,53 +280,66 @@ html.dark {
   mix-blend-mode: normal;
 }
 html.light #root::before {
-  background: radial-gradient(
-    ellipse 130% 85% at 8% -5%,
-    rgba(255, 250, 240, 0.55) 0%,
-    transparent 48%
-  );
-  opacity: 0.85;
+  background:
+    radial-gradient(
+      ellipse 120% 80% at 12% -8%,
+      rgba(255, 255, 255, 0.28) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 90% 55% at 88% 100%,
+      rgba(0, 0, 0, 0.028) 0%,
+      transparent 50%
+    );
+  opacity: 0.42;
 }
 html.dark #root::before {
   background:
     radial-gradient(
-      ellipse 125% 88% at 14% -6%,
-      rgba(212, 196, 168, 0.14) 0%,
-      transparent 52%
+      ellipse 140% 90% at 18% -12%,
+      rgba(255, 255, 255, 0.045) 0%,
+      transparent 58%
     ),
     radial-gradient(
-      ellipse 90% 55% at 92% 102%,
-      rgba(0, 0, 0, 0.35) 0%,
-      transparent 42%
+      ellipse 95% 60% at 50% 108%,
+      rgba(0, 0, 0, 0.28) 0%,
+      transparent 45%
     );
-  opacity: 1;
+  opacity: 0.72;
 }
 @media (prefers-color-scheme: dark) {
   html:not(.light):not(.dark) #root::before {
     background:
       radial-gradient(
-        ellipse 125% 88% at 14% -6%,
-        rgba(212, 196, 168, 0.14) 0%,
-        transparent 52%
+        ellipse 140% 90% at 18% -12%,
+        rgba(255, 255, 255, 0.045) 0%,
+        transparent 58%
       ),
       radial-gradient(
-        ellipse 90% 55% at 92% 102%,
-        rgba(0, 0, 0, 0.35) 0%,
-        transparent 42%
+        ellipse 95% 60% at 50% 108%,
+        rgba(0, 0, 0, 0.28) 0%,
+        transparent 45%
       );
-    opacity: 1;
+    opacity: 0.72;
   }
 }
 @media (prefers-color-scheme: light) {
   html:not(.light):not(.dark) #root::before {
-    background: radial-gradient(
-      ellipse 130% 85% at 8% -5%,
-      rgba(255, 250, 240, 0.55) 0%,
-      transparent 48%
-    );
-    opacity: 0.85;
+    background:
+      radial-gradient(
+        ellipse 120% 80% at 12% -8%,
+        rgba(255, 255, 255, 0.28) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 90% 55% at 88% 100%,
+        rgba(0, 0, 0, 0.028) 0%,
+        transparent 50%
+      );
+    opacity: 0.42;
   }
 }
+
 #root > * {
   position: relative;
   z-index: 2;

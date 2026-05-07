@@ -2,7 +2,10 @@ import { Compass, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 
 import { ErrorView } from '@/components/ErrorView';
-import { Container } from '@/components/Layout';
+import {
+  RegistryPageLayout,
+  RegistryPageTitle,
+} from '@/components/RegistryPageLayout';
 import { Button } from '@/components/ui/button';
 import { Pagination } from '@/components/Pagination';
 import {
@@ -14,7 +17,7 @@ import { api_error_message } from '@/lib/api';
 import { useFeed } from '@/lib/queries';
 import {
   registry_card_inset,
-  registry_empty_panel,
+  registry_empty_simple,
   registry_feed_x,
   registry_feed_y_gutter,
 } from '@/lib/registry-surface';
@@ -41,49 +44,47 @@ export function BrowseRoute() {
   const refresh_locked = manual_refresh || feed.isFetching;
 
   return (
-    <Container className="grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16">
-      <header className="grid gap-3">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          New releases
-        </p>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="text-[2rem] font-semibold leading-[1.12] tracking-[-0.03em] text-foreground sm:text-[2.5rem]">
-            Everything publishing right now.
-          </h1>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            aria-busy={manual_refresh}
-            onClick={() => {
-              set_manual_refresh(true);
-              void Promise.all([
-                feed.refetch(),
-                new Promise<void>((resolve) => {
-                  setTimeout(resolve, MIN_REFRESH_SPIN_MS);
-                }),
-              ]).finally(() => set_manual_refresh(false));
-            }}
-            className="gap-1.5 px-2.5 py-1.5 text-[12px] text-foreground-soft hover:border-border-strong hover:text-foreground"
-            disabled={refresh_locked}
-          >
-            <RefreshCw
-              className={cn(
-                'size-3.5',
-                manual_refresh && 'motion-safe:animate-spin',
-              )}
-              strokeWidth={1.85}
-              aria-hidden
-            />
-            Refresh
-          </Button>
-        </div>
-        <p className="max-w-[62ch] text-[15px] leading-[1.68] text-foreground-soft">
+    <RegistryPageLayout
+      eyebrow="New releases"
+      title={
+        <RegistryPageTitle>Everything publishing right now.</RegistryPageTitle>
+      }
+      description={
+        <p>
           A living feed of new releases — each row is one signed, immutable
           version. Open one to read it.
         </p>
-      </header>
-
+      }
+      headerAside={
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          aria-busy={manual_refresh}
+          onClick={() => {
+            set_manual_refresh(true);
+            void Promise.all([
+              feed.refetch(),
+              new Promise<void>((resolve) => {
+                setTimeout(resolve, MIN_REFRESH_SPIN_MS);
+              }),
+            ]).finally(() => set_manual_refresh(false));
+          }}
+          className="gap-1.5 px-2.5 py-1.5 text-[12px] text-foreground-soft hover:border-border-strong hover:text-foreground"
+          disabled={refresh_locked}
+        >
+          <RefreshCw
+            className={cn(
+              'size-3.5',
+              manual_refresh && 'motion-safe:animate-spin',
+            )}
+            strokeWidth={1.85}
+            aria-hidden
+          />
+          Refresh
+        </Button>
+      }
+    >
       <PublicationFeedSection
         aria-label="New releases feed"
         loading={feed.isLoading}
@@ -145,14 +146,14 @@ export function BrowseRoute() {
           </PublicationList>
         )}
       </PublicationFeedSection>
-    </Container>
+    </RegistryPageLayout>
   );
 }
 
 function EmptyFeed() {
   return (
     <div className={cn(registry_feed_x, registry_feed_y_gutter)}>
-      <div className={registry_empty_panel}>
+      <div className={registry_empty_simple}>
         <Compass
           className="size-5 text-muted-foreground"
           strokeWidth={1.6}

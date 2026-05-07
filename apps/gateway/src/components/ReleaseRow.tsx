@@ -5,7 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import { PublisherAddressLink } from '@/components/PublisherAddressLink';
 import { format_bytes, format_relative_time, shorten } from '@/lib/format';
 import type { ReleaseDto } from '@/lib/queries';
-import { registry_feed_x } from '@/lib/registry-surface';
+import {
+  registry_feed_column_header_typography,
+  registry_feed_header_grid,
+  registry_feed_x,
+} from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 /** Shared list container: horizontal rules only (matches browse / publisher / search). */
@@ -113,14 +117,18 @@ function Dot() {
 
 export function ReleaseListHeader() {
   return (
-    <div
-      className={cn(
-        registry_feed_x,
-        'hidden grid-cols-[minmax(0,1fr)_auto] gap-x-6 border-b border-border/25 bg-elevated/20 py-2.5 text-[10.5px] font-medium uppercase tracking-[0.22em] text-muted-foreground sm:grid sm:py-3',
-      )}
-    >
-      <div className="min-w-0">Registry ID</div>
-      <div className="text-right tabular-nums">Published</div>
+    <div className={cn(registry_feed_x, registry_feed_header_grid)}>
+      <div className={cn(registry_feed_column_header_typography, 'min-w-0')}>
+        Registry ID
+      </div>
+      <div
+        className={cn(
+          registry_feed_column_header_typography,
+          'text-right tabular-nums',
+        )}
+      >
+        Published
+      </div>
     </div>
   );
 }

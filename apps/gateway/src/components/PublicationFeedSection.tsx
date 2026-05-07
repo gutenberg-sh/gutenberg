@@ -14,7 +14,7 @@ import {
 } from '@/components/ReleaseRow';
 import { format_relative_time, shorten } from '@/lib/format';
 import type { PublicationDto } from '@/lib/queries';
-import { registry_data_card, registry_feed_x } from '@/lib/registry-surface';
+import { registry_feed_shell, registry_feed_x } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 type PublicationFeedSectionProps = {
@@ -41,7 +41,7 @@ export function PublicationFeedFooter({
     <div
       className={cn(
         registry_feed_x,
-        'grid gap-4 border-t border-border/25 bg-elevated/15 pb-5 pt-5 sm:pb-6 sm:pt-5',
+        'grid gap-4 border-t border-border pb-5 pt-5 sm:pb-6 sm:pt-5',
       )}
     >
       <div className="min-w-0 text-[12px] font-medium tabular-nums leading-relaxed text-muted-foreground">
@@ -70,7 +70,7 @@ export function PublicationFeedSection({
       aria-busy={loading || undefined}
       className={cn('grid min-w-0', className)}
     >
-      <div className={cn(registry_data_card, 'grid min-w-0 gap-0')}>
+      <div className={cn(registry_feed_shell)}>
         {show_column_headers ? <ReleaseListHeader /> : null}
         {loading ? (
           <ReleaseListSkeleton rows={skeleton_rows} />

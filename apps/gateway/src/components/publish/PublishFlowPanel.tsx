@@ -19,11 +19,7 @@ import {
   type SolanaCostEstimate,
 } from '@/lib/publish-cost';
 import { type PublishFlowEvent, run_publish_flow } from '@/lib/publish-flow';
-import {
-  registry_data_card,
-  registry_data_card_accent,
-  registry_nested_panel,
-} from '@/lib/registry-surface';
+import { registry_feed_x } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 type RunState =
@@ -101,26 +97,28 @@ export function PublishFlowPanel({
   }
 
   return (
-    <div className="grid w-full max-w-[880px] gap-4">
-      <Identity session={session} />
+    <div className="grid w-full min-w-0">
+      <div className="grid min-w-0 divide-y divide-border">
+        <Identity session={session} />
 
-      <Action
-        session={session}
-        cost={cost_state}
-        wallet_pubkey={
-          wallet.status === 'connected' && wallet_session
-            ? wallet_session.account.address.toString()
-            : null
-        }
-        wallet_connected={Boolean(
-          wallet.status === 'connected' &&
-          wallet_session?.signMessage &&
-          wallet_session?.signTransaction,
-        )}
-        run={run}
-        on_publish={() => void on_publish()}
-        on_cancel={on_cancel}
-      />
+        <Action
+          session={session}
+          cost={cost_state}
+          wallet_pubkey={
+            wallet.status === 'connected' && wallet_session
+              ? wallet_session.account.address.toString()
+              : null
+          }
+          wallet_connected={Boolean(
+            wallet.status === 'connected' &&
+            wallet_session?.signMessage &&
+            wallet_session?.signTransaction,
+          )}
+          run={run}
+          on_publish={() => void on_publish()}
+          on_cancel={on_cancel}
+        />
+      </div>
     </div>
   );
 }
@@ -131,10 +129,7 @@ function Identity({ session }: { session: PublishSessionInput }) {
   return (
     <section
       aria-label="What you are publishing"
-      className={cn(
-        registry_data_card,
-        'grid gap-2 border-dashed bg-surface/35 px-3 py-2.5 sm:px-3.5 sm:py-3',
-      )}
+      className={cn(registry_feed_x, 'grid gap-2 py-3 sm:py-3.5')}
     >
       <p className="font-mono text-[9.5px] uppercase tracking-[0.26em] text-muted-foreground/90">
         About to publish
@@ -374,9 +369,9 @@ function Action({
   return (
     <section
       aria-label="Publish action"
-      className={cn(registry_data_card, 'grid gap-4 p-4 sm:p-5')}
+      className={cn(registry_feed_x, 'grid gap-4 py-5')}
     >
-      <div className="border-b border-border/25 pb-4">
+      <div className="border-b border-border pb-4">
         <p className="mb-2.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
           Cost summary
         </p>
@@ -407,7 +402,7 @@ function Action({
         </p>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border/25 pt-3.5">
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border pt-3.5">
         {running ? (
           <Button variant="ghost" onClick={on_cancel}>
             Cancel
@@ -474,7 +469,7 @@ function CurrentStep({
         </span>
       </summary>
 
-      <ol className={cn(registry_nested_panel, 'grid gap-0.5')}>
+      <ol className="mt-1 grid gap-0.5 border-t border-border/35 pt-2">
         {events.map((event, idx) => (
           <li
             key={`${event.kind}-${idx}`}
@@ -521,7 +516,7 @@ function Success({
   return (
     <section
       aria-label="Published"
-      className={cn(registry_data_card_accent, 'grid gap-3.5 p-4 sm:p-5')}
+      className={cn(registry_feed_x, 'grid gap-3.5 py-5')}
     >
       <div className="flex items-center gap-2.5">
         <span className="inline-flex size-7 items-center justify-center rounded-full bg-accent text-accent-foreground">
