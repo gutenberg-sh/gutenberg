@@ -53,7 +53,7 @@ ENV NODE_ENV=production
 CMD ["node", "dist/src/main.js"]
 
 FROM nginx:1.27-alpine AS gateway
-COPY docker/gateway/default.conf /etc/nginx/conf.d/default.conf
+COPY nginx.default.conf /etc/nginx/conf.d/default.conf
 COPY --from=build-gateway /app/apps/gateway/dist /usr/share/nginx/html
 
 FROM node:22-bookworm-slim AS gutenberg
@@ -71,12 +71,12 @@ RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 COPY --from=indexer-migrate /app /app-migrate
 COPY --from=indexer-deploy /app/deploy /app
-COPY docker/gateway/default.conf /etc/nginx/sites-available/default
+COPY nginx.default.conf /etc/nginx/sites-available/default
 RUN rm -f /etc/nginx/sites-enabled/default \
   && ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 COPY --from=build-gateway /app/apps/gateway/dist /usr/share/nginx/html
 
-COPY docker/gutenberg/entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 WORKDIR /app

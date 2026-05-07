@@ -6,8 +6,8 @@ on:
     branches: [master]
     paths:
       - 'Dockerfile'
-      - 'docker/**'
-      - 'docker/gutenberg/**'
+      - 'entrypoint.sh'
+      - 'nginx.default.conf'
       - 'docker-compose.yml'
       - 'apps/**'
       - 'packages/**'
