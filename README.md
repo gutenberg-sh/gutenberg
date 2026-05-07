@@ -5,7 +5,7 @@
 <h1 align="center">Gutenberg</h1>
 
 <p align="center">
-  <strong>Gutenberg lets anyone publish freely, privately, and permanently on Solana.</strong>
+  <strong>Gutenberg is a decentralized protocol for censorship-resistant, private, permanent publishing.</strong>
 </p>
 
 <p align="center">
@@ -18,21 +18,27 @@
   <img src="https://img.shields.io/badge/Anchor-program-3E4348?style=flat-square" alt="Anchor program" />
 </p>
 
-The state's censorship apparatus is a sophisticated machine of control: courts issue suppression orders, police execute warrantless seizures, legislatures mandate backdoors, and tech giants comply with silent requests. They've built walls around information, and they hold the only keys.
+Modern censorship is coordinated and systematic: courts issue takedowns, infrastructure providers remove access, platforms enforce quiet requests, and centralized systems enforce strict narratives. When publishing depends on a few gatekeepers, access to information can disappear overnight.
 
 ---
 
-## Why Gutenberg?
+## Local sovereignty
 
-Gutenberg is a decentralized publishing protocol that is designed to dismantle centralized control.
+Gutenberg starts from one premise: publishing should not require institutional permission. Control stays with the operator who runs the instance, so publishing decisions are not delegated to a platform, a hosting intermediary, or a central authority.
 
-Gutenberg strikes at three heads of control: Solana's immutable ledger makes deletion impossible; separating storage from identity eliminates centralized enforcement; each instance you deploy multiplies the redundancy, making suppression a hydra-headed problem. This is a technical solution to a political problem.
+This baseline gives publishers operational sovereignty over keys, policy, and availability, creating the conditions required for independent publication.
 
-## Local by default
+## Protocol design
 
-You control the entire stack: your keys, your nodes, your rules. Running your own infrastructure eliminates centralized points of control.
+Gutenberg is built to turn that sovereignty into durable distribution. It anchors publication state on Solana to provide immutable history, separates identity from storage so no single account controls existence, and allows independent deployments to compound network resilience over time.
+
+The result is a publishing system where suppressing information requires coordinated pressure across many operators instead of a single takedown target.
 
 ## Getting Started
+
+This quick start launches your own Gutenberg instance on your computer. Think of it as starting your own independent publishing environment, where you can create and manage content without relying on a centralized platform.
+
+You do not need to configure blockchain infrastructure yourself for this step. The goal is simply to get Gutenberg running locally so you can explore the interface and understand how local publishing works in practice.
 
 1. Install **Docker**: [Docker Desktop for Mac or Windows](https://www.docker.com/products/docker-desktop/). Install it, open it once, and leave it running.
 
