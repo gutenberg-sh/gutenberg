@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/leonmeka/gutenberg/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/leonmeka/gutenberg/ci.yml?branch=develop&amp;style=flat-square&amp;logo=github&amp;label=CI" alt="CI status" /></a>
-  <a href="https://github.com/leonmeka/gutenberg/actions/workflows/docker-publish.yml"><img src="https://img.shields.io/github/actions/workflow/status/leonmeka/gutenberg/docker-publish.yml?branch=develop&amp;style=flat-square&amp;logo=github&amp;label=Docker%20images" alt="Docker images status" /></a>
+  <a href="https://github.com/gutenberg-sh/gutenberg/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/gutenberg-sh/gutenberg/ci.yml?branch=develop&amp;style=flat-square&amp;logo=github&amp;label=CI" alt="CI status" /></a>
+  <a href="https://github.com/gutenberg-sh/gutenberg/actions/workflows/docker-publish.yml"><img src="https://img.shields.io/github/actions/workflow/status/gutenberg-sh/gutenberg/docker-publish.yml?branch=develop&amp;style=flat-square&amp;logo=github&amp;label=Docker%20images" alt="Docker images status" /></a>
   <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-22.22.2-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js" /></a>
   <a href="https://pnpm.io/"><img src="https://img.shields.io/badge/pnpm-10.33.1-f69220?style=flat-square&logo=pnpm&logoColor=white" alt="pnpm" /></a>
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
@@ -50,11 +50,11 @@ You do not need to configure blockchain infrastructure yourself for this step. T
 2. Open **Terminal** (Mac) or **PowerShell** / **Command Prompt** (Windows), run:
 
 ```bash
-docker pull ghcr.io/leonmeka/gutenberg:latest
+docker pull ghcr.io/gutenberg-sh/gutenberg:latest
 docker run -d --name gutenberg \
   -p 8080:80 -p 4000:4000 \
   -v gutenberg-pg:/var/lib/postgresql/data \
-  ghcr.io/leonmeka/gutenberg:latest
+  ghcr.io/gutenberg-sh/gutenberg:latest
 u=http://localhost:8080
 open "$u" 2>/dev/null||xdg-open "$u" 2>/dev/null||cmd.exe /c start "$u"
 ```

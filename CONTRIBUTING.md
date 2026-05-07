@@ -11,7 +11,7 @@ Contributions are welcome. For substantial changes, open an issue first so we ca
 ## Clone and install
 
 ```bash
-git clone https://github.com/leonmeka/gutenberg.git
+git clone https://github.com/gutenberg-sh/gutenberg.git
 cd gutenberg
 pnpm install
 ```

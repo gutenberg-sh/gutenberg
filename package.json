@@ -3,11 +3,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/leonmeka/gutenberg.git"
+    "url": "git+https://github.com/gutenberg-sh/gutenberg.git"
   },
-  "homepage": "https://github.com/leonmeka/gutenberg#readme",
+  "homepage": "https://github.com/gutenberg-sh/gutenberg#readme",
   "bugs": {
-    "url": "https://github.com/leonmeka/gutenberg/issues"
+    "url": "https://github.com/gutenberg-sh/gutenberg/issues"
   },
   "packageManager": "pnpm@10.33.1",
   "type": "module",

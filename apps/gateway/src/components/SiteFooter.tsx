@@ -15,7 +15,7 @@ import { shorten } from '@/lib/format';
 import { registry_shell_x } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
-const GUTENBERG_REPO_HREF = 'https://github.com/leonmeka/gutenberg';
+const GUTENBERG_REPO_HREF = 'https://github.com/gutenberg-sh/gutenberg';
 
 const FOOTER_CHAIN_ID = infer_chain_id(env.VITE_GUTENBERG_SOLANA_RPC_URL);
 const FOOTER_CLUSTER_LABEL = cluster_label(
