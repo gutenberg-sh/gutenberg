@@ -24,6 +24,8 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.sha.outputs.short }}
     permissions:
       contents: read
       packages: write
@@ -38,6 +40,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - id: sha
+        name: Short Git SHA for tags
+        run: echo "short=$(echo "${GITHUB_SHA}" | cut -c1-7)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
@@ -55,7 +61,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/gutenberg
           tags: |
-            type=raw,value=${{ github.sha }}
+            type=raw,value=${{ steps.sha.outputs.short }}
             type=raw,value=latest
 
       - name: Build and push
@@ -82,11 +88,9 @@ jobs:
       - name: Create GitHub release
         uses: softprops/action-gh-release@437e073e786973c6b6af97d9e445c41ae43b1d29 # v3.4.0
         with:
-          tag_name: develop-${{ github.sha }}
-          name: develop ${{ github.sha }}
+          tag_name: gutenberg-docker-${{ needs.build-and-push.outputs.short_sha }}
+          name: Gutenberg Docker (${{ github.ref_name }} @ ${{ needs.build-and-push.outputs.short_sha }})
           target_commitish: ${{ github.sha }}
-          prerelease: true
-          make_latest: false
           generate_release_notes: true
           body: |
-            **Image:** `ghcr.io/${{ github.repository_owner }}/gutenberg:${{ github.sha }}` (also `latest` on this branch).
+            **Image:** `ghcr.io/${{ github.repository_owner }}/gutenberg:${{ needs.build-and-push.outputs.short_sha }}` (also `latest` for this branch).
