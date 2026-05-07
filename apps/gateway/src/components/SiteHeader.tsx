@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border/55 bg-surface/92 backdrop-blur-md supports-backdrop-filter:bg-surface/85 dark:border-border/80 dark:bg-background/90 supports-backdrop-filter:dark:bg-background/75">
+    <header className="sticky top-0 z-40 border-b border-border/55 bg-surface dark:border-border/80 dark:bg-background">
         <div className="mx-auto flex w-full max-w-[1332px] items-center gap-2 px-6 py-2.5 sm:gap-3 sm:px-6 lg:gap-4 lg:px-10">
           <Link
             to="/"
