@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.webp" width="100%" alt="Gutenberg, panoramic archive scene with title" />
+  <img src="assets/banner.png" width="100%" alt="Gutenberg banner: miasma fog and wraith silhouette in sickly green tones" />
 </p>
 
 <h1 align="center">Gutenberg</h1>
@@ -32,7 +32,7 @@ Gutenberg strikes at three heads of control: Solana's immutable ledger makes del
 
 You control the entire stack: your keys, your nodes, your rules. Running your own infrastructure eliminates centralized points of control.
 
-## Run the mainnet stack
+## Getting Started
 
 1. Install **Docker**: [Docker Desktop for Mac or Windows](https://www.docker.com/products/docker-desktop/). Install it, open it once, and leave it running.
 

@@ -51,8 +51,8 @@ pnpm indexer:dev
 pnpm gateway:dev
 ```
 
-- Gateway (Vite): **http://localhost:5173**
-- Indexer API: **http://localhost:4000**
+- Gateway: **http://localhost:5173**
+- Indexer: **http://localhost:4000**
 
 ## Solana program (`apps/solana`)
 
