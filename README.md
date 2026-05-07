@@ -20,7 +20,7 @@
 
 ---
 
-> Modern censorship is coordinated and systemic: courts issue takedowns, infrastructure providers remove access, platforms enforce quiet requests, and centralized systems define narratives. When publishing is governed by au entities, freedom of speech is surpressed.
+> Modern censorship is coordinated and systemic: courts issue takedowns, infrastructure providers remove access, platforms enforce quiet requests, and centralized systems define narratives. When publishing is governed by authoritive entities, freedom of speech is inherently surpressed.
 
 ## Local sovereignty
 
