@@ -56,6 +56,12 @@ open "$u" 2>/dev/null||xdg-open "$u" 2>/dev/null||cmd.exe /c start "$u"
 
 3. Open **http://localhost:8080** in your browser. Done!
 
+### Optional: Wallet setup
+
+For local exploration, you can run Gutenberg without a wallet. For signing on-chain actions, you will need one.
+
+A wallet is your cryptographic identity in the Solana ecosystem. If you do not have one yet, install [Phantom](https://phantom.app/), [Solflare](https://solflare.com/), or another Solana wallet, follow the onboarding flow to create a wallet, and securely back up your recovery phrase.
+
 To stop and remove the container:
 
 ```bash
