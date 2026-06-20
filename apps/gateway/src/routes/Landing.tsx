@@ -101,8 +101,8 @@ export function LandingRoute() {
               <h1
                 className={cn(
                   'max-w-[min(24ch,90vw)] text-3xl font-medium leading-[108%] tracking-[-0.03em]',
-                  'text-foreground/88 [text-shadow:0_1px_0_rgba(255,255,255,0.32)]',
-                  'dark:text-foreground dark:[text-shadow:0_1px_0_#1f1f1f]',
+                  'text-foreground',
+                  'dark:text-foreground',
                   'md:text-[42px]',
                 )}
               >
@@ -137,7 +137,7 @@ export function LandingRoute() {
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5">
                 <Link
                   to="/publish"
-                  className="inline-flex w-full min-h-11 items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2.5 text-[13px] font-semibold leading-tight text-primary-foreground shadow-sm transition-[background-color,transform,box-shadow] duration-200 ease-out hover:bg-primary/90 hover:shadow active:translate-y-px active:scale-[0.99] sm:w-auto sm:px-5 sm:text-[14px]"
+                  className="inline-flex w-full min-h-11 items-center justify-center rounded-md border border-transparent bg-primary px-4 py-2.5 text-[13px] font-semibold leading-tight text-primary-foreground transition-[background-color,transform] duration-200 ease-out hover:bg-primary/90 active:translate-y-px active:scale-[0.99] sm:w-auto sm:px-5 sm:text-[14px]"
                 >
                   Publish a release
                 </Link>
@@ -145,7 +145,7 @@ export function LandingRoute() {
                   to="/browse"
                   className={cn(
                     registry_command_shell,
-                    'inline-flex w-full min-h-11 items-center justify-center px-4 py-2.5 text-[13px] font-medium leading-tight text-foreground-soft transition-[color,border-color,background-color,box-shadow] duration-200 ease-out hover:border-border-strong hover:bg-elevated/50 hover:text-foreground sm:w-auto sm:px-5 sm:text-[14px]',
+                    'inline-flex w-full min-h-11 items-center justify-center px-4 py-2.5 text-[13px] font-medium leading-tight text-foreground-soft transition-[color,border-color,background-color] duration-200 ease-out hover:border-border-strong hover:bg-elevated/50 hover:text-foreground sm:w-auto sm:px-5 sm:text-[14px]',
                   )}
                 >
                   Browse publications
@@ -355,7 +355,7 @@ function StatsStrip({ embedded = false }: { embedded?: boolean }) {
                 <span
                   className={cn(
                     'text-[clamp(1.125rem,4.5vw,1.375rem)] font-semibold tabular-nums leading-none tracking-tight text-foreground transition-colors group-hover:text-foreground sm:text-[22px]',
-                    ready ? '' : 'text-muted-foreground/45',
+                    ready ? '' : 'text-muted-foreground',
                   )}
                 >
                   {ready ? format_count(value) : '···'}

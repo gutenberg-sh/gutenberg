@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border/55 bg-surface dark:border-border/80 dark:bg-background">
+    <header className="sticky top-0 z-40 border-b border-border bg-surface dark:bg-background">
         <div className={cn('mx-auto flex w-full max-w-[1332px] items-center gap-2 py-2.5 sm:gap-3 lg:gap-4', registry_shell_x)}>
           <Link
             to="/"
@@ -32,7 +32,7 @@ export function SiteHeader() {
               variant="outline"
               className={cn(
                 registry_command_shell,
-                'h-9 shrink-0 px-3 text-[12px] font-medium transition-[color,background-color,border-color,box-shadow] duration-200 ease-out hover:border-border-strong hover:bg-elevated sm:px-3.5',
+                'h-9 shrink-0 px-3 text-[12px] font-medium transition-[color,background-color,border-color] duration-200 ease-out hover:border-border-strong hover:bg-elevated sm:px-3.5',
               )}
             />
           </div>
@@ -60,7 +60,7 @@ function HeaderLink({
             ? 'text-foreground'
             : emphasis === 'high'
               ? 'text-foreground-soft hover:text-foreground'
-              : 'text-muted-foreground hover:text-foreground',
+              : 'text-foreground-soft hover:text-foreground',
         )
       }
     >

@@ -46,7 +46,7 @@ export function PublicationFeedFooter({
         'grid gap-4 border-t border-border pb-5 pt-5 sm:pb-6 sm:pt-5',
       )}
     >
-      <div className="min-w-0 text-[12px] font-medium tabular-nums leading-relaxed text-muted-foreground">
+      <div className="min-w-0 text-[12px] font-medium tabular-nums leading-relaxed text-foreground-soft">
         {summary}
       </div>
       <div className="min-w-0">{children}</div>
@@ -145,7 +145,7 @@ export function SearchPublicationRow({ item }: { item: PublicationDto }) {
             </span>
           ) : null}
         </div>
-        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-muted-foreground">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-foreground-soft">
           {publisher_address ? (
             <PublisherAddressLink
               address={publisher_address}
@@ -157,7 +157,7 @@ export function SearchPublicationRow({ item }: { item: PublicationDto }) {
           ) : (
             <span className="font-mono tabular text-muted-foreground">{format_empty}</span>
           )}
-          <span aria-hidden className="text-muted-foreground/50">
+          <span aria-hidden className="text-foreground-soft/60">
             ·
           </span>
           <span>
@@ -168,14 +168,14 @@ export function SearchPublicationRow({ item }: { item: PublicationDto }) {
       <div className="flex shrink-0 items-center gap-3 px-3 sm:px-4">
         {latest ? (
           <span
-            className="font-mono text-[11.5px] tabular text-muted-foreground"
+            className="font-mono text-[11.5px] tabular text-foreground-soft"
             title={new Date(latest.published_at).toISOString()}
           >
             {format_relative_time(latest.published_at)}
           </span>
         ) : null}
         <ArrowUpRight
-          className="size-3.5 text-muted-foreground transition-transform duration-200 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
+          className="size-3.5 text-foreground-soft transition-transform duration-200 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
           strokeWidth={1.75}
           aria-hidden
         />

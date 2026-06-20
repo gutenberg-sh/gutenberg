@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 
 /** Shared list container: horizontal rules only (matches browse / publisher / search). */
 export function PublicationList({ children }: { children: ReactNode }) {
-  return <div className="divide-y divide-border/30">{children}</div>;
+  return <div className="divide-y divide-border/50">{children}</div>;
 }
 
 export function ReleaseRow({ release }: { release: ReleaseDto }) {
@@ -66,7 +66,7 @@ export function ReleaseRow({ release }: { release: ReleaseDto }) {
             {release.version}
           </span>
         </div>
-        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-muted-foreground">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-foreground-soft">
           {publisher_address ? (
             <>
               <PublisherAddressLink
@@ -92,13 +92,13 @@ export function ReleaseRow({ release }: { release: ReleaseDto }) {
 
       <div className="flex shrink-0 items-center gap-3 px-3 sm:px-4">
         <span
-          className="font-mono text-[11.5px] tabular text-muted-foreground"
+          className="font-mono text-[11.5px] tabular text-foreground-soft"
           title={new Date(release.published_at).toISOString()}
         >
           {format_relative_time(release.published_at)}
         </span>
         <ArrowUpRight
-          className="size-3.5 text-muted-foreground transition-transform duration-200 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
+          className="size-3.5 text-foreground-soft transition-transform duration-200 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
           strokeWidth={1.75}
           aria-hidden
         />
@@ -109,7 +109,7 @@ export function ReleaseRow({ release }: { release: ReleaseDto }) {
 
 function Dot() {
   return (
-    <span aria-hidden className="text-muted-foreground/50">
+    <span aria-hidden className="text-foreground-soft/60">
       ·
     </span>
   );

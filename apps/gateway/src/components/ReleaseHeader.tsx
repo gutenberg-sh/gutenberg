@@ -1,6 +1,7 @@
 import {
   Calendar,
   Check,
+  ChevronDown,
   Copy,
   ExternalLink,
   GitBranch,
@@ -11,6 +12,11 @@ import { Link } from 'react-router-dom';
 
 import { GatewayLinks } from '@/components/GatewayLinks';
 import { Button } from '@/components/ui/button';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { env } from '@/env';
 import { explorer_address_url } from '@/lib/explorer';
 import type { VerifiedRelease } from '@/lib/types';
@@ -165,108 +171,123 @@ export function ProvenancePanel({
   const event = release.release;
 
   return (
-    <section
-      id="provenance"
-      aria-labelledby="provenance-heading"
+    <Collapsible
+      defaultOpen={false}
       className={cn(
         'scroll-mt-8 border-t border-border pt-6 lg:pt-8',
         className,
       )}
     >
-      <div className="grid w-full gap-4">
-        <header className="grid w-full max-w-[65ch] gap-1.5 text-left">
-          <h2
-            id="provenance-heading"
-            className="text-[0.95rem] font-semibold leading-tight tracking-[-0.02em] text-foreground"
+      <section id="provenance" aria-labelledby="provenance-heading">
+        <CollapsibleTrigger asChild>
+          <button
+            type="button"
+            className="group flex w-full cursor-pointer items-start justify-between gap-3 rounded-lg text-left transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[state=open]:[&_svg]:rotate-180"
           >
-            Provenance
-          </h2>
-          <p className="text-[11.5px] leading-[1.45] text-muted-foreground">
-            On-chain accounts, hashes, and signatures. Copy a value or open it
-            in the explorer.
-          </p>
-        </header>
+            <span className="grid w-full max-w-[65ch] gap-1.5">
+              <span
+                id="provenance-heading"
+                className="text-[0.95rem] font-semibold leading-tight tracking-[-0.02em] text-foreground"
+              >
+                Provenance
+              </span>
+              <span className="text-[11.5px] leading-[1.45] text-foreground-soft">
+                On-chain accounts, hashes, and signatures. Copy a value or open
+                it in the explorer.
+              </span>
+            </span>
+            <ChevronDown
+              className="mt-0.5 size-4 shrink-0 text-foreground-soft transition-transform duration-200"
+              strokeWidth={1.85}
+              aria-hidden
+            />
+          </button>
+        </CollapsibleTrigger>
 
-        <div className="rounded-lg border border-border/90 bg-surface/45 p-3 shadow-[inset_0_1px_0_oklch(1_0_0/5%)] sm:p-4 lg:p-5 dark:bg-surface/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/6%)]">
-          <div className="grid w-full gap-5">
-            <ProofGroup
-              title="Registry"
-              caption="Solana accounts"
-              className="min-w-0"
-            >
-              <ProofRow
-                label="Publication"
-                display={shorten(release.release_address, 6, 6)}
-                value={release.release_address}
-                copyable
-                explorer_url={explorer_address_url(release.release_address)}
-              />
-              <ProofRow
-                label="Program"
-                display={shorten(manifest.chain.program_id, 6, 6)}
-                value={manifest.chain.program_id}
-                copyable
-                explorer_url={explorer_address_url(manifest.chain.program_id)}
-              />
-              <ProofRow
-                label="Network"
-                display={manifest.chain.chain_id}
-                value={manifest.chain.chain_id}
-              />
-            </ProofGroup>
-
-            <ProofGroup
-              title="Content & signature"
-              caption="Payload hash and author signature"
-              className="min-w-0 border-t border-border/45 pt-5"
-            >
-              <ProofRow
-                label="Content hash"
-                display={shorten(event.content_hash, 14, 8)}
-                value={event.content_hash}
-                copyable
-              />
-              <ProofRow
-                label="Manifest signature"
-                display={shorten(manifest.signature, 14, 8)}
-                value={manifest.signature}
-                copyable
-              />
-            </ProofGroup>
-
-            <ProofGroup
-              title="Manifest"
-              caption="Signed index and fetch locations"
-              className="min-w-0 border-t border-border/45 pt-5"
-            >
-              <ProofRow
-                label="Manifest hash"
-                display={shorten(event.manifest_hash, 14, 8)}
-                value={event.manifest_hash}
-                copyable
-              />
-              <ProofRow
-                label="Source URI"
-                display={shorten(release.manifest_uri, 8, 12)}
-                value={release.manifest_uri}
-                copyable
-              />
-              <ProofRow
-                label="Mirrors"
-                aside={
-                  <GatewayLinks
-                    variant="plain"
-                    uri={release.manifest_uri}
-                    irys_gateway={env.VITE_GUTENBERG_IRYS_GATEWAY}
-                    arweave_mirrors={env.VITE_GUTENBERG_ARWEAVE_MIRRORS}
+        <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+          <div className="pt-4">
+            <div className="rounded-lg border border-border/90 bg-surface/45 p-3 sm:p-4 lg:p-5 dark:bg-surface/35">
+              <div className="grid w-full gap-5">
+                <ProofGroup
+                  title="Registry"
+                  caption="Solana accounts"
+                  className="min-w-0"
+                >
+                  <ProofRow
+                    label="Publication"
+                    display={shorten(release.release_address, 6, 6)}
+                    value={release.release_address}
+                    copyable
+                    explorer_url={explorer_address_url(release.release_address)}
                   />
-                }
-              />
-            </ProofGroup>
+                  <ProofRow
+                    label="Program"
+                    display={shorten(manifest.chain.program_id, 6, 6)}
+                    value={manifest.chain.program_id}
+                    copyable
+                    explorer_url={explorer_address_url(manifest.chain.program_id)}
+                  />
+                  <ProofRow
+                    label="Network"
+                    display={manifest.chain.chain_id}
+                    value={manifest.chain.chain_id}
+                  />
+                </ProofGroup>
+
+                <ProofGroup
+                  title="Content & signature"
+                  caption="Payload hash and author signature"
+                  className="min-w-0 border-t border-border/45 pt-5"
+                >
+                  <ProofRow
+                    label="Content hash"
+                    display={shorten(event.content_hash, 14, 8)}
+                    value={event.content_hash}
+                    copyable
+                  />
+                  <ProofRow
+                    label="Manifest signature"
+                    display={shorten(manifest.signature, 14, 8)}
+                    value={manifest.signature}
+                    copyable
+                  />
+                </ProofGroup>
+
+                <ProofGroup
+                  title="Manifest"
+                  caption="Signed index and fetch locations"
+                  className="min-w-0 border-t border-border/45 pt-5"
+                >
+                  <ProofRow
+                    label="Manifest hash"
+                    display={shorten(event.manifest_hash, 14, 8)}
+                    value={event.manifest_hash}
+                    copyable
+                  />
+                  <ProofRow
+                    label="Source URI"
+                    display={shorten(release.manifest_uri, 8, 12)}
+                    value={release.manifest_uri}
+                    copyable
+                  />
+                  <ProofRow
+                    label="Mirrors"
+                    aside={
+                      <GatewayLinks
+                        variant="plain"
+                        uri={release.manifest_uri}
+                        irys_gateway={env.VITE_GUTENBERG_IRYS_GATEWAY}
+                        arweave_mirrors={env.VITE_GUTENBERG_ARWEAVE_MIRRORS}
+                      />
+                    }
+                  />
+                </ProofGroup>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </CollapsibleContent>
+      </section>
+    </Collapsible>
   );
 }
 

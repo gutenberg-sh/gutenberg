@@ -93,45 +93,12 @@ export function VerifiedReleaseView({
 function ProvenancePanelSkeleton({ className }: { className?: string }) {
   return (
     <div className={cn('border-t border-border pt-6 lg:pt-8', className)}>
-      <div className="grid w-full gap-4">
-        <header className="grid w-full max-w-[65ch] gap-1.5 text-left">
+      <div className="flex w-full items-start justify-between gap-3">
+        <div className="grid w-full max-w-[65ch] gap-1.5">
           <Skeleton className="h-[0.95rem] w-28 rounded-lg" />
           <Skeleton className="h-3 w-full max-w-sm rounded-lg" />
-        </header>
-        <div className="rounded-lg border border-border/90 bg-surface/45 p-3 shadow-[inset_0_1px_0_oklch(1_0_0/5%)] sm:p-4 lg:p-5 dark:bg-surface/35 dark:shadow-[inset_0_1px_0_oklch(1_0_0/6%)]">
-          <div className="grid w-full gap-5">
-            <div className="grid min-w-0 gap-2">
-              <div className="grid gap-1 border-b border-border/50 pb-2">
-                <Skeleton className="h-3 w-20 rounded-lg" />
-                <Skeleton className="h-2.5 w-32 rounded-lg" />
-              </div>
-              <Skeleton className="h-9 w-full rounded-lg" />
-              <Skeleton className="h-9 w-full rounded-lg" />
-              <Skeleton className="h-9 w-full rounded-lg" />
-            </div>
-            <div className="grid min-w-0 gap-2 border-t border-border/45 pt-5">
-              <div className="grid gap-1 border-b border-border/50 pb-2">
-                <Skeleton className="h-3 w-36 rounded-lg" />
-                <Skeleton className="h-2.5 w-44 rounded-lg" />
-              </div>
-              <Skeleton className="h-9 w-full rounded-lg" />
-              <Skeleton className="h-9 w-full rounded-lg" />
-            </div>
-            <div className="grid min-w-0 gap-2 border-t border-border/45 pt-5">
-              <div className="grid gap-1 border-b border-border/50 pb-2">
-                <Skeleton className="h-3 w-20 rounded-lg" />
-                <Skeleton className="h-2.5 w-48 rounded-lg" />
-              </div>
-              <Skeleton className="h-9 w-full rounded-lg" />
-              <Skeleton className="h-9 w-full rounded-lg" />
-              <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-border/40 pt-2">
-                <Skeleton className="h-3 w-28 rounded-lg" />
-                <Skeleton className="h-3 w-32 rounded-lg" />
-                <Skeleton className="h-3 w-32 rounded-lg" />
-              </div>
-            </div>
-          </div>
         </div>
+        <Skeleton className="mt-0.5 size-4 shrink-0 rounded-sm" />
       </div>
     </div>
   );
@@ -166,7 +133,7 @@ function ReleaseHeaderSkeleton() {
 
 function PublicationAsideSkeleton() {
   return (
-    <div className="rounded-lg border border-border bg-card p-4 shadow-[inset_0_1px_0_oklch(1_0_0/6%)] dark:shadow-[inset_0_1px_0_oklch(1_0_0/8%)]">
+    <div className="rounded-lg border border-border bg-card p-4">
       <Skeleton className="h-2.5 w-34 rounded-lg" />
       <dl className="mt-4 grid gap-4 text-[13px]">
         <div className="grid gap-1">
@@ -323,7 +290,7 @@ function PublicationAside({
   const publisher = m.publisher;
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4 shadow-[inset_0_1px_0_oklch(1_0_0/6%)] dark:shadow-[inset_0_1px_0_oklch(1_0_0/8%)]">
+    <div className="rounded-lg border border-border bg-card p-4">
       <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
         Publication details
       </p>

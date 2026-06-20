@@ -28,7 +28,7 @@ const FOOTER_PROGRAM_EXPLORER = explorer_address_url(
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-border/55 bg-surface dark:border-border/80 dark:bg-background">
+    <footer className="mt-auto border-t border-border bg-surface dark:bg-background">
       <div
         className={cn(
           'mx-auto grid w-full max-w-[1332px] gap-8 py-10',

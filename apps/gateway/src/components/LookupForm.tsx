@@ -180,12 +180,12 @@ export function LookupForm({
         <div
           className={cn(
             registry_data_card,
-            'flex items-stretch shadow-none transition-[border-color,box-shadow,background-color] duration-200 ease-out',
+            'flex items-stretch transition-[border-color,background-color] duration-200 ease-out',
             has_error
               ? 'border-destructive/55 ring-2 ring-destructive/30'
               : focused
                 ? 'border-primary/50 ring-2 ring-primary/35'
-                : 'border-border/55 ring-1 ring-border/25 dark:border-border/60 dark:ring-border/25',
+                : 'border-border ring-1 ring-border/35 dark:border-border dark:ring-border/30',
           )}
         >
           <span
@@ -228,7 +228,7 @@ export function LookupForm({
             onKeyDown={on_key_down}
             required
             className={cn(
-              'min-w-0 flex-1 bg-transparent font-mono tabular text-foreground placeholder:text-muted-foreground/55 focus:outline-none',
+              'min-w-0 flex-1 bg-transparent font-mono tabular text-foreground placeholder:text-muted-foreground/75 focus:outline-none',
               lg ? 'h-12 pr-2 text-[14px]' : 'h-11 pr-2 text-[13.5px]',
             )}
           />

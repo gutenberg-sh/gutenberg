@@ -111,7 +111,7 @@ export function VerifyStatus({ steps }: { steps: readonly VerifyStep[] }) {
         >
           <span
             aria-hidden
-            className="inline-flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-[inset_0_1px_0_oklch(1_0_0/12%)] motion-safe:animate-verify-big-check-pop motion-reduce:animate-none dark:shadow-[inset_0_1px_0_oklch(1_0_0/14%)]"
+            className="inline-flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground motion-safe:animate-verify-big-check-pop motion-reduce:animate-none"
           >
             <Check className="size-5" strokeWidth={2.5} aria-hidden />
           </span>

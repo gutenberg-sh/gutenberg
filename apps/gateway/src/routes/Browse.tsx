@@ -257,7 +257,7 @@ function ExploreSearchField({
         placeholder="Search by registry id, or browse latest releases below"
         spellCheck={false}
         autoComplete="off"
-        className="h-12 min-w-0 flex-1 bg-transparent pr-2 font-mono tabular text-[14px] text-foreground placeholder:text-muted-foreground/55 focus:outline-none"
+        className="h-12 min-w-0 flex-1 bg-transparent pr-2 font-mono tabular text-[14px] text-foreground placeholder:text-muted-foreground/75 focus:outline-none"
       />
       <div
         className="mr-2 my-2 flex size-9 shrink-0 items-center justify-center"
