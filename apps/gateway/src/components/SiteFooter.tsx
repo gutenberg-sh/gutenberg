@@ -38,7 +38,7 @@ export function SiteFooter() {
         <div className="grid gap-3">
           <Wordmark className="text-foreground" showSubmark={false} />
           <p className="max-w-[44ch] text-[12.5px] leading-[1.65] text-foreground-soft">
-            Publish freely, privately, and permanently.
+            Publish freely, anonymously, and permanently.
           </p>
           <p className="max-w-[48ch] text-[12.5px] leading-[1.65] text-foreground-soft">
             Gutenberg is{' '}

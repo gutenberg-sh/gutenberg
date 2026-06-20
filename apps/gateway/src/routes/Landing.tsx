@@ -185,7 +185,7 @@ export function LandingRoute() {
               v: 'You don\u2019t wait on us to approve a publication.',
             },
             {
-              k: 'Privately',
+              k: 'Anonymously',
               v: 'You\u2019re a key, not a profile; tie it to your name only if you want.',
             },
             {
