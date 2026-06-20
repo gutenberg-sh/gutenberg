@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 
 import { Container } from '@/components/Layout';
 import { LookupForm } from '@/components/LookupForm';
-import { RecentReleases } from '@/components/RecentReleases';
 import { format_count } from '@/lib/format';
 import { useIndexerStats } from '@/lib/queries';
 import { registry_command_shell, registry_page_eyebrow, registry_page_pad_top } from '@/lib/registry-surface';
@@ -162,10 +161,6 @@ export function LandingRoute() {
 
           <StatsStrip embedded />
         </div>
-      </Container>
-
-      <Container as="section" className="border-t border-border py-14 lg:py-20">
-        <RecentReleases limit={8} />
       </Container>
 
       <Section

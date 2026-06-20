@@ -30,7 +30,7 @@ type PublicationFeedSectionProps = {
 } & Pick<React.ComponentProps<'section'>, 'aria-label' | 'className'>;
 
 /**
- * Summary line + pagination under the list — same on browse, publisher, landing.
+ * Summary line + pagination under the list — same on browse and publisher.
  */
 export function PublicationFeedFooter({
   summary,
