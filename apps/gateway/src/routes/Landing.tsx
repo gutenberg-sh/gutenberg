@@ -337,8 +337,8 @@ function StatsStrip({ embedded = false }: { embedded?: boolean }) {
     href: string;
   }> = [
     { key: 'releases', label: 'releases', href: '/browse' },
-    { key: 'publications', label: 'publications', href: '/search' },
-    { key: 'publishers', label: 'publishers', href: '/search' },
+    { key: 'publications', label: 'publications', href: '/browse' },
+    { key: 'publishers', label: 'publishers', href: '/browse' },
   ];
 
   const ready = stats.isSuccess && !!stats.data;

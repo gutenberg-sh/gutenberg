@@ -14,7 +14,7 @@ import { NotFoundRoute } from '@/routes/NotFound';
 import { PublishRoute } from '@/routes/Publish';
 import { PublisherRoute } from '@/routes/Publisher';
 import { ReleaseRoute } from '@/routes/Release';
-import { SearchRoute } from '@/routes/Search';
+import { SearchRedirect } from '@/routes/SearchRedirect';
 import { VersionsRoute } from '@/routes/Versions';
 
 export function App() {
@@ -31,7 +31,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<LandingRoute />} />
           <Route path="/browse" element={<BrowseRoute />} />
-          <Route path="/search" element={<SearchRoute />} />
+          <Route path="/search" element={<SearchRedirect />} />
           <Route path="/publish" element={<PublishRoute />} />
           <Route path="/publisher/:address" element={<PublisherRoute />} />
           <Route path="/p/:address" element={<LegacyPublisherRedirect />} />

@@ -22,13 +22,15 @@ type PublicationFeedSectionProps = {
   skeleton_rows?: number;
   /** When false, skips “Publication / Published” row (rare). */
   show_column_headers?: boolean;
+  /** Optional block above column headers (e.g. explore search field). */
+  header?: ReactNode;
   /** Use {@link PublicationFeedFooter} + {@link Pagination} for consistent chrome. */
   footer?: ReactNode;
   children: ReactNode;
 } & Pick<React.ComponentProps<'section'>, 'aria-label' | 'className'>;
 
 /**
- * Summary line + pagination under the list — same on browse, search, publisher, landing.
+ * Summary line + pagination under the list — same on browse, publisher, landing.
  */
 export function PublicationFeedFooter({
   summary,
@@ -59,6 +61,7 @@ export function PublicationFeedSection({
   loading,
   skeleton_rows = 8,
   show_column_headers = true,
+  header,
   footer,
   children,
   'aria-label': aria_label,
@@ -71,6 +74,7 @@ export function PublicationFeedSection({
       className={cn('grid min-w-0', className)}
     >
       <div className={cn(registry_feed_shell)}>
+        {header}
         {show_column_headers ? <ReleaseListHeader /> : null}
         {loading ? (
           <ReleaseListSkeleton rows={skeleton_rows} />

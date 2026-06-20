@@ -22,7 +22,6 @@ export function SiteHeader() {
             className="hidden items-center gap-0.5 text-[13px] font-medium sm:flex"
           >
             <HeaderLink to="/browse">Browse</HeaderLink>
-            <HeaderLink to="/search">Search</HeaderLink>
             <HeaderLink to="/publish" emphasis="high">
               Publish
             </HeaderLink>

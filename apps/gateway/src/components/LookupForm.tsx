@@ -95,7 +95,7 @@ export function LookupForm({
 
   function go_to_search(query: string) {
     on_navigate?.();
-    void navigate(`/search?q=${encodeURIComponent(query)}`);
+    void navigate(`/browse?q=${encodeURIComponent(query)}`);
   }
 
   function submit(event: FormEvent) {
@@ -308,7 +308,7 @@ export function LookupForm({
                   onClick={() => go_to_search(debounced_query)}
                   className="h-auto gap-1 px-0 py-0 font-medium text-foreground hover:underline"
                 >
-                  Open search
+                  See all results
                   <ArrowUpRight className="size-3" strokeWidth={1.85} />
                 </Button>
               </div>

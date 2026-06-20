@@ -3,11 +3,11 @@ import type { ReactNode } from 'react';
 import { Container } from '@/components/Layout';
 import { cn } from '@/lib/utils';
 
-/** Vertical rhythm between page header, body blocks, and page bottom (browse / search / publish / publisher). */
+/** Vertical rhythm between page header, body blocks, and page bottom (browse / publish / publisher). */
 export const registry_page_stack =
   'grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16';
 
-/** `className` helper: stacked body regions (e.g. search field + results). */
+/** `className` helper: stacked body regions (e.g. form sections). */
 export const registry_page_body_gap = 'grid gap-6';
 
 /** Between major body blocks (e.g. publish form grid and sign footer). */

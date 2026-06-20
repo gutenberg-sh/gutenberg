@@ -67,15 +67,7 @@ pnpm solana:deploy
 
 ## Pull requests
 
-Keep changes small and focused. Before you open a PR, run the same checks as [CI](.github/workflows/ci.yml):
-
-```bash
-pnpm install
-pnpm core:build
-pnpm gateway:build
-pnpm indexer:build
-pnpm lint
-```
+Keep changes small and focused. Before you open a PR, run the same checks as [CI](.github/workflows/ci.yml).
 
 If you changed `apps/solana`, also run `pnpm solana:test`. Formatting is optional: `pnpm format`.
 

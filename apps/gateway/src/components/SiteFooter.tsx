@@ -77,7 +77,6 @@ export function SiteFooter() {
           className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-border pt-6 text-[13px] font-medium text-muted-foreground"
         >
           <FooterLink to="/browse">Browse</FooterLink>
-          <FooterLink to="/search">Search</FooterLink>
           <a
             href={GUTENBERG_REPO_HREF}
             target="_blank"
