@@ -5,7 +5,7 @@
 <h1 align="center">Gutenberg</h1>
 
 <p align="center">
-  <strong>Gutenberg is a decentralized protocol for censorship-resistant, private, permanent publishing.</strong>
+  <strong>Gutenberg is a decentralized protocol for censorship-resistant publishing: freely, anonymously, and permanently.</strong>
 </p>
 
 <p align="center">
