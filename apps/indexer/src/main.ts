@@ -1,62 +1,20 @@
 import 'reflect-metadata';
 
-import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import helmet from 'helmet';
 
 import { AppModule } from './app.module';
-import { resolve_cors_options } from './cors.config';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  const config = app.get(ConfigService);
-
-  const environment = config.getOrThrow<'development' | 'production'>(
-    'GUTENBERG_INDEXER_NODE_ENV',
-  );
-
-  const express_app = app.getHttpAdapter().getInstance();
-  express_app.set('trust proxy', true);
-  express_app.disable('x-powered-by');
-
-  app.use(
-    helmet({
-      contentSecurityPolicy: false,
-      crossOriginResourcePolicy: { policy: 'cross-origin' },
-      referrerPolicy: { policy: 'no-referrer' },
-      strictTransportSecurity: {
-        maxAge: 63072000,
-        includeSubDomains: true,
-        preload: true,
-      },
-    }),
-  );
-
-  app.enableCors(
-    resolve_cors_options(
-      environment,
-      config.getOrThrow<string>('GUTENBERG_INDEXER_CORS_ORIGINS'),
-    ),
-  );
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-    }),
-  );
+  const app = await NestFactory.createApplicationContext(AppModule, {
+    logger: ['error', 'warn', 'log'],
+  });
 
   app.enableShutdownHooks();
 
-  const port = config.getOrThrow<number>('GUTENBERG_INDEXER_PORT');
-  await app.listen(port, '0.0.0.0');
-
-  console.log(`Gutenberg indexer listening on port ${port}`);
+  console.log('Gutenberg indexer worker started');
 }
 
 void bootstrap().catch((error: unknown) => {
-  console.error('Failed to start Gutenberg indexer:', error);
+  console.error('Failed to start Gutenberg indexer worker:', error);
   process.exit(1);
 });

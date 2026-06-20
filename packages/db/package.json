@@ -1,0 +1,38 @@
+{
+  "name": "@gutenberg/db",
+  "type": "commonjs",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "drizzle"
+  ],
+  "scripts": {
+    "prebuild": "pnpm --filter @gutenberg/core run build",
+    "build": "tsc -p tsconfig.json",
+    "db:migrate": "drizzle-kit generate",
+    "db:apply": "drizzle-kit migrate",
+    "format": "eslint . --fix --ignore-pattern 'dist/**' --ignore-pattern '*.json' && prettier --write .",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 0 --ignore-pattern 'drizzle.config.ts'"
+  },
+  "dependencies": {
+    "@gutenberg/core": "workspace:*",
+    "@nestjs/common": "^11.1.19",
+    "drizzle-orm": "^0.45.2",
+    "nanoid": "^5.1.11",
+    "pg": "^8.20.0",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "dotenv": "17.4.2",
+    "drizzle-kit": "^0.31.10"
+  }
+}

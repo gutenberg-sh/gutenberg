@@ -11,11 +11,13 @@ import {
   publicationsTable,
   publishersTable,
   releasesTable,
-} from '../../common/database/tables';
-import { ManifestsService } from '../manifests/manifests.service';
-import { PublicationsService } from '../publications/publications.service';
-import { PublishersService } from '../publishers/publishers.service';
-import { ReleasesService } from '../releases/releases.service';
+} from '@gutenberg/db';
+import {
+  ManifestsService,
+  PublicationsService,
+  PublishersService,
+  ReleasesService,
+} from '@gutenberg/shared';
 
 import { CursorService } from './cursor.service';
 import { RELEASES_CURSOR_SCOPE } from './ingest.types';

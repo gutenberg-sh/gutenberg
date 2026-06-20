@@ -20,7 +20,7 @@ Copy [`.env.local`](.env.local) to `.env` in the repo root.
 
 ## Local development
 
-**Postgres and the Solana test validator run in Docker.** The gateway, indexer, and everything else run via pnpm on your machine (hot reload, normal debugging).
+**Postgres and the Solana test validator run in Docker.** The gateway, API, indexer, and everything else run via pnpm on your machine (hot reload, normal debugging).
 
 ### 1. Start infrastructure
 
@@ -39,7 +39,7 @@ Stop containers: `pnpm stack:down`. To wipe the local Postgres volume and start 
 After the first `pnpm stack:up`, or whenever you pull migration changes:
 
 ```bash
-pnpm indexer:db:apply
+pnpm db:apply
 ```
 
 ### 3. Run apps
@@ -47,12 +47,14 @@ pnpm indexer:db:apply
 Use separate terminals (order does not matter after Postgres is up):
 
 ```bash
+pnpm api:dev
 pnpm indexer:dev
 pnpm gateway:dev
 ```
 
 - Gateway: **http://localhost:5173**
-- Indexer: **http://localhost:4000**
+- API: **http://localhost:4000**
+- Indexer: background worker (no HTTP port)
 
 ## Solana program (`apps/solana`)
 

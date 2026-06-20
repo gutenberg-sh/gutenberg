@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-
-import { DatabaseModule } from '../../common/database/database.module';
-import { HealthController } from '../../routes/health/health.controller';
-import { ManifestsModule } from '../manifests/manifests.module';
-import { PublicationsModule } from '../publications/publications.module';
-import { PublishersModule } from '../publishers/publishers.module';
-import { ReleasesModule } from '../releases/releases.module';
+import { DatabaseModule } from '@gutenberg/db';
+import {
+  ManifestsModule,
+  PublicationsModule,
+  PublishersModule,
+  ReleasesModule,
+} from '@gutenberg/shared';
 
 import { BackfillService } from './backfill.service';
 import { CursorRepository } from './cursor.repository';
@@ -23,7 +23,6 @@ import { StreamService } from './stream.service';
     ReleasesModule,
     ManifestsModule,
   ],
-  controllers: [HealthController],
   providers: [
     SolanaRpcClient,
     CursorRepository,

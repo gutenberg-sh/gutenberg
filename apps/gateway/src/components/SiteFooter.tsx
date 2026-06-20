@@ -5,7 +5,7 @@ import {
 } from '@gutenberg/core';
 import { Link } from 'react-router-dom';
 
-import { IndexerStatus } from '@/components/IndexerStatus';
+import { ApiStatus } from '@/components/ApiStatus';
 import { SolanaHorizontalLogo } from '@/components/SolanaHorizontalLogo';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Wordmark } from '@/components/Wordmark';
@@ -109,7 +109,7 @@ export function SiteFooter() {
             </a>
           </p>
           <div className="shrink-0">
-            <IndexerStatus />
+            <ApiStatus />
           </div>
         </div>
       </div>

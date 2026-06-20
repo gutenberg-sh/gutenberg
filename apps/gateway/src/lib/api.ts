@@ -3,7 +3,7 @@ import axios, { type AxiosError } from 'axios';
 import { env } from '@/env';
 
 export const api = axios.create({
-  baseURL: env.VITE_GUTENBERG_INDEXER_URL,
+  baseURL: env.VITE_GUTENBERG_API_URL,
   timeout: 15_000,
   headers: {
     Accept: 'application/json',

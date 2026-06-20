@@ -35,7 +35,7 @@ const env_schema = z.object({
       message:
         'VITE_GUTENBERG_EXPLORER_URL must contain the `{address}` placeholder',
     }),
-  VITE_GUTENBERG_INDEXER_URL: z
+  VITE_GUTENBERG_API_URL: z
     .string()
     .url()
     .transform((raw) => raw.replace(/\/$/, '')),

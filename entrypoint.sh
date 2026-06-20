@@ -37,17 +37,25 @@ if ! runuser -u postgres -- "$PG_BIN/psql" -h 127.0.0.1 -U "$POSTGRES_USER" -tc 
   runuser -u postgres -- "$PG_BIN/createdb" -h 127.0.0.1 -U "$POSTGRES_USER" "$POSTGRES_DB"
 fi
 
-export GUTENBERG_INDEXER_DATABASE_URL="${GUTENBERG_INDEXER_DATABASE_URL:-postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:5432/${POSTGRES_DB}}"
+DATABASE_URL="${GUTENBERG_API_DATABASE_URL:-postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:5432/${POSTGRES_DB}}"
+export GUTENBERG_API_DATABASE_URL="$DATABASE_URL"
+export GUTENBERG_INDEXER_DATABASE_URL="${GUTENBERG_INDEXER_DATABASE_URL:-$DATABASE_URL}"
 
-cd /app-migrate/apps/indexer
+cd /app-migrate/packages/db
 pnpm exec drizzle-kit migrate
 
-cd /app
+cd /app-api
+export NODE_ENV=production
+node dist/src/main.js &
+API_PID=$!
+
+cd /app-indexer
 export NODE_ENV=production
 node dist/src/main.js &
 INDEXER_PID=$!
 
 cleanup() {
+  kill "$API_PID" 2>/dev/null || true
   kill "$INDEXER_PID" 2>/dev/null || true
   kill "${NGINX_PID:-}" 2>/dev/null || true
   runuser -u postgres -- "$PG_BIN/pg_ctl" -D "$PGDATA" -m fast stop || true

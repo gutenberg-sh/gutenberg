@@ -27,13 +27,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Core
-        run: pnpm run core:build
+      - name: Build Core, DB, and Shared
+        run: |
+          set -e
+          pnpm run core:build
+          pnpm run db:build
+          pnpm run shared:build
 
-      - name: Build Gateway and Indexer
+      - name: Build Gateway, API, and Indexer
         run: |
           set -e
           pnpm run gateway:build &
+          pnpm run api:build &
           pnpm run indexer:build &
           wait
 
@@ -41,6 +46,9 @@ jobs:
         run: |
           set -e
           pnpm --filter @gutenberg/core run lint &
+          pnpm --filter @gutenberg/db run lint &
+          pnpm --filter @gutenberg/shared run lint &
           pnpm --filter @gutenberg/gateway run lint &
+          pnpm --filter @gutenberg/api run lint &
           pnpm --filter @gutenberg/indexer run lint &
           wait

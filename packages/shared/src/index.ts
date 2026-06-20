@@ -1,0 +1,10 @@
+export { BaseRepository } from './repositories/base.repository';
+export { BaseService } from './services/base.service';
+export { ManifestsModule } from './modules/manifests/manifests.module';
+export { ManifestsService } from './modules/manifests/manifests.service';
+export { PublicationsModule } from './modules/publications/publications.module';
+export { PublicationsService } from './modules/publications/publications.service';
+export { PublishersModule } from './modules/publishers/publishers.module';
+export { PublishersService } from './modules/publishers/publishers.service';
+export { ReleasesModule } from './modules/releases/releases.module';
+export { ReleasesService } from './modules/releases/releases.service';

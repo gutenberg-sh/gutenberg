@@ -56,16 +56,8 @@ export interface ReleaseDto {
   manifest?: ManifestDto | null;
 }
 
-export interface IndexerHealth {
+export interface ApiHealth {
   status: 'ok';
-  backfill_completed_at: string | null;
-  cursor_slot: number | null;
-  cursor_signature: string | null;
-  chain_slot: number | null;
-  /** Slot of newest tx touching the registry program (added in indexer health). */
-  program_tip_slot?: number | null;
-  /** Slots behind that program tip, not raw chain-tip minus cursor. */
-  lag_slots: number | null;
 }
 
 export interface IndexerStats {
@@ -97,8 +89,8 @@ export const query_keys = {
     address: string,
     input: { limit: number; offset: number; includes?: string },
   ) => ['indexer', 'publisher', address, 'releases', input] as const,
-  health: () => ['indexer', 'health'] as const,
-  stats: () => ['indexer', 'stats'] as const,
+  api_health: () => ['api', 'health'] as const,
+  stats: () => ['api', 'stats'] as const,
 };
 
 function build_params(record: Record<string, string | number | undefined>) {
@@ -227,11 +219,11 @@ export function usePublisherReleases(
   });
 }
 
-export function useIndexerHealth() {
-  return useQuery<IndexerHealth>({
-    queryKey: query_keys.health(),
+export function useApiHealth() {
+  return useQuery<ApiHealth>({
+    queryKey: query_keys.api_health(),
     queryFn: async () => {
-      const { data } = await api.get<IndexerHealth>('/health');
+      const { data } = await api.get<ApiHealth>('/health');
       return data;
     },
     staleTime: STALE_HEALTH,

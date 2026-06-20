@@ -12,7 +12,7 @@ import {
   BACKFILL_BATCH_SIZE,
   BACKFILL_TX_CONCURRENCY,
 } from '../../common/config/config.tokens';
-import { cursorsTable } from '../../common/database/tables';
+import { cursorsTable } from '@gutenberg/db';
 
 import { CursorService } from './cursor.service';
 import { IngestService } from './ingest.service';

@@ -3,6 +3,8 @@ import {
   ConfigModule as NestConfigModule,
   ConfigService,
 } from '@nestjs/config';
+import { DATABASE_URL as DB_DATABASE_URL } from '@gutenberg/db';
+
 import { env } from '../../env';
 import { load_env_file, resolve_env_file_path } from '../../env-file';
 
@@ -11,7 +13,6 @@ import {
   BACKFILL_TX_CONCURRENCY,
   DATABASE_URL,
   NODE_ENV,
-  PORT,
   SOLANA_RPC_URL,
   SOLANA_WS_URL,
 } from './config.tokens';
@@ -46,13 +47,13 @@ const env_file_path = resolve_env_file_path();
         ),
     },
     {
-      provide: PORT,
+      provide: DATABASE_URL,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.getOrThrow<number>('GUTENBERG_INDEXER_PORT'),
+        config.getOrThrow<string>('GUTENBERG_INDEXER_DATABASE_URL'),
     },
     {
-      provide: DATABASE_URL,
+      provide: DB_DATABASE_URL,
       inject: [ConfigService],
       useFactory: (config: ConfigService) =>
         config.getOrThrow<string>('GUTENBERG_INDEXER_DATABASE_URL'),
@@ -85,8 +86,8 @@ const env_file_path = resolve_env_file_path();
   exports: [
     NestConfigModule,
     NODE_ENV,
-    PORT,
     DATABASE_URL,
+    DB_DATABASE_URL,
     SOLANA_RPC_URL,
     SOLANA_WS_URL,
     BACKFILL_BATCH_SIZE,
