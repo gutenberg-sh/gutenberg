@@ -5,7 +5,7 @@ import { LookupForm } from '@/components/LookupForm';
 import { RecentReleases } from '@/components/RecentReleases';
 import { format_count } from '@/lib/format';
 import { useIndexerStats } from '@/lib/queries';
-import { registry_command_shell } from '@/lib/registry-surface';
+import { registry_command_shell, registry_page_eyebrow, registry_page_pad_top } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
 
 const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
@@ -94,13 +94,11 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
 export function LandingRoute() {
   return (
     <div className="flex flex-col">
-      <Container className="pb-20 pt-14 sm:pb-24 sm:pt-18 lg:pb-14 lg:pt-22">
+      <Container className={cn(registry_page_pad_top, 'pb-20 sm:pb-24 lg:pb-14')}>
         <div className="grid gap-9 lg:gap-11">
           <div className="grid gap-10 lg:min-h-[min(36svh,480px)] lg:grid-cols-[minmax(0,1.12fr)_minmax(0,0.92fr)] lg:items-start lg:gap-x-16 lg:gap-y-8">
             <div className="grid max-w-xl content-start gap-6 self-start sm:max-w-none">
-              <p className="text-xs font-medium tracking-wide text-muted-foreground">
-                Solana registry
-              </p>
+              <p className={registry_page_eyebrow}>Solana registry</p>
               <h1
                 className={cn(
                   'max-w-[min(24ch,90vw)] text-3xl font-medium leading-[108%] tracking-[-0.03em]',
@@ -157,9 +155,7 @@ export function LandingRoute() {
             </div>
 
             <div className="grid w-full gap-2.5 sm:gap-3 lg:self-center">
-              <p className="text-xs font-medium tracking-wide text-muted-foreground">
-                Find a publication
-              </p>
+              <p className={registry_page_eyebrow}>Find a publication</p>
               <LookupForm size="lg" placeholder="registry id or id@version" />
             </div>
           </div>

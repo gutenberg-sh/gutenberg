@@ -97,7 +97,7 @@ export function BrowseRoute() {
 
   return (
     <RegistryPageLayout
-      eyebrow="Registry"
+      eyebrow="Solana registry"
       title={<RegistryPageTitle>Explore</RegistryPageTitle>}
       headerAside={
         !is_searching ? (

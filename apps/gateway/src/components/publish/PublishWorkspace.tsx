@@ -237,7 +237,7 @@ export function PublishWorkspace() {
 
   return (
     <RegistryPageLayout
-      eyebrow="Publish"
+      eyebrow="Solana registry"
       title={<RegistryPageTitle>Put a release on the record.</RegistryPageTitle>}
       description={
         <p>

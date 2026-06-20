@@ -8,14 +8,24 @@ export const registry_data_card =
 export const registry_data_card_accent =
   'overflow-hidden rounded-xl border border-accent/20 bg-accent/5 shadow-sm ring-1 ring-accent/15';
 
-/** Horizontal inset aligned with feed rows / header. */
-export const registry_feed_x = 'px-3 sm:px-4';
+/** Page meta label (browse, publish, landing hero) — one line below the site header. */
+export const registry_page_eyebrow =
+  'font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground';
+
+/** Top inset for registry routes so the page eyebrow lines up site-wide. */
+export const registry_page_pad_top = 'pt-12 lg:pt-16';
+
+/** Vertical rhythm between page header, body blocks, and page bottom. */
+export const registry_page_stack = `${registry_page_pad_top} grid gap-10 pb-24 lg:gap-12 lg:pb-32`;
 
 /**
  * Max-width shell gutters (Container, site header, site footer).
  * Slightly wider padding on small screens so copy sits inside the vertical frame rails.
  */
 export const registry_shell_x = 'px-8 sm:px-6 lg:px-10';
+
+/** Horizontal inset aligned with feed rows / header. */
+export const registry_feed_x = 'px-3 sm:px-4';
 
 /** Feed list shell — top/bottom rules only, no card elevation. */
 export const registry_feed_shell = 'grid min-w-0 gap-0 border-y border-border';

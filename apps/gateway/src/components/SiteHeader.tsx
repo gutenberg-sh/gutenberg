@@ -12,14 +12,14 @@ export function SiteHeader() {
           <Link
             to="/"
             aria-label="Gutenberg, home"
-            className="group inline-flex shrink-0 items-baseline outline-none transition-opacity focus-visible:opacity-80"
+            className="group inline-flex shrink-0 items-center outline-none transition-opacity focus-visible:opacity-80"
           >
             <Wordmark className="text-[17px] text-foreground sm:text-[19px]" showSubmark={false} />
           </Link>
 
           <nav
             aria-label="Primary"
-            className="hidden items-center gap-0.5 text-[13px] font-medium sm:flex"
+            className="hidden h-9 items-center gap-0.5 text-[13px] font-medium sm:flex"
           >
             <HeaderLink to="/browse">Browse</HeaderLink>
             <HeaderLink to="/publish" emphasis="high">
@@ -55,7 +55,7 @@ function HeaderLink({
       to={to}
       className={({ isActive }) =>
         cn(
-          'group relative rounded-md px-3 py-2 transition-colors duration-200 ease-out',
+          'group relative flex h-9 items-center rounded-md px-3 transition-colors duration-200 ease-out',
           isActive
             ? 'text-foreground'
             : emphasis === 'high'

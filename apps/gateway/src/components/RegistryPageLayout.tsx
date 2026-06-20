@@ -1,11 +1,8 @@
 import type { ReactNode } from 'react';
 
 import { Container } from '@/components/Layout';
+import { registry_page_eyebrow, registry_page_stack } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
-
-/** Vertical rhythm between page header, body blocks, and page bottom (browse / publish / publisher). */
-export const registry_page_stack =
-  'grid gap-10 pb-24 pt-12 lg:gap-12 lg:pb-32 lg:pt-16';
 
 /** `className` helper: stacked body regions (e.g. form sections). */
 export const registry_page_body_gap = 'grid gap-6';
@@ -37,9 +34,7 @@ export function RegistryPageLayout({
   return (
     <Container className={cn(registry_page_stack, className)}>
       <header className="grid gap-3">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          {eyebrow}
-        </p>
+        <p className={registry_page_eyebrow}>{eyebrow}</p>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0 flex-1">{title}</div>
           {headerAside ? (
