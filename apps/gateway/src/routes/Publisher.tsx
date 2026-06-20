@@ -157,7 +157,7 @@ export function PublisherRoute() {
                 <>
                   Showing{' '}
                   <span className="text-foreground-soft">
-                    {range_start}–{range_end}
+                    {range_start}-{range_end}
                   </span>
                   {has_next
                     ? ' · more on the next page'

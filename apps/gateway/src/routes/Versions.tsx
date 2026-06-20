@@ -6,7 +6,7 @@ import { ErrorView } from '@/components/ErrorView';
 import { Container } from '@/components/Layout';
 import { PublisherAddressLink } from '@/components/PublisherAddressLink';
 import { api_error_message } from '@/lib/api';
-import { format_bytes, format_relative_time, shorten } from '@/lib/format';
+import { format_bytes, format_empty, format_relative_time, shorten } from '@/lib/format';
 import { usePublicationVersions, type ReleaseDto } from '@/lib/queries';
 
 export function VersionsRoute() {
@@ -53,7 +53,7 @@ function VersionsView({ registry_id }: { registry_id: string }) {
         </div>
         <p className="max-w-[60ch] text-[14.5px] leading-[1.7] text-foreground-soft">
           Every release this publisher has anchored for this registry id, newest
-          first. Each release is permanent — once it&rsquo;s up, it stays up
+          first. Each release is permanent; once it&rsquo;s up, it stays up
           exactly as it was signed.
         </p>
       </header>
@@ -139,7 +139,7 @@ function Timeline({
                     </PublisherAddressLink>
                   ) : (
                     <span className="font-mono tabular text-muted-foreground">
-                      —
+                      {format_empty}
                     </span>
                   )}
                 </div>

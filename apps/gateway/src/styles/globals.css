@@ -56,7 +56,7 @@
     Times, serif;
 }
 
-/* ─── Light — warm paper base; chrome (surface) sits off page (background) ─ */
+/* Light theme: warm paper base; chrome (surface) sits off page (background). */
 html,
 html.light {
   --background: #f1f0ec;
@@ -98,7 +98,7 @@ html.light {
   --grain-blend-mode: soft-light;
 }
 
-/* ─── Dark — MetEngine tokens (grey-925 page, #202020 / #090909 chrome) ─── */
+/* Dark theme: MetEngine tokens (grey-925 page, #202020 / #090909 chrome). */
 html.dark {
   --background: #121212;
   --surface: #171717;
@@ -138,7 +138,7 @@ html.dark {
   --grain-blend-mode: soft-light;
 }
 
-/* ─── System dark when the user has not pinned light or dark —────────────── */
+/* System dark when the user has not pinned light or dark. */
 @media (prefers-color-scheme: dark) {
   html:not(.light):not(.dark) {
     --background: #121212;
@@ -260,7 +260,7 @@ html.dark {
 /*
  * Textural treatment:
  * - Ambient wash on #root::before (very soft; keeps depth without heavy vignette).
- * - Grain: FilmGrain canvas (fixed z 45) — low contrast, slow tick, soft-light blend.
+ * - Grain: FilmGrain canvas (fixed z 45), low contrast, slow tick, soft-light blend.
  * - Modals use z-index above 45 so they sit above grain.
  */
 #root {

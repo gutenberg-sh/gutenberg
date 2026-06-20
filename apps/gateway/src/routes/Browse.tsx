@@ -160,7 +160,7 @@ export function BrowseRoute() {
               ) : (
                 <>
                   Showing{' '}
-                  <span className="text-foreground-soft">{range_start}</span>–
+                  <span className="text-foreground-soft">{range_start}</span>-
                   <span className="text-foreground-soft">{range_end}</span>
                   {is_searching ? (
                     <>

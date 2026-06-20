@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { PublisherAddressLink } from '@/components/PublisherAddressLink';
 import { Button } from '@/components/ui/button';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
-import { format_relative_time, shorten } from '@/lib/format';
+import { format_empty, format_relative_time, shorten } from '@/lib/format';
 import { usePublicationSearch, type PublicationDto } from '@/lib/queries';
 import { registry_data_card } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
@@ -409,7 +409,7 @@ function SuggestionItem({
               {shorten(publisher_address, 4, 4)}
             </PublisherAddressLink>
           ) : (
-            <span className="font-mono tabular text-muted-foreground">—</span>
+            <span className="font-mono tabular text-muted-foreground">{format_empty}</span>
           )}
           {latest ? (
             <>

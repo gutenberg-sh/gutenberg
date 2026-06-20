@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 
 /**
- * Vertical rails as on https://www.metengine.xyz/ — `sm:` full-bleed; below `sm`,
+ * Vertical rails as on https://www.metengine.xyz/. At `sm:` full-bleed; below `sm`,
  * inset from viewport so the frame is not edge-glued; shell uses `px-6` so copy
  * sits slightly inside the rails.
  */

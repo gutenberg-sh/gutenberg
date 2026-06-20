@@ -1,5 +1,5 @@
 /**
- * Shared modal overlay layout — wallet picker, tip publisher, etc.
+ * Shared modal overlay layout: wallet picker, tip publisher, etc.
  * Pair {@link overlay_scrim} with a `z-*` class on the same element for stacking.
  */
 export const overlay_scrim =

@@ -66,7 +66,7 @@ function derive_status(health: ReturnType<typeof useIndexerHealth>): {
       tone: 'unknown',
       label: 'Indexer · syncing',
       title:
-        'Indexer replied but Solana RPC data was incomplete — often a transient RPC error from the indexer. Retry shortly or check GUTENBERG_INDEXER_SOLANA_RPC_URL.',
+        'Indexer replied but Solana RPC data was incomplete; often a transient RPC error from the indexer. Retry shortly or check GUTENBERG_INDEXER_SOLANA_RPC_URL.',
     };
   }
 
@@ -74,7 +74,7 @@ function derive_status(health: ReturnType<typeof useIndexerHealth>): {
     return {
       tone: 'ok',
       label: 'Indexer · live',
-      title: `Caught up with latest registry activity on this RPC — ${lag} slot${lag === 1 ? '' : 's'} behind the newest program transaction.`,
+      title: `Caught up with latest registry activity on this RPC, ${lag} slot${lag === 1 ? '' : 's'} behind the newest program transaction.`,
     };
   }
 
@@ -83,7 +83,7 @@ function derive_status(health: ReturnType<typeof useIndexerHealth>): {
       tone: 'lag',
       label: `Indexer · ~${lag} slots behind`,
       title:
-        'Behind the newest registry transaction — ingest or reconcile is still catching up.',
+        'Behind the newest registry transaction; ingest or reconcile is still catching up.',
     };
   }
 
@@ -100,6 +100,6 @@ function derive_status(health: ReturnType<typeof useIndexerHealth>): {
     tone: 'lag',
     label: `Indexer · ~${lag} slots behind`,
     title:
-      'Far behind the newest registry transaction — check WebSocket ingest, reconcile logs, or RPC/program ID mismatch.',
+      'Far behind the newest registry transaction; check WebSocket ingest, reconcile logs, or RPC/program ID mismatch.',
   };
 }

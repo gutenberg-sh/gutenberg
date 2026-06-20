@@ -2,7 +2,7 @@ import { useEffect, useRef, type CSSProperties } from 'react';
 
 /**
  * Canvas size uses `ceil(viewport / SCALE)`. **Lower SCALE ⇒ more canvas pixels ⇒ finer grain.**
- * (Raising SCALE makes chunky blobs — that was wrong before.)
+ * (Raising SCALE makes chunky blobs; that was wrong before.)
  */
 const SCALE = 1;
 const FPS = 8;
@@ -61,7 +61,7 @@ function paint_noise_to_image_data(data: Uint8ClampedArray) {
   }
 }
 
-/** Full-viewport noise regenerated each tick — not a translated texture tile. */
+/** Full-viewport noise regenerated each tick, not a translated texture tile. */
 export function FilmGrain() {
   const canvas_ref = useRef<HTMLCanvasElement>(null);
   const reduced_motion_ref = useRef(false);

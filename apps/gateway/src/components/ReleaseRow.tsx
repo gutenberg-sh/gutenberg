@@ -3,7 +3,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { PublisherAddressLink } from '@/components/PublisherAddressLink';
-import { format_bytes, format_relative_time, shorten } from '@/lib/format';
+import { format_bytes, format_empty, format_relative_time, shorten } from '@/lib/format';
 import type { ReleaseDto } from '@/lib/queries';
 import {
   registry_feed_column_header_typography,
@@ -80,7 +80,7 @@ export function ReleaseRow({ release }: { release: ReleaseDto }) {
             </>
           ) : (
             <>
-              <span className="font-mono tabular text-muted-foreground">—</span>
+              <span className="font-mono tabular text-muted-foreground">{format_empty}</span>
               <Dot />
             </>
           )}

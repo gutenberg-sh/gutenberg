@@ -68,7 +68,7 @@ export function decode_release_event_payload(
  * Extract `Program data: <base64>` lines from a transaction's log array,
  * decode them, and yield any that look like a `ReleasePublished` event for
  * the configured Gutenberg registry program. Lines that don't match are
- * silently skipped — Anchor mixes our events with `Program log:` traces
+ * silently skipped; Anchor mixes our events with `Program log:` traces
  * and other programs' data lines.
  */
 export function decode_release_events_from_logs(

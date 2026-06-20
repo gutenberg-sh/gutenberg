@@ -41,7 +41,7 @@ export class HealthController {
       program_tip_slot = tip_sigs[0]?.slot ?? null;
 
       /*
-       * Lag vs newest *program* tx (not global chain tip — empty slots used to inflate lag).
+       * Lag vs newest *program* tx (not global chain tip; empty slots used to inflate lag).
        * - No signatures: vacuously caught up (lag 0).
        * - Cursor without last_slot (e.g. row created only with backfill_completed_at):
        *   still compute lag vs tip so the UI is not stuck on "syncing".

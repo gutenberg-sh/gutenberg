@@ -10,7 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { PublisherAddressLink } from '@/components/PublisherAddressLink';
 import { Button } from '@/components/ui/button';
 import { env } from '@/env';
-import { format_bytes, shorten } from '@/lib/format';
+import { format_bytes, format_empty, shorten } from '@/lib/format';
 import {
   estimate_irys_publish_cost,
   estimate_solana_publish_cost,
@@ -237,7 +237,7 @@ function usePublishCostEstimates(
     total_lamports !== undefined
       ? `~${format_lamports_as_sol(total_lamports)}`
       : has_error
-        ? '—'
+        ? format_empty
         : '···';
 
   return { solana, irys, both_ready, total_lamports, has_error, total_s };

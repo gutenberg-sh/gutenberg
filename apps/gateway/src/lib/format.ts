@@ -1,5 +1,8 @@
+/** Shown when a numeric or text value is missing in the UI. */
+export const format_empty = '-';
+
 export function format_bytes(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes < 0) return '—';
+  if (!Number.isFinite(bytes) || bytes < 0) return format_empty;
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   if (bytes < 1024 * 1024 * 1024)
@@ -48,7 +51,7 @@ export function shorten(value: string, head = 6, tail = 6): string {
 }
 
 export function format_count(value: number | null | undefined): string {
-  if (value == null || !Number.isFinite(value)) return '—';
+  if (value == null || !Number.isFinite(value)) return format_empty;
   if (value < 1_000) return value.toLocaleString();
   if (value < 10_000) return value.toLocaleString();
   if (value < 1_000_000)

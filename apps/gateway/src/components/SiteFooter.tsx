@@ -59,7 +59,7 @@ export function SiteFooter() {
             href="https://solana.com"
             target="_blank"
             rel="noreferrer noopener"
-            aria-label="Built on Solana — opens solana.com"
+            aria-label="Built on Solana (opens solana.com)"
             className="inline-flex min-w-0 items-center gap-3 text-muted-foreground transition-colors hover:text-foreground active:translate-y-px"
           >
             <span className="shrink-0 text-[12px] font-medium text-muted-foreground">

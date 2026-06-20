@@ -12,7 +12,7 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     q: 'Who can take a publication down?',
     a: (
       <>
-        No one — not you, not us, not the person who published it. Once a
+        No one can take it down; not you, not us, not the person who published it. Once a
         publication is signed and recorded, that signed version stays.
       </>
     ),
@@ -22,7 +22,7 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     a: (
       <>
         Each publication is signed and anchored on-chain. Change the stored
-        bundle without updating the record and readers hit errors — not a silent
+        bundle without updating the record and readers hit errors, not a silent
         substitute.
       </>
     ),
@@ -67,7 +67,7 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     a: (
       <>
         If you lose your key, old publications still count for what they were.
-        Anything new needs a new key — readers see the break.
+        Anything new needs a new key; readers see the break.
       </>
     ),
   },
@@ -75,7 +75,7 @@ const FAQ: ReadonlyArray<{ q: string; a: React.ReactNode }> = [
     q: 'Is the code open?',
     a: (
       <>
-        Yes — this site and the on-chain program live in the{' '}
+        Yes; this site and the on-chain program live in the{' '}
         <a
           href="https://github.com/itsmekamal/gutenberg"
           target="_blank"
@@ -169,7 +169,7 @@ export function LandingRoute() {
       >
         <p className="max-w-[60ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
           Most of what you read lives on someone else&rsquo;s computer. They can
-          pull it, rewrite it in place, or let it sink — often without telling
+          pull it, rewrite it in place, or let it sink, often without telling
           you.
         </p>
         <p className="mt-4 max-w-[60ch] text-[16px] leading-[1.7] text-foreground-soft sm:text-[17px]">
@@ -186,7 +186,7 @@ export function LandingRoute() {
             },
             {
               k: 'Privately',
-              v: 'You\u2019re a key, not a profile — tie it to your name only if you want.',
+              v: 'You\u2019re a key, not a profile; tie it to your name only if you want.',
             },
             {
               k: 'Permanently',
@@ -230,7 +230,7 @@ export function LandingRoute() {
             {
               k: 'manifest.json',
               t: 'The signed index',
-              v: 'Your signed table of contents — paths, sizes, who signed the bundle.',
+              v: 'Your signed table of contents: paths, sizes, who signed the bundle.',
             },
             {
               k: 'ar://<txid>',
@@ -240,7 +240,7 @@ export function LandingRoute() {
             {
               k: 'solana://release',
               t: 'The public record',
-              v: 'The slot for registry id + version — who published and what the bundle must match.',
+              v: 'The slot for registry id + version: who published and what the bundle must match.',
             },
           ].map((row) => (
             <div
@@ -261,7 +261,7 @@ export function LandingRoute() {
         </dl>
 
         <p className="mt-8 max-w-[60ch] text-[13.5px] leading-[1.7] text-muted-foreground">
-          Narrow registry plumbing — not law, not moderation, not a verdict on
+          Narrow registry plumbing: not law, not moderation, not a verdict on
           what belongs online.
         </p>
       </Section>

@@ -12,7 +12,7 @@ import {
   ReleaseListHeader,
   ReleaseListSkeleton,
 } from '@/components/ReleaseRow';
-import { format_relative_time, shorten } from '@/lib/format';
+import { format_relative_time, shorten, format_empty } from '@/lib/format';
 import type { PublicationDto } from '@/lib/queries';
 import { registry_feed_shell, registry_feed_x } from '@/lib/registry-surface';
 import { cn } from '@/lib/utils';
@@ -30,7 +30,7 @@ type PublicationFeedSectionProps = {
 } & Pick<React.ComponentProps<'section'>, 'aria-label' | 'className'>;
 
 /**
- * Summary line + pagination under the list — same on browse and publisher.
+ * Summary line + pagination under the list; same on browse and publisher.
  */
 export function PublicationFeedFooter({
   summary,
@@ -87,7 +87,7 @@ export function PublicationFeedSection({
   );
 }
 
-/** Publication search hit — same grid and rhythm as `ReleaseRow`. */
+/** Publication search hit: same grid and rhythm as `ReleaseRow`. */
 export function SearchPublicationRow({ item }: { item: PublicationDto }) {
   const navigate = useNavigate();
   const publisher_address = item.publisher?.address;
@@ -155,7 +155,7 @@ export function SearchPublicationRow({ item }: { item: PublicationDto }) {
               {shorten(publisher_address, 6, 6)}
             </PublisherAddressLink>
           ) : (
-            <span className="font-mono tabular text-muted-foreground">—</span>
+            <span className="font-mono tabular text-muted-foreground">{format_empty}</span>
           )}
           <span aria-hidden className="text-muted-foreground/50">
             ·

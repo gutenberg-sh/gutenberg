@@ -28,7 +28,7 @@ import {
 import { cn } from '@/lib/utils';
 
 const BUNDLE_SOURCE_HINT =
-  'Drop a project folder, loose files, or a .zip — or browse for files or a zip. Folders keep paths when dragged from your desktop; nothing uploads until you sign.';
+  'Drop a project folder, loose files, or a .zip, or browse for files or a zip. Folders keep paths when dragged from your desktop; nothing uploads until you sign.';
 
 export function PublishWorkspace() {
   const [search_params] = useSearchParams();

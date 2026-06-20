@@ -64,7 +64,7 @@ export interface IndexerHealth {
   chain_slot: number | null;
   /** Slot of newest tx touching the registry program (added in indexer health). */
   program_tip_slot?: number | null;
-  /** Slots behind that program tip — not raw chain-tip minus cursor. */
+  /** Slots behind that program tip, not raw chain-tip minus cursor. */
   lag_slots: number | null;
 }
 
